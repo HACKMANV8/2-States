@@ -325,7 +325,7 @@ def get_pointblank_pricing_flow():
     }
 
 
-def get_pointblank_signup_flow(phone_number="1111111111"):
+def get_pointblank_signup_flow():
     """Standard test flow for pointblank.club recruitment/signup."""
     return {
         "flow_name": "Recruitment/Signup Registration Flow",
@@ -362,8 +362,8 @@ def get_pointblank_signup_flow(phone_number="1111111111"):
                 "step_number": 5,
                 "action": "fill",
                 "target": "input[type='tel'], input[name*='phone']",
-                "value": phone_number,
-                "expected": f"Phone number {phone_number} entered",
+                "value": None,
+                "expected": "Phone number field filled (agent decides value autonomously)",
                 "timeout_seconds": 3
             },
             {

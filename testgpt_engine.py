@@ -19,6 +19,7 @@ from test_executor import TestExecutor
 from result_formatter import ResultFormatter
 from persistence import PersistenceLayer
 from models import RunArtifact, TestPlan
+from mcp_manager import get_mcp_manager
 
 
 class TestGPTEngine:
@@ -34,14 +35,15 @@ class TestGPTEngine:
         Initialize TestGPT engine.
 
         Args:
-            mcp_tools: Connected MCPTools instance for Playwright
+            mcp_tools: (Deprecated) No longer used - using dynamic MCP manager
             storage_dir: Directory for persistence storage
         """
         self.parser = SlackRequestParser()
         self.plan_builder = TestPlanBuilder()
-        self.executor = TestExecutor(mcp_tools) if mcp_tools else None
+        self.executor = TestExecutor()  # Always create executor (uses dynamic MCP manager)
         self.formatter = ResultFormatter()
         self.persistence = PersistenceLayer(storage_dir)
+        self.mcp_manager = get_mcp_manager()
 
     async def process_test_request(
         self,
@@ -112,50 +114,55 @@ class TestGPTEngine:
         print()
 
         # Step 5: Execute tests (if executor available)
-        if self.executor:
-            print("▶️  Step 4: Executing test matrix...")
-            cell_results = await self.executor.execute_test_plan(test_plan)
-            print(f"   Completed {len(cell_results)} cells\n")
-        else:
-            print("⚠️  Step 4: Skipping execution (no MCP tools connected)")
-            print("   Generating mock results for demonstration...\n")
-            cell_results = self._generate_mock_results(test_plan)
+        try:
+            if self.executor:
+                print("▶️  Step 4: Executing test matrix...")
+                cell_results = await self.executor.execute_test_plan(test_plan)
+                print(f"   Completed {len(cell_results)} cells\n")
+            else:
+                print("⚠️  Step 4: Skipping execution (no MCP tools connected)")
+                print("   Generating mock results for demonstration...\n")
+                cell_results = self._generate_mock_results(test_plan)
 
-        # Step 6: Aggregate results
-        print("📊 Step 5: Aggregating results...")
-        run_id = f"run-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:6]}"
+            # Step 6: Aggregate results
+            print("📊 Step 5: Aggregating results...")
+            run_id = f"run-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:6]}"
 
-        run_artifact = self.formatter.aggregate_results(
-            cell_results=cell_results,
-            scenario_name=test_plan.scenario_name,
-            target_url=test_plan.target_url,
-            run_id=run_id
-        )
+            run_artifact = self.formatter.aggregate_results(
+                cell_results=cell_results,
+                scenario_name=test_plan.scenario_name,
+                target_url=test_plan.target_url,
+                run_id=run_id
+            )
 
-        # Fill in additional artifact fields
-        run_artifact.test_plan_id = test_plan.test_plan_id
-        run_artifact.scenario_id = test_plan.scenario_id
-        run_artifact.triggered_by = user_id
+            # Fill in additional artifact fields
+            run_artifact.test_plan_id = test_plan.test_plan_id
+            run_artifact.scenario_id = test_plan.scenario_id
+            run_artifact.triggered_by = user_id
 
-        print(f"   Overall status: {run_artifact.overall_status.value}")
-        print(f"   Pass rate: {run_artifact.passed_cells}/{run_artifact.total_cells}\n")
+            print(f"   Overall status: {run_artifact.overall_status.value}")
+            print(f"   Pass rate: {run_artifact.passed_cells}/{run_artifact.total_cells}\n")
 
-        # Step 7: Save run artifact
-        print("💾 Step 6: Saving run artifact...")
-        self.persistence.save_run_artifact(run_artifact)
-        self.persistence.update_scenario_last_run(scenario_id, datetime.now())
-        print()
+            # Step 7: Save run artifact
+            print("💾 Step 6: Saving run artifact...")
+            self.persistence.save_run_artifact(run_artifact)
+            self.persistence.update_scenario_last_run(scenario_id, datetime.now())
+            print()
 
-        # Step 8: Format Slack summary
-        print("✍️  Step 7: Formatting Slack summary...")
-        slack_summary = self.formatter.format_slack_summary(run_artifact)
-        print()
+            # Step 8: Format Slack summary
+            print("✍️  Step 7: Formatting Slack summary...")
+            slack_summary = self.formatter.format_slack_summary(run_artifact)
+            print()
 
-        print("=" * 70)
-        print("✅ TestGPT Processing Complete")
-        print("=" * 70 + "\n")
+            print("=" * 70)
+            print("✅ TestGPT Processing Complete")
+            print("=" * 70 + "\n")
 
-        return slack_summary
+            return slack_summary
+
+        finally:
+            # Always cleanup MCP servers after execution (success or failure)
+            await self.mcp_manager.cleanup_all()
 
     async def _handle_rerun(self, parsed_request, user_id: str) -> str:
         """

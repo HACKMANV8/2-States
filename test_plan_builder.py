@@ -96,12 +96,6 @@ class TestPlanBuilder:
         if "pointblank.club" in target_url:
             flows_to_include = []
 
-            # Extract phone number if mentioned
-            phone_number = "1111111111"  # default
-            phone_match = re.search(r'phone.*?(\d{10,})', parsed_request.raw_message.lower())
-            if phone_match:
-                phone_number = phone_match.group(1)
-
             if "landing" in parsed_request.flows:
                 landing_flow_dict = get_pointblank_landing_flow()
                 flows_to_include.append(self._dict_to_flow(landing_flow_dict))
@@ -111,7 +105,7 @@ class TestPlanBuilder:
                 flows_to_include.append(self._dict_to_flow(pricing_flow_dict))
 
             if "signup" in parsed_request.flows:
-                signup_flow_dict = get_pointblank_signup_flow(phone_number)
+                signup_flow_dict = get_pointblank_signup_flow()
                 flows_to_include.append(self._dict_to_flow(signup_flow_dict))
 
             # If no specific flows, include landing by default

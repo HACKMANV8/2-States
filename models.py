@@ -58,6 +58,8 @@ class ViewportProfile:
     description: str
     device_scale_factor: float = 1.0
     is_mobile: bool = False
+    display_name: str = ""  # Human-readable display name (e.g., "iPhone 13 Pro")
+    playwright_device: Optional[str] = None  # Playwright device descriptor (e.g., "iPhone 13 Pro")
 
 
 @dataclass

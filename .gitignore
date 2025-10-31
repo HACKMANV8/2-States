@@ -3,3 +3,7 @@
 __pycache__/
 .venv/
 venv/
+
+# TestGPT runtime data
+testgpt_data/
+logs/

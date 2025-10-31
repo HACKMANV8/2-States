@@ -1,0 +1,161 @@
+{
+  "viewports": {
+    "iphone-se": {
+      "name": "iphone-se",
+      "display_name": "iPhone SE",
+      "playwright_device": "iPhone SE",
+      "mcp_launch_args": ["--device=iPhone SE"],
+      "width": 375,
+      "height": 667,
+      "device_scale_factor": 2.0,
+      "is_mobile": true,
+      "device_class": "Budget iOS"
+    },
+    "iphone-13-pro": {
+      "name": "iphone-13-pro",
+      "display_name": "iPhone 13 Pro",
+      "playwright_device": "iPhone 13 Pro",
+      "mcp_launch_args": ["--device=iPhone 13 Pro"],
+      "width": 390,
+      "height": 844,
+      "device_scale_factor": 3.0,
+      "is_mobile": true,
+      "device_class": "Standard iOS"
+    },
+    "iphone-13-pro-landscape": {
+      "name": "iphone-13-pro-landscape",
+      "display_name": "iPhone 13 Pro (Landscape)",
+      "playwright_device": "iPhone 13 Pro landscape",
+      "mcp_launch_args": ["--device=iPhone 13 Pro landscape"],
+      "width": 844,
+      "height": 390,
+      "device_scale_factor": 3.0,
+      "is_mobile": true,
+      "device_class": "iOS Landscape"
+    },
+    "android-small": {
+      "name": "android-small",
+      "display_name": "Android Small",
+      "playwright_device": "Pixel 5",
+      "mcp_launch_args": ["--device=Pixel 5"],
+      "width": 360,
+      "height": 640,
+      "device_scale_factor": 2.0,
+      "is_mobile": true,
+      "device_class": "Cheap Android"
+    },
+    "android-medium": {
+      "name": "android-medium",
+      "display_name": "Android Medium",
+      "playwright_device": "Galaxy S9+",
+      "mcp_launch_args": ["--device=Galaxy S9+"],
+      "width": 412,
+      "height": 915,
+      "device_scale_factor": 2.5,
+      "is_mobile": true,
+      "device_class": "Mid-range Android"
+    },
+    "ipad-air": {
+      "name": "ipad-air",
+      "display_name": "iPad Air",
+      "playwright_device": "iPad (gen 7)",
+      "mcp_launch_args": ["--device=iPad (gen 7)"],
+      "width": 820,
+      "height": 1180,
+      "device_scale_factor": 2.0,
+      "is_mobile": false,
+      "device_class": "Tablet Portrait"
+    },
+    "ipad-air-landscape": {
+      "name": "ipad-air-landscape",
+      "display_name": "iPad Air (Landscape)",
+      "playwright_device": "iPad (gen 7) landscape",
+      "mcp_launch_args": ["--device=iPad (gen 7) landscape"],
+      "width": 1180,
+      "height": 820,
+      "device_scale_factor": 2.0,
+      "is_mobile": false,
+      "device_class": "Tablet Landscape"
+    },
+    "desktop-standard": {
+      "name": "desktop-standard",
+      "display_name": "Desktop Standard (1920×1080)",
+      "playwright_device": null,
+      "mcp_launch_args": ["--viewport-size=1920x1080"],
+      "width": 1920,
+      "height": 1080,
+      "device_scale_factor": 1.0,
+      "is_mobile": false,
+      "device_class": "Desktop Baseline"
+    },
+    "desktop-ultrawide": {
+      "name": "desktop-ultrawide",
+      "display_name": "Desktop Ultrawide (2560×1440)",
+      "playwright_device": null,
+      "mcp_launch_args": ["--viewport-size=2560x1440"],
+      "width": 2560,
+      "height": 1440,
+      "device_scale_factor": 1.0,
+      "is_mobile": false,
+      "device_class": "Desktop Ultrawide"
+    },
+    "desktop-small": {
+      "name": "desktop-small",
+      "display_name": "Desktop Small (1366×768)",
+      "playwright_device": null,
+      "mcp_launch_args": ["--viewport-size=1366x768"],
+      "width": 1366,
+      "height": 768,
+      "device_scale_factor": 1.0,
+      "is_mobile": false,
+      "device_class": "Budget Laptop"
+    }
+  },
+  "browsers": {
+    "chromium-desktop": {
+      "name": "chromium-desktop",
+      "display_name": "Chrome (Desktop)",
+      "engine": "chromium",
+      "mcp_launch_args": ["--browser=chromium"]
+    },
+    "webkit-ios": {
+      "name": "webkit-ios",
+      "display_name": "Safari (iOS)",
+      "engine": "webkit",
+      "mcp_launch_args": ["--browser=webkit"]
+    },
+    "webkit-desktop": {
+      "name": "webkit-desktop",
+      "display_name": "Safari (macOS)",
+      "engine": "webkit",
+      "mcp_launch_args": ["--browser=webkit"]
+    },
+    "firefox-desktop": {
+      "name": "firefox-desktop",
+      "display_name": "Firefox (Desktop)",
+      "engine": "firefox",
+      "mcp_launch_args": ["--browser=firefox"]
+    }
+  },
+  "networks": {
+    "normal": {
+      "name": "normal",
+      "display_name": "Good Broadband",
+      "mcp_launch_args": []
+    },
+    "slow-3g": {
+      "name": "slow-3g",
+      "display_name": "Slow 3G",
+      "download_kbps": 500,
+      "upload_kbps": 500,
+      "latency_ms": 400,
+      "mcp_launch_args": []
+    },
+    "flaky": {
+      "name": "flaky",
+      "display_name": "Unstable Connection",
+      "packet_loss": 0.1,
+      "mcp_launch_args": []
+    }
+  }
+}

@@ -16,6 +16,8 @@ from models import (
 from agno.agent import Agent
 from agno.models.anthropic import Claude
 import os
+import sys
+from mcp_manager import get_mcp_manager
 
 
 class TestExecutor:
@@ -26,15 +28,67 @@ class TestExecutor:
     detailed results for each step, screenshot, and error.
     """
 
-    def __init__(self, mcp_tools):
+    def __init__(self, mcp_tools=None):
         """
-        Initialize executor with MCP tools.
+        Initialize executor.
 
         Args:
-            mcp_tools: Connected MCPTools instance for Playwright
+            mcp_tools: (Deprecated) Legacy single MCP connection - no longer used
         """
-        self.mcp_tools = mcp_tools
+        # Use dynamic MCP manager instead of single connection
+        self.mcp_manager = get_mcp_manager()
         self.agent = None
+
+        # Setup file logging
+        self.log_file = None
+        self._setup_logging()
+
+    def _setup_logging(self):
+        """Setup logging to file."""
+        log_dir = os.path.join(os.getcwd(), "logs")
+        os.makedirs(log_dir, exist_ok=True)
+
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        log_filename = f"testgpt-debug-{timestamp}.log"
+        self.log_file_path = os.path.join(log_dir, log_filename)
+
+        # Also create a symlink to latest log
+        latest_log = os.path.join(log_dir, "latest.log")
+
+        self.log_file = open(self.log_file_path, 'w', encoding='utf-8')
+
+        # Write header
+        self.log_file.write(f"{'='*80}\n")
+        self.log_file.write(f"TestGPT Debug Log\n")
+        self.log_file.write(f"Started: {datetime.now().isoformat()}\n")
+        self.log_file.write(f"{'='*80}\n\n")
+        self.log_file.flush()
+
+        print(f"📝 Logging to: {self.log_file_path}")
+        print(f"   (Also available at: logs/latest.log)\n")
+
+        # Create symlink
+        try:
+            if os.path.exists(latest_log):
+                os.remove(latest_log)
+            os.symlink(log_filename, latest_log)
+        except:
+            pass  # Windows doesn't support symlinks easily
+
+    def _log(self, message):
+        """Log message to both console and file."""
+        print(message)
+        if self.log_file:
+            self.log_file.write(message + '\n')
+            self.log_file.flush()
+
+    def __del__(self):
+        """Cleanup: close log file."""
+        if self.log_file:
+            self.log_file.write(f"\n{'='*80}\n")
+            self.log_file.write(f"Ended: {datetime.now().isoformat()}\n")
+            self.log_file.write(f"{'='*80}\n")
+            self.log_file.close()
 
     async def execute_test_plan(self, test_plan: TestPlan) -> List[CellResult]:
         """
@@ -73,19 +127,29 @@ class TestExecutor:
 
         return cell_results
 
-    async def _initialize_agent(self):
-        """Initialize Agno agent with Playwright MCP tools."""
-        if self.agent is None and self.mcp_tools is not None:
-            print("🔧 Initializing Agno agent with Playwright MCP tools...")
-            print("   Debug mode: ENABLED")
-            print("   Tool calls: Will be logged\n")
+    async def _initialize_agent(self, mcp_tools):
+        """
+        Initialize Agno agent with Playwright MCP tools for this specific cell.
 
-            self.agent = Agent(
-                name="PlaywrightTestAgent",
-                model=Claude(id="claude-sonnet-4-20250514"),
-                tools=[self.mcp_tools],
-                debug_mode=True,  # Enable debug logging
-                instructions="""You are an autonomous web testing agent with full Playwright MCP access.
+        Args:
+            mcp_tools: MCPTools instance configured for specific viewport/browser
+        """
+        if mcp_tools is None:
+            self.agent = None
+            return
+
+        self._log("   🔧 Initializing AI agent with viewport-specific MCP connection...")
+        self._log("      Debug mode: ENABLED")
+        self._log("      Tool calls: Will be logged\n")
+
+        # Create new agent for this cell
+        # (Each cell gets its own agent with its own MCP connection)
+        self.agent = Agent(
+            name="PlaywrightTestAgent",
+            model=Claude(id="claude-sonnet-4-20250514"),
+            tools=[mcp_tools],
+            debug_mode=True,  # Enable debug logging
+            instructions="""You are an autonomous web testing agent with full Playwright MCP access.
 
 CRITICAL: You have FULL CONTROL over browser automation. Make your own decisions about how to accomplish the testing goals.
 
@@ -133,16 +197,22 @@ Be thorough but efficient. Report clear outcomes.""",
         network_requests = []
         overall_passed = True
 
-        # Initialize agent if needed
-        await self._initialize_agent()
+        # Get dedicated MCP tools for this viewport/browser combination
+        mcp_tools = await self.mcp_manager.get_mcp_tools_for_cell(
+            viewport=cell.viewport,
+            browser=cell.browser
+        )
 
-        print(f"   🌐 Browser: {cell.browser.display_name}")
-        print(f"   📱 Viewport: {cell.viewport.name} ({cell.viewport.width}×{cell.viewport.height})")
-        print(f"   📡 Network: {cell.network.display_name}")
+        # Initialize agent with this cell's specific MCP tools
+        await self._initialize_agent(mcp_tools)
+
+        self._log(f"   🌐 Browser: {cell.browser.display_name}")
+        self._log(f"   📱 Viewport: {cell.viewport.name} ({cell.viewport.width}×{cell.viewport.height})")
+        self._log(f"   📡 Network: {cell.network.display_name}")
 
         # NEW APPROACH: Give agent the full flow goal, let it decide the steps
         if self.agent is not None:
-            print(f"   🤖 Letting AI agent execute flow autonomously...")
+            self._log(f"   🤖 Letting AI agent execute flow autonomously...")
             flow_result = await self._execute_flow_autonomously(cell)
             step_results = flow_result["step_results"]
             overall_passed = flow_result["passed"]
@@ -201,9 +271,9 @@ Be thorough but efficient. Report clear outcomes.""",
         """
         flow_start = datetime.now()
 
-        print(f"\n{'='*70}")
-        print(f"🔍 DEBUG: Starting autonomous execution for cell {cell.cell_id}")
-        print(f"{'='*70}")
+        self._log(f"\n{'='*70}")
+        self._log(f"🔍 DEBUG: Starting autonomous execution for cell {cell.cell_id}")
+        self._log(f"{'='*70}")
 
         # Build the high-level goal for the agent
         flow_description = self._build_flow_goal_description(cell)
@@ -219,14 +289,25 @@ ENVIRONMENT SETUP:
 - Mobile: {"YES" if cell.viewport.is_mobile else "NO"}
 - Network: {cell.network.display_name}
 
-CRITICAL DEVICE EMULATION:
-{"- MUST use playwright.devices['iPhone 13 Pro'] or similar device descriptor" if cell.viewport.is_mobile and "iphone" in cell.viewport.name.lower() else ""}
-{"- MUST use playwright.devices['iPad Air'] or similar device descriptor" if cell.viewport.is_mobile and "ipad" in cell.viewport.name.lower() else ""}
-{"- Use proper Playwright device emulation, NOT just viewport.setViewportSize()" if cell.viewport.is_mobile else "- Set viewport size and verify responsive layout"}
-{"- Device MUST have: touch events, mobile user agent, correct DPR" if cell.viewport.is_mobile else ""}
-- Launch browser with device context from the START (before navigation)
-- DO NOT resize window after page load - that breaks responsive behavior
-- Page must render at target dimensions from initial load
+VIEWPORT IS ALREADY CONFIGURED CORRECTLY:
+✅ This browser was launched with proper device emulation for {cell.viewport.display_name}
+✅ Viewport: {cell.viewport.width}×{cell.viewport.height} ({cell.viewport.device_class})
+✅ Device scale factor: {cell.viewport.device_scale_factor}x
+✅ {"Mobile mode with touch events" if cell.viewport.is_mobile else "Desktop mode"}
+
+YOUR WORKFLOW:
+1. Navigate directly to target URL: browser_navigate(url="TARGET_URL")
+2. Wait for page to load completely (2-3 seconds)
+3. Proceed with testing (clicks, assertions, screenshots)
+4. Report what you observe
+
+IMPORTANT:
+- DO NOT use browser_install - all browsers are already installed and ready
+- DO NOT use browser_resize - viewport is already correct from launch
+- The page will render properly at {cell.viewport.width}×{cell.viewport.height} from initial load
+- CSS media queries will fire correctly for this viewport size
+- Test what you see - responsive behavior should work properly
+- If you get "browser not installed" error, just navigate directly - the browser IS installed
 
 YOUR MISSION:
 {flow_description}
@@ -252,15 +333,15 @@ For each major step you take, report:
 Begin execution now. Take full control."""
 
         # Log the full instruction being sent to agent
-        print(f"\n📤 INSTRUCTION SENT TO AGENT:")
-        print(f"{'-'*70}")
-        print(autonomous_instruction)
-        print(f"{'-'*70}\n")
+        self._log(f"\n📤 INSTRUCTION SENT TO AGENT:")
+        self._log(f"{'-'*70}")
+        self._log(autonomous_instruction)
+        self._log(f"{'-'*70}\n")
 
         try:
             # Execute autonomously with agent
-            print(f"⏳ Executing with AI agent (this may take 30-60 seconds)...")
-            print(f"🤖 Agent is thinking and using Playwright MCP tools...\n")
+            self._log(f"⏳ Executing with AI agent (this may take 30-60 seconds)...")
+            self._log(f"🤖 Agent is thinking and using Playwright MCP tools...\n")
 
             response = await self.agent.arun(autonomous_instruction)
 
@@ -268,10 +349,10 @@ Begin execution now. Take full control."""
             agent_output = response.content if hasattr(response, 'content') else str(response)
 
             # Log the agent's full response
-            print(f"\n📥 AGENT RESPONSE:")
-            print(f"{'-'*70}")
-            print(agent_output)
-            print(f"{'-'*70}\n")
+            self._log(f"\n📥 AGENT RESPONSE:")
+            self._log(f"{'-'*70}")
+            self._log(agent_output)
+            self._log(f"{'-'*70}\n")
 
             # Parse agent's execution report into step results
             step_results = self._parse_agent_execution_report(agent_output, cell, flow_start)
@@ -279,8 +360,8 @@ Begin execution now. Take full control."""
             # Determine overall pass/fail
             overall_passed = all(sr.passed for sr in step_results)
 
-            print(f"✅ Autonomous execution completed: {'PASSED' if overall_passed else 'FAILED'}")
-            print(f"{'='*70}\n")
+            self._log(f"✅ Autonomous execution completed: {'PASSED' if overall_passed else 'FAILED'}")
+            self._log(f"{'='*70}\n")
 
             return {
                 "step_results": step_results,
@@ -292,13 +373,13 @@ Begin execution now. Take full control."""
             import traceback
             error_traceback = traceback.format_exc()
 
-            print(f"\n❌ AGENT EXECUTION ERROR:")
-            print(f"{'-'*70}")
-            print(f"Error Type: {type(e).__name__}")
-            print(f"Error Message: {str(e)}")
-            print(f"\nFull Traceback:")
-            print(error_traceback)
-            print(f"{'-'*70}\n")
+            self._log(f"\n❌ AGENT EXECUTION ERROR:")
+            self._log(f"{'-'*70}")
+            self._log(f"Error Type: {type(e).__name__}")
+            self._log(f"Error Message: {str(e)}")
+            self._log(f"\nFull Traceback:")
+            self._log(error_traceback)
+            self._log(f"{'-'*70}\n")
 
             # Agent execution failed - create error result
             error_result = StepResult(
@@ -319,82 +400,43 @@ Begin execution now. Take full control."""
             }
 
     def _get_device_emulation_example(self, cell: MatrixCell) -> str:
-        """Get device-specific Playwright emulation example."""
+        """Get device-specific Playwright MCP workflow example."""
 
-        # Map viewport names to Playwright device descriptors
-        playwright_device_map = {
-            "iphone-se": "iPhone SE",
-            "iphone-13-pro": "iPhone 13 Pro",
-            "iphone-13-pro-max": "iPhone 13 Pro Max",
-            "iphone-13-pro-landscape": "iPhone 13 Pro landscape",
-            "iphone-12": "iPhone 12",
-            "ipad-air": "iPad (gen 7)",  # Playwright uses this name
-            "ipad-air-landscape": "iPad (gen 7) landscape",
-            "ipad-pro": "iPad Pro 11",
-            "android-small": "Pixel 5",  # Close match
-            "android-medium": "Galaxy S9+",  # Close match
-        }
+        return f"""
+WORKFLOW for {cell.viewport.display_name}:
 
-        viewport_name = cell.viewport.name.lower()
-        playwright_device = playwright_device_map.get(viewport_name)
+✅ Browser already launched with correct device emulation
+✅ Viewport: {cell.viewport.width}×{cell.viewport.height}
+✅ {"Mobile device with touch events" if cell.viewport.is_mobile else "Desktop device"}
 
-        if playwright_device:
-            # Use Playwright's built-in device descriptor
-            return f"""
-For {cell.viewport.device_class} ({cell.viewport.name}), use Playwright's built-in device:
+Step 1: Navigate directly to target URL
+{{
+  "tool": "browser_navigate",
+  "arguments": {{
+    "url": "https://pointblank.club"  // Replace with actual target URL
+  }}
+}}
 
-// CORRECT - Device emulation from START:
-const device = playwright.devices['{playwright_device}'];
-const context = await browser.newContext({{
-  ...device,
-  // Optional network throttling:
-  // offline: false,
-  // downloadThroughput: (500 * 1024) / 8,  // 500 Kbps
-  // uploadThroughput: (500 * 1024) / 8,
-  // latency: 400  // ms
-}});
-const page = await context.newPage();
-await page.goto('URL'); // ✅ Page renders correctly from initial load
+Step 2: Wait for page to fully load
+{{
+  "tool": "browser_wait_for",
+  "arguments": {{
+    "time": 2  // Wait 2 seconds for page to settle
+  }}
+}}
 
-// WRONG - Don't do this:
-await page.setViewportSize({{width: {cell.viewport.width}, height: {cell.viewport.height}}}); // ❌ Breaks responsive behavior
-"""
-        elif cell.viewport.is_mobile:
-            # Custom mobile viewport - provide full config
-            return f"""
-For {cell.viewport.device_class} at {cell.viewport.width}×{cell.viewport.height}:
+Step 3: Proceed with testing
+- Use browser_snapshot to see page structure
+- Use browser_click to interact with elements
+- Use browser_take_screenshot for visual evidence
+- Report what you observe
 
-// CORRECT - Full mobile device emulation from START:
-const context = await browser.newContext({{
-  viewport: {{ width: {cell.viewport.width}, height: {cell.viewport.height} }},
-  deviceScaleFactor: {cell.viewport.device_scale_factor},
-  isMobile: true,
-  hasTouch: true,
-  userAgent: 'Mozilla/5.0 (Linux; Android 12; SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36'
-}});
-const page = await context.newPage();
-await page.goto('URL'); // ✅ Page renders at mobile dimensions from start
-
-// WRONG - Don't do this:
-await page.setViewportSize({{width: {cell.viewport.width}, height: {cell.viewport.height}}}); // ❌ Breaks responsive behavior
-"""
-        else:
-            # Desktop viewport
-            return f"""
-For {cell.viewport.device_class} at {cell.viewport.width}×{cell.viewport.height}:
-
-// CORRECT - Set viewport in browser context from START:
-const context = await browser.newContext({{
-  viewport: {{ width: {cell.viewport.width}, height: {cell.viewport.height} }},
-  deviceScaleFactor: {cell.viewport.device_scale_factor}
-}});
-const page = await context.newPage();
-await page.goto('URL'); // ✅ Page renders at desktop size from start
-
-// WRONG - Don't do this:
-const page = await browser.newPage();
-await page.goto('URL');
-await page.setViewportSize({{width: {cell.viewport.width}, height: {cell.viewport.height}}}); // ❌ Too late!
+WHY THIS WORKS:
+- MCP server was launched with --device="{cell.viewport.playwright_device if hasattr(cell.viewport, 'playwright_device') and cell.viewport.playwright_device else f'viewport {cell.viewport.width}x{cell.viewport.height}'}"
+- Page renders at correct dimensions from initial load
+- CSS media queries fire correctly
+- Responsive behavior works properly
+- No need to resize after page load
 """
 
     def _build_flow_goal_description(self, cell: MatrixCell) -> str:

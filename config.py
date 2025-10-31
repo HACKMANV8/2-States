@@ -21,7 +21,9 @@ VIEWPORT_PROFILES = {
         device_class="Budget iOS",
         description="Smallest modern iPhone; catches bottom nav cutoff, narrow column overflow",
         device_scale_factor=2.0,
-        is_mobile=True
+        is_mobile=True,
+        display_name="iPhone SE",
+        playwright_device="iPhone SE"
     ),
 
     "iphone-13-pro": ViewportProfile(
@@ -31,7 +33,9 @@ VIEWPORT_PROFILES = {
         device_class="Standard iOS",
         description="Most common iPhone viewport; baseline for iOS testing",
         device_scale_factor=3.0,
-        is_mobile=True
+        is_mobile=True,
+        display_name="iPhone 13 Pro",
+        playwright_device="iPhone 13 Pro"
     ),
 
     "iphone-13-pro-landscape": ViewportProfile(
@@ -41,7 +45,9 @@ VIEWPORT_PROFILES = {
         device_class="iOS landscape",
         description="Catches horizontal layout breakage, header collapse issues",
         device_scale_factor=3.0,
-        is_mobile=True
+        is_mobile=True,
+        display_name="iPhone 13 Pro (Landscape)",
+        playwright_device="iPhone 13 Pro landscape"
     ),
 
     "android-small": ViewportProfile(
@@ -51,7 +57,9 @@ VIEWPORT_PROFILES = {
         device_class="Cheap Android",
         description="Common low-end Android; smallest practical mobile viewport",
         device_scale_factor=2.0,
-        is_mobile=True
+        is_mobile=True,
+        display_name="Android Small / Pixel 5",
+        playwright_device="Pixel 5"
     ),
 
     "android-medium": ViewportProfile(
@@ -61,7 +69,9 @@ VIEWPORT_PROFILES = {
         device_class="Mid-range Android",
         description="Galaxy S-class; catches Android-specific rendering quirks",
         device_scale_factor=2.5,
-        is_mobile=True
+        is_mobile=True,
+        display_name="Android Medium / Galaxy S9+",
+        playwright_device="Galaxy S9+"
     ),
 
     "ipad-air": ViewportProfile(
@@ -71,7 +81,9 @@ VIEWPORT_PROFILES = {
         device_class="Tablet portrait",
         description="Tablet breakpoint; often forgotten in responsive design",
         device_scale_factor=2.0,
-        is_mobile=False
+        is_mobile=False,
+        display_name="iPad Air",
+        playwright_device="iPad (gen 7)"
     ),
 
     "ipad-air-landscape": ViewportProfile(
@@ -81,7 +93,9 @@ VIEWPORT_PROFILES = {
         device_class="Tablet landscape",
         description="Horizontal tablet; catches weird mid-size layout bugs",
         device_scale_factor=2.0,
-        is_mobile=False
+        is_mobile=False,
+        display_name="iPad Air (Landscape)",
+        playwright_device="iPad (gen 7) landscape"
     ),
 
     "desktop-standard": ViewportProfile(
@@ -91,7 +105,9 @@ VIEWPORT_PROFILES = {
         device_class="Desktop baseline",
         description="Most common desktop resolution; developer default",
         device_scale_factor=1.0,
-        is_mobile=False
+        is_mobile=False,
+        display_name="Desktop Standard (1920×1080)",
+        playwright_device=None
     ),
 
     "desktop-ultrawide": ViewportProfile(
@@ -101,7 +117,9 @@ VIEWPORT_PROFILES = {
         device_class="Large desktop",
         description="Catches max-width issues, ultra-wide layout stretch",
         device_scale_factor=1.0,
-        is_mobile=False
+        is_mobile=False,
+        display_name="Desktop Ultrawide (2560×1440)",
+        playwright_device=None
     ),
 
     "desktop-narrow": ViewportProfile(
@@ -111,7 +129,9 @@ VIEWPORT_PROFILES = {
         device_class="Laptop / small desktop",
         description="Older laptop resolution; still ~15% of users",
         device_scale_factor=1.0,
-        is_mobile=False
+        is_mobile=False,
+        display_name="Desktop Small (1366×768)",
+        playwright_device=None
     ),
 }
 
@@ -272,13 +292,6 @@ def select_browsers_for_keywords(keywords: List[str], target_url: str = "") -> L
     """
     keywords_lower = [k.lower() for k in keywords]
     selected = set()
-
-    # Pointblank.club ALWAYS gets Safari (RULE 4)
-    if "pointblank.club" in target_url.lower():
-        selected.add("webkit-ios")
-        selected.add("webkit-desktop")
-        selected.add("chromium-desktop")  # For comparison
-        return list(selected)
 
     # Check for specific browser mentions
     if any(k in keywords_lower for k in ["safari", "webkit", "ios", "iphone", "ipad"]):

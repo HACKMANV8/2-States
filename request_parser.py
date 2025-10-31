@@ -5,9 +5,17 @@ Parses natural language Slack messages into structured test requirements.
 """
 
 import re
+import os
 from typing import List, Optional
 from models import ParsedSlackRequest
 from config import select_viewports_for_keywords, select_browsers_for_keywords, select_networks_for_keywords
+
+# Claude API-based parser (smart parsing)
+try:
+    from viewport_parser_claude import ClaudeViewportParser
+    CLAUDE_PARSER_AVAILABLE = True
+except ImportError:
+    CLAUDE_PARSER_AVAILABLE = False
 
 
 class SlackRequestParser:
@@ -17,10 +25,34 @@ class SlackRequestParser:
     Implements behavioral rules from agent_instructions and specification TODO 1.
     """
 
-    def __init__(self):
+    def __init__(self, use_claude_parser: bool = True):
+        """
+        Initialize request parser.
+
+        Args:
+            use_claude_parser: If True and Claude API is available, use Claude-based
+                             environment parsing. Otherwise fall back to keyword matching.
+        """
         self.url_pattern = re.compile(
             r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+[^\s]*'
         )
+
+        # Initialize Claude parser if available and requested
+        self.use_claude_parser = use_claude_parser and CLAUDE_PARSER_AVAILABLE
+        if self.use_claude_parser:
+            try:
+                self.claude_parser = ClaudeViewportParser()
+                print("✅ Claude API parser initialized for smart viewport detection")
+            except Exception as e:
+                print(f"⚠️  Claude parser initialization failed: {e}")
+                print("   Falling back to keyword-based parsing")
+                self.use_claude_parser = False
+                self.claude_parser = None
+        else:
+            self.claude_parser = None
+            if use_claude_parser and not CLAUDE_PARSER_AVAILABLE:
+                print("⚠️  Claude parser not available (import failed)")
+                print("   Using keyword-based parsing")
 
     def parse(self, message: str, user_id: str = "unknown") -> ParsedSlackRequest:
         """
@@ -52,14 +84,35 @@ class SlackRequestParser:
         # Extract flows/scenarios mentioned
         flows = self._extract_flows(message_lower)
 
-        # Extract keywords for environment selection
-        keywords = self._extract_keywords(message_lower)
-
-        # Determine required environments
+        # Determine target URL
         target_url = urls[0] if urls else "https://pointblank.club"
-        required_viewports = select_viewports_for_keywords(keywords)
-        required_browsers = select_browsers_for_keywords(keywords, target_url)
-        required_networks = select_networks_for_keywords(keywords)
+
+        # Determine required environments using Claude parser or keyword matching
+        if self.use_claude_parser and self.claude_parser:
+            # Use Claude API for intelligent parsing
+            try:
+                print(f"🤖 Using Claude API to parse environment requirements...")
+                env_requirements = self.claude_parser.parse_environments(message, target_url)
+                required_viewports = env_requirements.get("viewports", ["desktop-standard"])
+                required_browsers = env_requirements.get("browsers", ["chromium-desktop"])
+                required_networks = env_requirements.get("networks", ["normal"])
+                print(f"   📱 Viewports: {', '.join(required_viewports)}")
+                print(f"   🌐 Browsers: {', '.join(required_browsers)}")
+                print(f"   📡 Networks: {', '.join(required_networks)}")
+            except Exception as e:
+                print(f"⚠️  Claude parsing failed: {e}")
+                print("   Falling back to keyword-based parsing")
+                # Fallback to keyword-based parsing
+                keywords = self._extract_keywords(message_lower)
+                required_viewports = select_viewports_for_keywords(keywords)
+                required_browsers = select_browsers_for_keywords(keywords, target_url)
+                required_networks = select_networks_for_keywords(keywords)
+        else:
+            # Use keyword-based parsing
+            keywords = self._extract_keywords(message_lower)
+            required_viewports = select_viewports_for_keywords(keywords)
+            required_browsers = select_browsers_for_keywords(keywords, target_url)
+            required_networks = select_networks_for_keywords(keywords)
 
         # Extract explicit expectations
         expectations = self._extract_expectations(message)
