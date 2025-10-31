@@ -95,24 +95,13 @@ class MCPServerInstance:
     async def disconnect(self):
         """Disconnect and cleanup this MCP server instance."""
         if self.mcp_tools:
-            try:
-                print(f"   🔌 Disconnecting MCP server for {self.viewport.name}")
-                # Properly close the MCP connection
-                # Note: This may raise RuntimeError about cancel scope if called from different task
-                # We suppress this as it's expected behavior when cleaning up across task boundaries
-                await self.mcp_tools.close()
-                print(f"      ✅ MCP connection closed successfully")
-            except RuntimeError as e:
-                # Expected error when closing across task boundaries
-                if "cancel scope" in str(e):
-                    print(f"      ✅ MCP connection closed (cross-task cleanup)")
-                else:
-                    print(f"   ⚠️  Runtime error disconnecting MCP server: {e}")
-            except Exception as e:
-                print(f"   ⚠️  Error disconnecting MCP server: {e}")
-            finally:
-                self.connected = False
-                self.mcp_tools = None
+            print(f"   🔌 Disconnecting MCP server for {self.viewport.name}")
+            # Note: We don't call close() because it causes RuntimeError when called across task boundaries
+            # The MCP connection will be cleaned up automatically when the program exits
+            # This is a known limitation with asyncio cancel scopes and stdio connections
+            self.connected = False
+            self.mcp_tools = None
+            print(f"      ✅ MCP connection released (will cleanup on exit)")
 
         if self.process:
             try:
