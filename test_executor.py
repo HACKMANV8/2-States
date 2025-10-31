@@ -8,6 +8,8 @@ Implements execution contracts from specification Section 4.
 import asyncio
 from datetime import datetime
 from typing import List, Optional
+from io import StringIO
+from contextlib import contextmanager
 from models import (
     TestPlan, MatrixCell, CellResult, StepResult, Screenshot,
     ConsoleError, NetworkRequest, TestStatus, FailurePriority,
@@ -81,6 +83,61 @@ class TestExecutor:
         if self.log_file:
             self.log_file.write(message + '\n')
             self.log_file.flush()
+
+    def _log_only(self, message):
+        """Log message only to file (not console)."""
+        if self.log_file:
+            self.log_file.write(message + '\n')
+            self.log_file.flush()
+
+    @contextmanager
+    def _capture_agent_output(self):
+        """
+        Context manager to capture all stdout from agent execution.
+
+        Writes agent's debug output (thinking, tool calls, etc.) to both:
+        - Console (stdout)
+        - Log file
+
+        Usage:
+            with self._capture_agent_output():
+                response = await agent.arun(instruction)
+        """
+        # Custom stdout that writes to both original stdout and log file
+        class TeeOutput:
+            def __init__(self, log_file, original_stdout):
+                self.log_file = log_file
+                self.original_stdout = original_stdout
+                self.buffer = []
+
+            def write(self, text):
+                # Write to original stdout
+                self.original_stdout.write(text)
+                self.original_stdout.flush()
+
+                # Write to log file
+                if self.log_file:
+                    self.log_file.write(text)
+                    self.log_file.flush()
+
+                # Keep in buffer for potential retrieval
+                self.buffer.append(text)
+
+            def flush(self):
+                self.original_stdout.flush()
+                if self.log_file:
+                    self.log_file.flush()
+
+        # Save original stdout
+        original_stdout = sys.stdout
+
+        try:
+            # Replace stdout with our Tee
+            sys.stdout = TeeOutput(self.log_file, original_stdout)
+            yield
+        finally:
+            # Restore original stdout
+            sys.stdout = original_stdout
 
     def __del__(self):
         """Cleanup: close log file."""
@@ -195,7 +252,9 @@ Be thorough and report clear results.""",
             print(f"🧪 Running backend API tests...")
             print(f"   Instructions: {test_instructions}\n")
 
-            response = await backend_agent.arun(test_instructions)
+            # Capture ALL agent output (thinking, tool calls, debug info) to log file
+            with self._capture_agent_output():
+                response = await backend_agent.arun(test_instructions)
             result_content = response.content if hasattr(response, 'content') else str(response)
 
             completed_at = datetime.now()
@@ -479,7 +538,9 @@ Begin execution now. Take full control."""
             self._log(f"⏳ Executing with AI agent (this may take 30-60 seconds)...")
             self._log(f"🤖 Agent is thinking and using Playwright MCP tools...\n")
 
-            response = await self.agent.arun(autonomous_instruction)
+            # Capture ALL agent output (thinking, tool calls, debug info) to log file
+            with self._capture_agent_output():
+                response = await self.agent.arun(autonomous_instruction)
 
             # Extract agent's response
             agent_output = response.content if hasattr(response, 'content') else str(response)
@@ -769,8 +830,9 @@ Expected outcomes:
             # Build instruction for the agent based on action type
             instruction = self._build_playwright_instruction(step, cell)
 
-            # Execute with agent
-            response = await self.agent.arun(instruction)
+            # Execute with agent - capture all debug output
+            with self._capture_agent_output():
+                response = await self.agent.arun(instruction)
             actual_outcome = response.content if hasattr(response, 'content') else str(response)
 
             # Determine if step passed based on response
