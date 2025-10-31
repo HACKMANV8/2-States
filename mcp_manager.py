@@ -10,6 +10,7 @@ Also manages dynamic backend testing MCP servers for API testing.
 import asyncio
 import json
 import os
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -51,7 +52,9 @@ class MCPServerInstance:
         mcp_args = self._build_mcp_args()
 
         # Build full command string (MCPTools expects single string, not separate args)
-        full_command = f"npx -y @playwright/mcp@latest {' '.join(mcp_args)}"
+        # Use shlex.quote to properly escape arguments with spaces
+        quoted_args = ' '.join(shlex.quote(arg) for arg in mcp_args)
+        full_command = f"npx -y @playwright/mcp@latest {quoted_args}"
 
         print(f"   🔌 Connecting to MCP server for {self.viewport.name} on {self.browser.name}")
         print(f"      Command: {full_command}")
