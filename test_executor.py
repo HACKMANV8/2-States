@@ -346,6 +346,13 @@ Be thorough but efficient. Report clear outcomes.""",
             failure_summary = self._generate_failure_summary(step_results, cell)
             failure_priority = self._determine_failure_priority(cell)
 
+        # CRITICAL: Cleanup MCP instance after cell execution
+        # This ensures next cell with different browser/viewport gets fresh MCP server
+        try:
+            await self.mcp_manager.cleanup_instance(cell.viewport, cell.browser)
+        except Exception as e:
+            self._log(f"   ⚠️  Warning: Failed to cleanup MCP instance: {e}")
+
         return CellResult(
             cell_id=cell.cell_id,
             viewport=cell.viewport.name,

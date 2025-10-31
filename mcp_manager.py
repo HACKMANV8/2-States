@@ -367,6 +367,28 @@ class DynamicMCPManager:
 
         return mcp_tools
 
+    async def cleanup_instance(self, viewport: ViewportProfile, browser: BrowserProfile):
+        """
+        Cleanup a specific MCP server instance after cell execution.
+
+        This ensures each cell gets a fresh MCP server with correct browser/viewport config.
+
+        Args:
+            viewport: ViewportProfile of the instance to cleanup
+            browser: BrowserProfile of the instance to cleanup
+        """
+        instance_id = f"{viewport.name}_{browser.name}"
+
+        if instance_id in self.instances:
+            instance = self.instances[instance_id]
+            try:
+                print(f"   🧹 Cleaning up MCP instance: {instance_id}")
+                await instance.disconnect()
+                del self.instances[instance_id]
+                print(f"      ✅ MCP instance cleaned up")
+            except Exception as e:
+                print(f"      ⚠️  Error cleaning up {instance_id}: {e}")
+
     async def cleanup_all(self):
         """Cleanup all MCP server instances (Playwright and Backend)."""
         total_instances = len(self.playwright_instances) + len(self.backend_instances)
