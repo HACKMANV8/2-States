@@ -8,6 +8,7 @@ Transform simple Slack messages into complete cross-browser, cross-device, and c
 
 - **AI-Powered**: Uses Claude Sonnet 4 for intelligent task understanding
 - **Multiple MCP Servers**: Context7 docs, Filesystem, Playwright web automation
+- **PR-Based Context Testing**: Automatically test GitHub PRs with deployment URLs (NEW!)
 - **Dynamic Backend API Testing**: Test ANY user API from repos/PRs automatically
 - **Slack Integration**: Production bot with web automation AND API testing
 - **Persistent Sessions**: Maintains state across tasks
@@ -43,56 +44,61 @@ Transform simple Slack messages into complete cross-browser, cross-device, and c
 
 ## Quick Start
 
-### Run the Test Demo (No Slack/MCP needed)
+### Complete Setup (3 Terminals - Recommended)
+
+#### Terminal 1: Start Backend API
 ```bash
-python test_testgpt.py
+./scripts/START_EVERYTHING.sh
+```
+Backend runs at: http://localhost:8000
+
+#### Terminal 2: Start Slack Bot
+```bash
+./scripts/START_SLACK_BOT.sh
+```
+Bot connects to Slack workspace and listens for commands.
+
+#### Terminal 3: Start Frontend (Optional)
+```bash
+npm run dev
+```
+Frontend runs at: http://localhost:3000/pr-tests
+
+### Alternative: Test Demo (No Slack/MCP needed)
+```bash
+python scripts/test_testgpt.py
 ```
 This demonstrates the full flow with mock results.
 
-### Run the Slack Bot
+### Environment Setup
+
+1. **Install Dependencies**
 ```bash
-# Install dependencies
 pip install -r requirements.txt
-
-# Install Playwright browsers (required for testing)
 npx playwright install
+```
 
-# Configure .env with your tokens
+2. **Configure .env**
+```bash
 cp .env.example .env
-# Edit .env with your API keys
-
-# Run TestGPT
-python main.py
 ```
 
-### Run Backend API Testing
-```bash
-# Test a GitHub API
-export ANTHROPIC_API_KEY=your_key
-python examples/test_github_repo.py
-```
-
-### Setup Test Persistence & Management (NEW!)
-```bash
-# One-command setup
-bash setup_persistence.sh
-
-# Start backend API server
-bash start_backend.sh
-
-# Start frontend (in another terminal)
-cd frontend && npm run dev
-
-# Access:
-# - API: http://localhost:8000/docs
-# - Frontend: http://localhost:3000/test-library
-```
+Required environment variables:
+- `ANTHROPIC_API_KEY` - Get from console.anthropic.com
+- `SLACK_BOT_TOKEN` - Your Slack bot token (xoxb-...)
+- `SLACK_APP_TOKEN` - Your Slack app token (xapp-...)
+- `GITHUB_TOKEN` - (Optional) For posting PR comments
 
 ### Example Slack Commands
 ```
 # Basic testing
 @TestGPT test pointblank.club responsive on safari and iphone
 @TestGPT run checkout flow on chrome desktop and ipad under slow network
+
+# PR-based testing (NEW!)
+@TestGPT test this PR https://github.com/owner/repo/pull/123
+@TestGPT test out this PR: https://github.com/owner/repo/pull/456
+@TestGPT check this PR https://github.com/owner/repo/pull/789
 
 # Custom instructions
 @TestGPT Test github.com, are you able to view the repositories of SkySingh04?
@@ -107,86 +113,60 @@ cd frontend && npm run dev
 @TestGPT run smoke tests on all endpoints
 ```
 
-## Examples Included
+## Examples & Demos
 
-### 1. Slack Bot
+### Slack Bot (Production)
 **File**: `slack_agent.py`
 - Production-ready Slack bot with Playwright MCP
 - Responds to channel mentions
-- Performs web automation tasks
+- Performs web automation tasks and PR testing
 - Posts results back to Slack
 
-### 2. Documentation Agent
-**File**: `01_basic_context7_agent.py`
-- Uses Context7 MCP for live documentation
-- Looks up library docs and examples
-- Supports any programming library
-
-### 3. Filesystem Agent
-**File**: `02_filesystem_agent.py`
-- File and directory operations
-- Read/write/create files
-- Search and navigate filesystem
-
-### 4. Multi-Agent Team
-**File**: `03_multi_agent_team.py`
-- Multiple agents working together
-- Specialized roles (researcher, coder, reviewer)
-- Coordinated task execution
-
-### 5. Streamlit Web Interface
-**File**: `04_streamlit_app.py`
-- Web UI for agent interaction
-- Visual task execution
-- Interactive chat interface
-
-### 6. Playwright MCP Agent
-**File**: `05_playwright_mcp_agent.py`
-- Persistent browser sessions
-- Advanced web automation
-- Class-based implementation
-
-### 7. Dynamic Backend API Testing System
-**Directory**: `dynamic_backend_testing/`
-- **Test ANY user-submitted API** from repos, branches, PRs
-- **Automatic OpenAPI introspection** and MCP wrapper generation
-- **Zero manual configuration** - works with unknown APIs
-- **CI/CD ready** - test PRs before merging
-- **Production-ready orchestration** for automated testing
-- Works with FastAPI, Flask, Django automatically
-- **See [dynamic_backend_testing/README.md](dynamic_backend_testing/README.md) for full documentation**
-
-### Live Demos
+### Example Agents (`examples/`)
+- `01_basic_context7_agent.py` - Documentation lookup with Context7 MCP
+- `02_filesystem_agent.py` - File operations
+- `03_multi_agent_team.py` - Multi-agent coordination
+- `04_streamlit_app.py` - Web UI for agent interaction
+- `05_playwright_mcp_agent.py` - Persistent browser sessions
 - `demo_google_search.py` - Google search automation
 - `demo_persistent_session.py` - Multi-step browser tasks
+- `test_github_repo.py` - Test any GitHub repository
+- `test_pr.py` - Test pull requests (CI/CD ready)
 
-### Test Scripts
+### Test Scripts (`scripts/`)
+- `test_testgpt.py` - Full end-to-end test demo
 - `test_api_key.py` - Verify API key
 - `test_mcp_connection.py` - Test MCP server connections
 - `test_playwright_mcp.py` - Test Playwright integration
+- `verify_installation.py` - Installation verification
 
-### Examples
-- `examples/test_github_repo.py` - Test any GitHub repository
-- `examples/test_pr.py` - Test pull requests (CI/CD ready)
+### Setup Scripts (`scripts/`)
+- `START_EVERYTHING.sh` - Start backend API server
+- `START_SLACK_BOT.sh` - Start Slack bot
+- `RUN_FULL_TEST.sh` - Run comprehensive test suite
+- `setup_persistence.sh` - Setup test persistence system
+
+### Dynamic Backend API Testing
+**Directory**: `dynamic_backend_testing/`
+- Test ANY user-submitted API from repos, branches, PRs
+- Automatic OpenAPI introspection and MCP wrapper generation
+- Zero manual configuration - works with unknown APIs
+- CI/CD ready - test PRs before merging
+- See [dynamic_backend_testing/README.md](dynamic_backend_testing/README.md) for full documentation
 
 ## Usage
 
-### Slack Bot
-Mention the bot in Slack:
-```
-@bot search Google for "best restaurants near me"
-@bot go to wikipedia and find info about Python
-@bot take a screenshot of example.com
-```
-
 ### Running Examples
 ```bash
-# Run any example
-python 01_basic_context7_agent.py
-python demo_google_search.py
+# Run agent examples
+python examples/01_basic_context7_agent.py
+python examples/demo_google_search.py
 
 # Run Streamlit app
-streamlit run 04_streamlit_app.py
+streamlit run examples/04_streamlit_app.py
+
+# Run tests
+python scripts/test_testgpt.py
 ```
 
 ## What the Agents Can Do
@@ -203,11 +183,6 @@ streamlit run 04_streamlit_app.py
 - Run comprehensive test suites
 
 ## Configuration
-
-Required environment variables in `.env`:
-- `ANTHROPIC_API_KEY` - Get from console.anthropic.com
-- `SLACK_BOT_TOKEN` - Your Slack bot token (xoxb-...)
-- `SLACK_APP_TOKEN` - Your Slack app token (xapp-...)
 
 ### Adding New Viewports
 
@@ -313,8 +288,6 @@ python examples/test_pr.py \
 
 For complete documentation, see:
 - [dynamic_backend_testing/README.md](dynamic_backend_testing/README.md) - Full system documentation
-- [DYNAMIC_SYSTEM_IMPLEMENTATION.md](DYNAMIC_SYSTEM_IMPLEMENTATION.md) - Architecture details
-- [FINAL_IMPLEMENTATION_SUMMARY.md](FINAL_IMPLEMENTATION_SUMMARY.md) - Implementation summary
 
 ## Bug Fixes & Improvements
 
@@ -402,21 +375,68 @@ cat logs/latest.log | grep "✅ Autonomous execution completed"
 - **Git/GitHub** - Repository management
 - **OpenAPI** - API introspection
 
+## PR-Based Testing
+
+### How It Works
+
+When you test a PR via Slack (`@TestGPT test this PR: <url>`), the system:
+
+1. **Fetches PR Context** from GitHub API
+   - PR metadata (title, author, description, labels)
+   - Changed files with line-by-line diffs
+   - Linked issues and acceptance criteria
+   - CI/CD status checks
+
+2. **Detects Deployment URL**
+   - Searches PR comments for deployment URLs
+   - Checks CI/CD status checks (Vercel, Netlify, etc.)
+   - Validates deployment is accessible (HTTP 200)
+
+3. **Analyzes Codebase**
+   - Detects project type (frontend, backend, fullstack)
+   - Identifies tech stack (Next.js, React, FastAPI, etc.)
+   - Reads package.json, requirements.txt, README
+
+4. **Generates Test Scenarios** based on changed files
+   - If UI components changed → UI component tests
+   - If API routes changed → API functionality tests
+   - If styles changed → Visual regression tests
+   - Always tests acceptance criteria from PR description
+
+5. **Executes Tests** with Playwright
+   - Runs browser automation tests on deployment URL
+   - Tests only the changes, not the entire site
+   - Captures screenshots and console errors
+
+6. **Reports Results** to Slack
+   - Pass/fail status with scenario breakdown
+   - Detailed failure messages
+   - Duration and environment info
+
+### GitHub Token Setup
+
+To post test results as PR comments (optional):
+
+1. Go to https://github.com/settings/tokens
+2. Generate new token with `repo` scope
+3. Add to `.env`:
+   ```bash
+   GITHUB_TOKEN=ghp_your_token_here
+   ```
+
+Without a token, TestGPT can still:
+- Read public PR data
+- Analyze code changes
+- Run tests on deployment URLs
+- Post results to Slack
+
+It just won't be able to post GitHub PR comments.
+
 ## Documentation
 
-### Test Persistence & Re-run System
-- **[PERSISTENCE_AND_RERUN_IMPLEMENTATION.md](PERSISTENCE_AND_RERUN_IMPLEMENTATION.md)** - Complete implementation guide for test persistence
-  - Architecture overview
-  - Database schema
-  - API endpoints reference
-  - Frontend components
-  - Configuration file format
-  - Usage examples
-  - Setup instructions
-  - Integration with existing TestGPT
-
-### Other Documentation
-- **[examples/README.md](examples/README.md)** - Example scripts and CI/CD integration
+For architecture details, see:
+- `dynamic_backend_testing/README.md` - Dynamic API testing system
+- `examples/README.md` - Example scripts and CI/CD integration
 
 ## API Reference
 

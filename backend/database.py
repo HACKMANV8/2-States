@@ -156,6 +156,122 @@ class ExecutionStep(Base):
     timestamp = Column(DateTime, default=datetime.utcnow)
 
 
+class PRTestRun(Base):
+    """PR-based test run record"""
+    __tablename__ = "pr_test_runs"
+
+    id = Column(String, primary_key=True)
+
+    # PR Information
+    pr_url = Column(String, nullable=False)
+    pr_number = Column(Integer, nullable=False)
+    pr_title = Column(String, nullable=False)
+    pr_author = Column(String)
+    repo_owner = Column(String, nullable=False)
+    repo_name = Column(String, nullable=False)
+    base_branch = Column(String)
+    head_branch = Column(String)
+    head_sha = Column(String)
+
+    # PR Context
+    pr_description = Column(Text)
+    files_changed_count = Column(Integer)
+    changed_files = Column(JSON)  # List of file paths
+    acceptance_criteria = Column(JSON)  # List of criteria
+    linked_issues = Column(JSON)  # List of linked issue numbers
+
+    # Deployment Information
+    deployment_url = Column(String)
+    deployment_platform = Column(String)  # vercel, netlify, etc.
+    deployment_accessible = Column(Boolean)
+    deployment_response_time_ms = Column(Integer)
+
+    # Codebase Analysis
+    project_type = Column(String)  # frontend, backend, fullstack
+    tech_stack = Column(JSON)  # Array of technologies
+    framework_detected = Column(String)
+
+    # Test Context
+    test_scenarios_generated = Column(JSON)  # List of scenarios
+    scenario_count = Column(Integer)
+
+    # Test Execution
+    status = Column(String, nullable=False)  # pending, running, passed, failed, error
+    overall_pass = Column(Boolean)
+    scenarios_passed = Column(Integer)
+    scenarios_failed = Column(Integer)
+    scenarios_total = Column(Integer)
+
+    # Results
+    test_results = Column(JSON)  # Full test results object
+    failures = Column(JSON)  # List of failure details
+    console_errors = Column(JSON)  # Console errors captured
+    screenshots = Column(JSON)  # Screenshot paths
+    agent_response = Column(Text)  # Full agent response
+
+    # Timing
+    started_at = Column(DateTime)
+    completed_at = Column(DateTime)
+    duration_ms = Column(Integer)
+
+    # GitHub Integration
+    github_comment_posted = Column(Boolean, default=False)
+    github_comment_url = Column(String)
+    github_comment_id = Column(String)
+
+    # Slack Integration
+    slack_message_posted = Column(Boolean, default=False)
+    slack_channel_id = Column(String)
+    slack_message_ts = Column(String)
+
+    # Trigger Information
+    triggered_by = Column(String)  # slack, github_webhook, manual
+    triggered_by_user = Column(String)
+    custom_instructions = Column(Text)
+
+    # Metrics
+    github_api_calls = Column(Integer)
+    total_processing_time_ms = Column(Integer)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class PRTestMetrics(Base):
+    """Aggregated metrics for PR testing"""
+    __tablename__ = "pr_test_metrics"
+
+    id = Column(String, primary_key=True)
+    date = Column(DateTime, nullable=False)
+
+    # Daily aggregates
+    total_pr_tests = Column(Integer, default=0)
+    total_passed = Column(Integer, default=0)
+    total_failed = Column(Integer, default=0)
+    total_errors = Column(Integer, default=0)
+
+    # Timing metrics
+    avg_execution_time_ms = Column(Integer)
+    avg_github_fetch_time_ms = Column(Integer)
+    avg_deployment_validation_time_ms = Column(Integer)
+
+    # Deployment metrics
+    deployments_found = Column(Integer, default=0)
+    deployments_accessible = Column(Integer, default=0)
+    deployment_platforms = Column(JSON)  # Count by platform
+
+    # Framework metrics
+    frameworks_detected = Column(JSON)  # Count by framework
+
+    # Success rates by type
+    frontend_success_rate = Column(Float)
+    backend_success_rate = Column(Float)
+    fullstack_success_rate = Column(Float)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 # ============================================================================
 # DATABASE INITIALIZATION
 # ============================================================================

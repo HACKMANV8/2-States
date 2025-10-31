@@ -375,3 +375,6 @@ class ParsedSlackRequest:
     backend_repo_url: Optional[str] = None
     backend_api_path: Optional[str] = None
     backend_app_module: str = "main:app"
+    # PR testing fields
+    is_pr_test: bool = False
+    pr_url: Optional[str] = None

@@ -42,6 +42,11 @@ class SlackRequestParser:
             r'https?://github\.com/([\w-]+)/([\w-]+)'
         )
 
+        # GitHub PR URL pattern
+        self.github_pr_pattern = re.compile(
+            r'https?://(?:www\.)?github\.com/([\w-]+)/([\w-]+)/pull/(\d+)'
+        )
+
         # Initialize Claude parser if available and requested
         self.use_claude_parser = use_claude_parser and CLAUDE_PARSER_AVAILABLE
         if self.use_claude_parser:
@@ -121,12 +126,18 @@ class SlackRequestParser:
         # Extract explicit expectations
         expectations = self._extract_expectations(message)
 
+        # Detect PR testing request
+        is_pr_test, pr_url = self._detect_pr_test(message)
+
         # Detect backend API testing
-        is_backend_test = self._detect_backend_api_test(message)
+        is_backend_test = self._detect_backend_api_test(message) if not is_pr_test else False
         backend_repo_url = None
         backend_app_module = "main:app"
 
-        if is_backend_test:
+        if is_pr_test:
+            print(f"   🔍 Detected PR testing request")
+            print(f"      PR URL: {pr_url}")
+        elif is_backend_test:
             # Extract GitHub URL if present
             backend_repo_url = self._extract_github_url(message)
             # Extract app module if specified
@@ -149,7 +160,9 @@ class SlackRequestParser:
             raw_message=message,
             is_backend_api_test=is_backend_test,
             backend_repo_url=backend_repo_url,
-            backend_app_module=backend_app_module
+            backend_app_module=backend_app_module,
+            is_pr_test=is_pr_test,
+            pr_url=pr_url
         )
 
     def _detect_rerun(self, message: str) -> tuple[bool, Optional[str]]:
@@ -301,6 +314,52 @@ class SlackRequestParser:
                 expectations.append(expectation)
 
         return expectations
+
+    def _detect_pr_test(self, message: str) -> tuple[bool, Optional[str]]:
+        """
+        Detect if this is a PR testing request.
+
+        Looks for:
+        - GitHub PR URLs
+        - Keywords like "test this PR", "test out this PR"
+
+        Args:
+            message: User message
+
+        Returns:
+            Tuple of (is_pr_test, pr_url)
+        """
+        message_lower = message.lower()
+
+        # Check for explicit PR testing keywords
+        pr_test_keywords = [
+            "test this pr",
+            "test out this pr",
+            "test the pr",
+            "test pr",
+            "check this pr",
+            "review this pr"
+        ]
+
+        has_pr_keyword = any(keyword in message_lower for keyword in pr_test_keywords)
+
+        # Check for GitHub PR URL
+        pr_match = self.github_pr_pattern.search(message)
+
+        if pr_match:
+            pr_url = pr_match.group(0)
+            return True, pr_url
+
+        # If PR keyword is present, look for any GitHub URL and append "/pull/" if needed
+        if has_pr_keyword:
+            # Look for GitHub repo URL that might need /pull/ appended
+            github_match = self.github_url_pattern.search(message)
+            if github_match:
+                # User might have said "test this PR" and provided a repo URL
+                # We'll return True but with None URL, let the orchestrator handle it
+                return True, None
+
+        return False, None
 
     def _detect_backend_api_test(self, message: str) -> bool:
         """

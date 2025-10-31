@@ -11,8 +11,10 @@ Coordinates the entire testing pipeline:
 """
 
 import uuid
+import logging
+import warnings
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict, Any, List
 from request_parser import SlackRequestParser
 from test_plan_builder import TestPlanBuilder
 from test_executor import TestExecutor
@@ -20,6 +22,12 @@ from result_formatter import ResultFormatter
 from persistence import PersistenceLayer
 from models import RunArtifact, TestPlan
 from mcp_manager import get_mcp_manager
+
+# Suppress known asyncio warnings from MCP async generator cleanup
+# These are cosmetic errors related to Python 3.13 async context handling
+logging.getLogger('asyncio').setLevel(logging.CRITICAL)
+warnings.filterwarnings('ignore', category=RuntimeWarning, message='.*async_generator.*')
+warnings.filterwarnings('ignore', category=RuntimeWarning, message='.*cancel scope.*')
 
 
 class TestGPTEngine:
@@ -115,6 +123,12 @@ class TestGPTEngine:
 
         # Step 5: Execute tests (if executor available)
         try:
+            # Check if this is a PR test
+            if parsed_request.is_pr_test:
+                print("🧪 Step 4: Executing PR-based tests...")
+                pr_result = await self._handle_pr_test(parsed_request, user_id)
+                return pr_result
+
             # Check if this is a backend API test
             if parsed_request.is_backend_api_test:
                 print("🧪 Step 4: Executing backend API tests...")
@@ -377,6 +391,320 @@ class TestGPTEngine:
             instructions.append(f"\nOriginal request: {parsed_request.raw_message}")
 
         return "\n".join(instructions)
+
+    async def _handle_pr_test(self, parsed_request, user_id: str) -> str:
+        """
+        Handle PR testing request.
+
+        Args:
+            parsed_request: Parsed request with PR information
+            user_id: User who triggered the test
+
+        Returns:
+            Formatted Slack summary
+        """
+        from pr_testing import PRTestOrchestrator
+        from pr_testing.pr_persistence import PRTestPersistence
+
+        try:
+            # Initialize PR orchestrator and persistence
+            orchestrator = PRTestOrchestrator()
+            persistence = PRTestPersistence()
+
+            # Check if PR URL is provided
+            pr_url = parsed_request.pr_url
+            if not pr_url:
+                return (
+                    "❌ **PR Testing Failed**\n\n"
+                    "Could not find a valid GitHub PR URL in your message.\n\n"
+                    "Please provide a PR URL like:\n"
+                    "- `test this PR https://github.com/owner/repo/pull/123`\n"
+                    "- `test out this PR: https://github.com/owner/repo/pull/456`"
+                )
+
+            # Step 1: Prepare PR test context
+            pr_test_result = await orchestrator.test_pr(
+                pr_url=pr_url,
+                custom_instructions=parsed_request.raw_message
+            )
+
+            # Save to database
+            pr_test_result["triggered_by"] = "slack"
+            pr_test_result["triggered_by_user"] = user_id
+            pr_test_result["custom_instructions"] = parsed_request.raw_message
+
+            test_run_id = persistence.save_pr_test_start(pr_test_result)
+            if test_run_id:
+                pr_test_result["test_run_id"] = test_run_id
+
+            # Check if preparation succeeded
+            if pr_test_result["status"] == "failed":
+                error_msg = pr_test_result.get("error", "Unknown error")
+                return (
+                    f"❌ **PR Testing Preparation Failed**\n\n"
+                    f"**Error:** {error_msg}\n\n"
+                    f"**PR URL:** {pr_url}\n\n"
+                    f"Please check that:\n"
+                    f"- The PR URL is valid\n"
+                    f"- The PR has a deployment preview URL\n"
+                    f"- Your GitHub token is configured (GITHUB_TOKEN env var)\n"
+                )
+
+            # Step 2: Execute tests with Playwright
+            if pr_test_result["status"] == "ready_for_execution":
+                deployment_url = pr_test_result["test_context"]["deployment_url"]
+                agent_instructions = pr_test_result["test_context"]["agent_instructions"]
+
+                print("\n🎭 Executing tests with Playwright agent...")
+
+                # Execute using existing TestExecutor
+                # Create a simple test with the deployment URL and instructions
+                test_result = await self._execute_pr_tests_with_playwright(
+                    deployment_url=deployment_url,
+                    instructions=agent_instructions,
+                    pr_context=pr_test_result
+                )
+
+                # Update database with test results
+                if test_run_id:
+                    persistence.update_pr_test_results(test_run_id, test_result)
+
+                # Format Slack summary
+                slack_summary = orchestrator.format_slack_summary(
+                    pr_test_result=pr_test_result,
+                    test_execution_result=test_result
+                )
+
+                return slack_summary
+
+            return orchestrator.format_slack_summary(pr_test_result=pr_test_result)
+
+        except Exception as e:
+            import traceback
+            error_trace = traceback.format_exc()
+            print(f"❌ Error in PR testing: {e}\n{error_trace}")
+
+            return (
+                f"❌ **PR Testing Failed**\n\n"
+                f"**Error:** {str(e)}\n\n"
+                f"**PR URL:** {parsed_request.pr_url}\n\n"
+                f"Please check the logs for more details."
+            )
+
+    async def _execute_pr_tests_with_playwright(
+        self,
+        deployment_url: str,
+        instructions: str,
+        pr_context: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Execute PR tests using Playwright agent.
+
+        Args:
+            deployment_url: Deployment URL to test
+            instructions: Test instructions for agent
+            pr_context: Full PR context
+
+        Returns:
+            Test execution results
+        """
+        from agno.agent import Agent
+        from agno.tools.mcp import MCPTools
+        from datetime import datetime
+
+        try:
+            # Get MCP manager and create instance for this test
+            print(f"   🔧 Starting Playwright MCP instance...")
+
+            # Use multiple browsers for comprehensive testing
+            # For now use chromium as primary, but structure for easy extension
+            browsers = ["chromium"]  # Can add ["chromium", "webkit", "firefox"] for multi-browser
+
+            # Use first browser for primary test
+            browser = browsers[0]
+            mcp_command = f'npx -y @playwright/mcp@latest --browser {browser}'
+            print(f"   🌐 Testing with {browser} browser")
+
+            # Connect to MCP
+            mcp_tools = MCPTools(command=mcp_command)
+            await mcp_tools.connect()
+
+            print(f"   ✅ Playwright MCP connected")
+
+            # Create agent with Claude model
+            from agno.models.anthropic import Claude
+
+            pr_agent = Agent(
+                name="PRTestAgent",
+                model=Claude(id="claude-sonnet-4-20250514"),
+                tools=[mcp_tools],
+                markdown=True,
+                debug_mode=True
+            )
+
+            print(f"   🤖 Executing test scenarios...")
+
+            start_time = datetime.now()
+
+            # Run tests
+            response = await pr_agent.arun(instructions)
+
+            end_time = datetime.now()
+            duration_ms = int((end_time - start_time).total_seconds() * 1000)
+
+            print(f"   ✅ Test execution completed ({duration_ms}ms)")
+
+            # Parse results from agent response
+            response_text = str(response)
+
+            # Simple pass/fail detection
+            test_passed = any(indicator in response_text.lower() for indicator in [
+                "all tests passed",
+                "all scenarios passed",
+                "✅",
+                "success"
+            ])
+
+            test_failed = any(indicator in response_text.lower() for indicator in [
+                "failed",
+                "error",
+                "❌",
+                "failure"
+            ])
+
+            # Count scenarios (rough estimate from response)
+            scenario_count = len(pr_context.get("test_context", {}).get("test_scenarios", []))
+
+            # Cleanup MCP with proper error handling
+            try:
+                await mcp_tools.disconnect()
+            except RuntimeError as e:
+                if "cancel scope" in str(e) or "asyncgen" in str(e):
+                    # Known cosmetic issue with stdio cleanup - safe to ignore
+                    pass
+                else:
+                    print(f"   ⚠️  MCP cleanup warning: {e}")
+            except Exception as e:
+                print(f"   ⚠️  MCP cleanup error: {e}")
+
+            return {
+                "success": True,
+                "test_run_id": pr_context.get("test_run_id"),
+                "deployment_url": deployment_url,
+                "overall_status": "PASS" if test_passed and not test_failed else "FAIL",
+                "passed_count": scenario_count if test_passed else 0,
+                "total_count": scenario_count,
+                "duration_ms": duration_ms,
+                "agent_response": response_text[:2000],  # Truncate for summary
+                "scenario_results": self._parse_scenario_results(response_text, pr_context),
+                "failures": self._extract_failures(response_text) if test_failed else [],
+                "console_errors": [],
+                "started_at": start_time,
+                "completed_at": end_time
+            }
+
+        except Exception as e:
+            import traceback
+            error_trace = traceback.format_exc()
+            print(f"   ❌ Test execution failed: {e}")
+
+            return {
+                "success": False,
+                "error": str(e),
+                "error_trace": error_trace
+            }
+
+    def _parse_scenario_results(self, response_text: str, pr_context: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        Parse scenario results from agent response with improved detection.
+
+        Uses multiple indicators to determine pass/fail status.
+        """
+        scenarios = pr_context.get("test_context", {}).get("test_scenarios", [])
+        results = []
+
+        # Normalize response text
+        response_lower = response_text.lower()
+        response_lines = response_text.split("\n")
+
+        for scenario in scenarios:
+            scenario_name = scenario["name"]
+            scenario_lower = scenario_name.lower()
+
+            # Check multiple pass indicators
+            pass_indicators = [
+                f"✅ {scenario_lower}",
+                f"{scenario_lower} ✅",
+                f"{scenario_lower}: passed",
+                f"{scenario_lower} passed",
+                f"{scenario_lower}: success",
+                f"successfully completed {scenario_lower}",
+                "all tests passed" in response_lower and scenario_lower in response_lower,
+            ]
+
+            # Check multiple fail indicators
+            fail_indicators = [
+                f"❌ {scenario_lower}",
+                f"{scenario_lower} ❌",
+                f"{scenario_lower}: failed",
+                f"{scenario_lower} failed",
+                f"{scenario_lower}: error",
+                f"failed {scenario_lower}",
+            ]
+
+            passed = any(indicator if isinstance(indicator, bool) else indicator in response_lower
+                        for indicator in pass_indicators)
+
+            failed = any(indicator in response_lower for indicator in fail_indicators)
+
+            # If both passed and failed indicators, prefer failed
+            if failed:
+                passed = False
+
+            # Extract failure reason if failed
+            failure_reason = None
+            if failed:
+                # Try to find the failure line
+                for line in response_lines:
+                    if scenario_lower in line.lower() and ("failed" in line.lower() or "error" in line.lower()):
+                        failure_reason = line.strip()
+                        break
+
+            results.append({
+                "name": scenario_name,
+                "priority": scenario["priority"],
+                "passed": passed,
+                "failure_reason": failure_reason or ("Test failed or not executed" if not passed else None),
+                "mentioned": scenario_lower in response_lower
+            })
+
+        return results
+
+    def _extract_failures(self, response_text: str) -> List[Dict[str, Any]]:
+        """Extract failure details from agent response."""
+        failures = []
+
+        # Look for common failure patterns
+        lines = response_text.split("\n")
+        current_failure = None
+
+        for line in lines:
+            if "❌" in line or "failed" in line.lower() or "error" in line.lower():
+                if current_failure:
+                    failures.append(current_failure)
+
+                current_failure = {
+                    "scenario": line.strip(),
+                    "error": line.strip()
+                }
+            elif current_failure and line.strip():
+                # Append to current failure
+                current_failure["error"] += f"\n{line.strip()}"
+
+        if current_failure:
+            failures.append(current_failure)
+
+        return failures[:5]  # Limit to 5 failures
 
     def _format_backend_test_slack_summary(self, backend_result: dict, parsed_request) -> str:
         """

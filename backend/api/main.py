@@ -18,6 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from backend.database import init_db, get_db
 from backend import crud
 from backend import schemas
+from backend.api import pr_tests
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -34,6 +35,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include PR Tests router
+app.include_router(pr_tests.router)
 
 
 # ============================================================================
