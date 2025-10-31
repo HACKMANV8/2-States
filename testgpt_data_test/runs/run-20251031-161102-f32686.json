@@ -1,0 +1,1148 @@
+{
+  "run_id": "run-20251031-161102-f32686",
+  "test_plan_id": "plan-8381941f872b",
+  "scenario_id": "scenario-pointblank-club-landing-332",
+  "scenario_name": "Pointblank.Club - Landing - Cross-Browser Test",
+  "target_url": "https://pointblank.club",
+  "triggered_by": "test-user",
+  "triggered_at": "2025-10-31T16:11:02.409714",
+  "started_at": "2025-10-31T16:11:02.409714",
+  "completed_at": "2025-10-31T16:11:02.409714",
+  "duration_total_seconds": 0,
+  "overall_status": "PARTIAL",
+  "total_cells": 18,
+  "passed_cells": 12,
+  "failed_cells": 6,
+  "timed_out_cells": 0,
+  "environment_summary": {
+    "viewports_tested": [
+      "desktop-standard",
+      "ipad-air",
+      "iphone-13-pro"
+    ],
+    "browsers_tested": [
+      "chromium-desktop",
+      "webkit-desktop",
+      "webkit-ios"
+    ],
+    "networks_tested": [
+      "normal",
+      "slow-3g"
+    ]
+  },
+  "cell_results": [
+    {
+      "cell_id": "landing-page-load-an_iphone-13-pro_webkit-ios_slow-3g_20251031-161102",
+      "viewport": "iphone-13-pro",
+      "browser": "webkit-ios",
+      "network": "slow-3g",
+      "status": "FAIL",
+      "started_at": "2025-10-31T16:11:02.409714",
+      "completed_at": "2025-10-31T16:11:02.409714",
+      "duration_ms": 5000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Safari (iOS) on Standard iOS: Hero CTA button not visible in viewport",
+          "duration_ms": 1000
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Safari (iOS) on Standard iOS: Hero CTA button not visible in viewport",
+          "duration_ms": 1000
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Safari (iOS) on Standard iOS: Hero CTA button not visible in viewport",
+          "duration_ms": 1000
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Safari (iOS) on Standard iOS: Hero CTA button not visible in viewport",
+          "duration_ms": 1000
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": "Safari (iOS) on Standard iOS: Hero CTA button not visible in viewport",
+      "failure_priority": "P0"
+    },
+    {
+      "cell_id": "landing-page-load-an_iphone-13-pro_webkit-ios_normal_20251031-161102",
+      "viewport": "iphone-13-pro",
+      "browser": "webkit-ios",
+      "network": "normal",
+      "status": "PASS",
+      "started_at": "2025-10-31T16:11:02.409714",
+      "completed_at": "2025-10-31T16:11:02.409714",
+      "duration_ms": 6000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Page loads with status 200 within 10 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1100
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Page body renders within 5 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1100
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1100
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Screenshot captured for visual evidence",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1100
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": null,
+      "failure_priority": null
+    },
+    {
+      "cell_id": "landing-page-load-an_iphone-13-pro_chromium-desktop_slow-3g_20251031-161102",
+      "viewport": "iphone-13-pro",
+      "browser": "chromium-desktop",
+      "network": "slow-3g",
+      "status": "PASS",
+      "started_at": "2025-10-31T16:11:02.409714",
+      "completed_at": "2025-10-31T16:11:02.409714",
+      "duration_ms": 7000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Page loads with status 200 within 10 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1200
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Page body renders within 5 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1200
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1200
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Screenshot captured for visual evidence",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1200
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": null,
+      "failure_priority": null
+    },
+    {
+      "cell_id": "landing-page-load-an_iphone-13-pro_chromium-desktop_normal_20251031-161102",
+      "viewport": "iphone-13-pro",
+      "browser": "chromium-desktop",
+      "network": "normal",
+      "status": "PASS",
+      "started_at": "2025-10-31T16:11:02.409714",
+      "completed_at": "2025-10-31T16:11:02.409714",
+      "duration_ms": 8000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Page loads with status 200 within 10 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1300
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Page body renders within 5 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1300
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1300
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Screenshot captured for visual evidence",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1300
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": null,
+      "failure_priority": null
+    },
+    {
+      "cell_id": "landing-page-load-an_iphone-13-pro_webkit-desktop_slow-3g_20251031-161102",
+      "viewport": "iphone-13-pro",
+      "browser": "webkit-desktop",
+      "network": "slow-3g",
+      "status": "FAIL",
+      "started_at": "2025-10-31T16:11:02.409714",
+      "completed_at": "2025-10-31T16:11:02.409714",
+      "duration_ms": 9000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Safari (macOS) on Standard iOS: Hero CTA button not visible in viewport",
+          "duration_ms": 1400
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Safari (macOS) on Standard iOS: Hero CTA button not visible in viewport",
+          "duration_ms": 1400
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Safari (macOS) on Standard iOS: Hero CTA button not visible in viewport",
+          "duration_ms": 1400
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Safari (macOS) on Standard iOS: Hero CTA button not visible in viewport",
+          "duration_ms": 1400
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": "Safari (macOS) on Standard iOS: Hero CTA button not visible in viewport",
+      "failure_priority": "P0"
+    },
+    {
+      "cell_id": "landing-page-load-an_iphone-13-pro_webkit-desktop_normal_20251031-161102",
+      "viewport": "iphone-13-pro",
+      "browser": "webkit-desktop",
+      "network": "normal",
+      "status": "PASS",
+      "started_at": "2025-10-31T16:11:02.409714",
+      "completed_at": "2025-10-31T16:11:02.409714",
+      "duration_ms": 10000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Page loads with status 200 within 10 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1500
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Page body renders within 5 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1500
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1500
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Screenshot captured for visual evidence",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1500
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": null,
+      "failure_priority": null
+    },
+    {
+      "cell_id": "landing-page-load-an_desktop-standard_webkit-ios_slow-3g_20251031-161102",
+      "viewport": "desktop-standard",
+      "browser": "webkit-ios",
+      "network": "slow-3g",
+      "status": "FAIL",
+      "started_at": "2025-10-31T16:11:02.409714",
+      "completed_at": "2025-10-31T16:11:02.409714",
+      "duration_ms": 11000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Safari (iOS): Pricing modal does not open on click",
+          "duration_ms": 1600
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Safari (iOS): Pricing modal does not open on click",
+          "duration_ms": 1600
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Safari (iOS): Pricing modal does not open on click",
+          "duration_ms": 1600
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Safari (iOS): Pricing modal does not open on click",
+          "duration_ms": 1600
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": "Safari (iOS): Pricing modal does not open on click",
+      "failure_priority": "P0"
+    },
+    {
+      "cell_id": "landing-page-load-an_desktop-standard_webkit-ios_normal_20251031-161102",
+      "viewport": "desktop-standard",
+      "browser": "webkit-ios",
+      "network": "normal",
+      "status": "PASS",
+      "started_at": "2025-10-31T16:11:02.409714",
+      "completed_at": "2025-10-31T16:11:02.409714",
+      "duration_ms": 12000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Page loads with status 200 within 10 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1700
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Page body renders within 5 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1700
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1700
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Screenshot captured for visual evidence",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1700
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": null,
+      "failure_priority": null
+    },
+    {
+      "cell_id": "landing-page-load-an_desktop-standard_chromium-desktop_slow-3g_20251031-161102",
+      "viewport": "desktop-standard",
+      "browser": "chromium-desktop",
+      "network": "slow-3g",
+      "status": "FAIL",
+      "started_at": "2025-10-31T16:11:02.409714",
+      "completed_at": "2025-10-31T16:11:02.409714",
+      "duration_ms": 13000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Page load timeout after 10 seconds on Slow 3G",
+          "duration_ms": 1800
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Page load timeout after 10 seconds on Slow 3G",
+          "duration_ms": 1800
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Page load timeout after 10 seconds on Slow 3G",
+          "duration_ms": 1800
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Page load timeout after 10 seconds on Slow 3G",
+          "duration_ms": 1800
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": "Page load timeout after 10 seconds on Slow 3G",
+      "failure_priority": "P1"
+    },
+    {
+      "cell_id": "landing-page-load-an_desktop-standard_chromium-desktop_normal_20251031-161102",
+      "viewport": "desktop-standard",
+      "browser": "chromium-desktop",
+      "network": "normal",
+      "status": "PASS",
+      "started_at": "2025-10-31T16:11:02.409714",
+      "completed_at": "2025-10-31T16:11:02.409714",
+      "duration_ms": 14000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Page loads with status 200 within 10 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1900
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Page body renders within 5 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1900
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1900
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Screenshot captured for visual evidence",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 1900
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": null,
+      "failure_priority": null
+    },
+    {
+      "cell_id": "landing-page-load-an_desktop-standard_webkit-desktop_slow-3g_20251031-161102",
+      "viewport": "desktop-standard",
+      "browser": "webkit-desktop",
+      "network": "slow-3g",
+      "status": "PASS",
+      "started_at": "2025-10-31T16:11:02.409714",
+      "completed_at": "2025-10-31T16:11:02.409714",
+      "duration_ms": 15000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Page loads with status 200 within 10 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2000
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Page body renders within 5 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2000
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2000
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Screenshot captured for visual evidence",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2000
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": null,
+      "failure_priority": null
+    },
+    {
+      "cell_id": "landing-page-load-an_desktop-standard_webkit-desktop_normal_20251031-161102",
+      "viewport": "desktop-standard",
+      "browser": "webkit-desktop",
+      "network": "normal",
+      "status": "PASS",
+      "started_at": "2025-10-31T16:11:02.409714",
+      "completed_at": "2025-10-31T16:11:02.409714",
+      "duration_ms": 16000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Page loads with status 200 within 10 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2100
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Page body renders within 5 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2100
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2100
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Screenshot captured for visual evidence",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2100
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": null,
+      "failure_priority": null
+    },
+    {
+      "cell_id": "landing-page-load-an_ipad-air_webkit-ios_slow-3g_20251031-161102",
+      "viewport": "ipad-air",
+      "browser": "webkit-ios",
+      "network": "slow-3g",
+      "status": "FAIL",
+      "started_at": "2025-10-31T16:11:02.409714",
+      "completed_at": "2025-10-31T16:11:02.409714",
+      "duration_ms": 17000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Safari (iOS): Pricing modal does not open on click",
+          "duration_ms": 2200
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Safari (iOS): Pricing modal does not open on click",
+          "duration_ms": 2200
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Safari (iOS): Pricing modal does not open on click",
+          "duration_ms": 2200
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Safari (iOS): Pricing modal does not open on click",
+          "duration_ms": 2200
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": "Safari (iOS): Pricing modal does not open on click",
+      "failure_priority": "P0"
+    },
+    {
+      "cell_id": "landing-page-load-an_ipad-air_webkit-ios_normal_20251031-161102",
+      "viewport": "ipad-air",
+      "browser": "webkit-ios",
+      "network": "normal",
+      "status": "PASS",
+      "started_at": "2025-10-31T16:11:02.409714",
+      "completed_at": "2025-10-31T16:11:02.409714",
+      "duration_ms": 18000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Page loads with status 200 within 10 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2300
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Page body renders within 5 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2300
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2300
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Screenshot captured for visual evidence",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2300
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": null,
+      "failure_priority": null
+    },
+    {
+      "cell_id": "landing-page-load-an_ipad-air_chromium-desktop_slow-3g_20251031-161102",
+      "viewport": "ipad-air",
+      "browser": "chromium-desktop",
+      "network": "slow-3g",
+      "status": "PASS",
+      "started_at": "2025-10-31T16:11:02.409714",
+      "completed_at": "2025-10-31T16:11:02.409714",
+      "duration_ms": 19000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Page loads with status 200 within 10 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2400
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Page body renders within 5 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2400
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2400
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Screenshot captured for visual evidence",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2400
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": null,
+      "failure_priority": null
+    },
+    {
+      "cell_id": "landing-page-load-an_ipad-air_chromium-desktop_normal_20251031-161102",
+      "viewport": "ipad-air",
+      "browser": "chromium-desktop",
+      "network": "normal",
+      "status": "PASS",
+      "started_at": "2025-10-31T16:11:02.409714",
+      "completed_at": "2025-10-31T16:11:02.409714",
+      "duration_ms": 20000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Page loads with status 200 within 10 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2500
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Page body renders within 5 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2500
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2500
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Screenshot captured for visual evidence",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2500
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": null,
+      "failure_priority": null
+    },
+    {
+      "cell_id": "landing-page-load-an_ipad-air_webkit-desktop_slow-3g_20251031-161102",
+      "viewport": "ipad-air",
+      "browser": "webkit-desktop",
+      "network": "slow-3g",
+      "status": "FAIL",
+      "started_at": "2025-10-31T16:11:02.409714",
+      "completed_at": "2025-10-31T16:11:02.409714",
+      "duration_ms": 21000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Page load timeout after 10 seconds on Slow 3G",
+          "duration_ms": 2600
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Page load timeout after 10 seconds on Slow 3G",
+          "duration_ms": 2600
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Page load timeout after 10 seconds on Slow 3G",
+          "duration_ms": 2600
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": "Page load timeout after 10 seconds on Slow 3G",
+          "duration_ms": 2600
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": "Page load timeout after 10 seconds on Slow 3G",
+      "failure_priority": "P1"
+    },
+    {
+      "cell_id": "landing-page-load-an_ipad-air_webkit-desktop_normal_20251031-161102",
+      "viewport": "ipad-air",
+      "browser": "webkit-desktop",
+      "network": "normal",
+      "status": "PASS",
+      "started_at": "2025-10-31T16:11:02.409714",
+      "completed_at": "2025-10-31T16:11:02.409714",
+      "duration_ms": 22000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Page loads with status 200 within 10 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2700
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Page body renders within 5 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2700
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2700
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Screenshot captured for visual evidence",
+          "passed": true,
+          "timestamp": "2025-10-31T16:11:02.409714",
+          "error_message": null,
+          "duration_ms": 2700
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": null,
+      "failure_priority": null
+    }
+  ],
+  "failures_by_priority": {
+    "P0": [
+      "landing-page-load-an_iphone-13-pro_webkit-ios_slow-3g_20251031-161102",
+      "landing-page-load-an_iphone-13-pro_webkit-desktop_slow-3g_20251031-161102",
+      "landing-page-load-an_desktop-standard_webkit-ios_slow-3g_20251031-161102",
+      "landing-page-load-an_ipad-air_webkit-ios_slow-3g_20251031-161102"
+    ],
+    "P1": [
+      "landing-page-load-an_desktop-standard_chromium-desktop_slow-3g_20251031-161102",
+      "landing-page-load-an_ipad-air_webkit-desktop_slow-3g_20251031-161102"
+    ],
+    "P2": []
+  },
+  "artifacts_storage_path": "s3://testgpt-artifacts/run-20251031-161102-f32686/",
+  "comparison_to_previous_run": null
+}

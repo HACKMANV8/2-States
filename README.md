@@ -1,17 +1,50 @@
-# AI Agent Framework with MCP Integration
+# TestGPT - Multi-Environment QA Testing System
 
-Complete AI agent examples using Agno framework with Model Context Protocol (MCP) integration. Includes Slack bot, web automation, documentation lookup, and file system operations.
+**🚀 NEW: TestGPT is now a comprehensive multi-environment QA testing platform!**
 
-## Features
+Transform simple Slack messages into complete cross-browser, cross-device, and cross-network test matrices. TestGPT behaves like a professional manual QA engineer, automatically testing your sites across multiple environments and prioritizing failures.
 
-- **AI-Powered**: Uses Claude Sonnet 4 for intelligent task understanding
-- **Multiple MCP Servers**: Context7 docs, Filesystem, Playwright web automation
-- **Slack Integration**: Production bot that responds to mentions
-- **Persistent Sessions**: Maintains state across tasks
-- **Example Agents**: 5 complete examples + live demos
+## Quick Links
+
+- **📖 [TestGPT Documentation](TESTGPT_README.md)** - Complete guide to the new system
+- **✅ [Implementation Summary](IMPLEMENTATION_COMPLETE.md)** - Full specification compliance report
+- **🧪 [Original Examples](#original-examples)** - Simple AI agent examples (legacy)
+
+## TestGPT Features
+
+### 🎯 Multi-Environment Testing
+- **10 viewport profiles** (iPhone SE → desktop ultrawide)
+- **4 browser engines** (Chrome, Safari, Firefox)
+- **3 network conditions** (normal, slow 3G, flaky)
+- **Automatic matrix expansion** (one request → N test runs)
+- **REAL Playwright MCP execution** (actual browsers, not mocked)
+
+### 🧠 Intelligent Test Planning
+- **Natural language parsing** from Slack
+- **Deterministic test flows** with objective checkpoints
+- **Automatic scenario persistence** for re-running
+- **Failure prioritization** (P0 critical → P2 edge cases)
+
+### 📊 Comprehensive Reporting
+- **Formatted Slack summaries** with environment breakdown
+- **Per-dimension statistics** (by viewport, browser, network)
+- **Actionable next steps** for fixing issues
+- **Evidence collection** (screenshots, console errors)
+
+### 🔄 Re-run Capability
+- All tests automatically saved
+- Re-run with: `"re-run [scenario name]"`
+- Historical comparison support
 
 ## Quick Start
 
+### Run TestGPT Demo
+```bash
+# Test the full system with mock results
+python test_testgpt.py
+```
+
+### Run TestGPT Slack Bot
 ```bash
 # Install dependencies
 pip install -r requirements.txt
@@ -20,13 +53,26 @@ pip install -r requirements.txt
 cp .env.example .env
 # Edit .env with your API keys
 
-# Run the bot
-python slack_agent.py
+# Run the new TestGPT bot
+python slack_agent_testgpt.py
 ```
 
-## Examples Included
+### Example Slack Commands
+```
+@TestGPT test pointblank.club responsive on safari and iphone
+@TestGPT run checkout flow on chrome desktop and ipad under slow network
+@TestGPT list scenarios
+@TestGPT re-run pointblank responsive test
+```
 
-### 1. Slack Production Bot
+---
+
+## Original Examples
+
+The following are the original simple AI agent examples (legacy).
+For the new TestGPT system, see documentation above.
+
+### 1. Original Slack Bot (Legacy)
 **File**: `slack_agent.py`
 - Production-ready Slack bot with Playwright MCP
 - Responds to channel mentions

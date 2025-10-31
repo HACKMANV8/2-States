@@ -1,0 +1,224 @@
+{
+  "run_id": "run-20251031-154553-bdf251",
+  "test_plan_id": "plan-1cc64ad86575",
+  "scenario_id": "scenario-pointblank-club-landing-131",
+  "scenario_name": "Pointblank.Club - Landing - Cross-Browser Test",
+  "target_url": "https://pointblank.club",
+  "triggered_by": "test-user",
+  "triggered_at": "2025-10-31T15:45:53.616623",
+  "started_at": "2025-10-31T15:45:53.616623",
+  "completed_at": "2025-10-31T15:45:53.616623",
+  "duration_total_seconds": 0,
+  "overall_status": "PARTIAL",
+  "total_cells": 3,
+  "passed_cells": 2,
+  "failed_cells": 1,
+  "timed_out_cells": 0,
+  "environment_summary": {
+    "viewports_tested": [
+      "desktop-standard"
+    ],
+    "browsers_tested": [
+      "chromium-desktop",
+      "webkit-desktop",
+      "webkit-ios"
+    ],
+    "networks_tested": [
+      "normal"
+    ]
+  },
+  "cell_results": [
+    {
+      "cell_id": "landing-page-load-an_desktop-standard_webkit-desktop_normal_20251031-154553",
+      "viewport": "desktop-standard",
+      "browser": "webkit-desktop",
+      "network": "normal",
+      "status": "FAIL",
+      "started_at": "2025-10-31T15:45:53.616623",
+      "completed_at": "2025-10-31T15:45:53.616623",
+      "duration_ms": 5000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T15:45:53.616623",
+          "error_message": "Safari (macOS): Pricing modal does not open on click",
+          "duration_ms": 1000
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T15:45:53.616623",
+          "error_message": "Safari (macOS): Pricing modal does not open on click",
+          "duration_ms": 1000
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T15:45:53.616623",
+          "error_message": "Safari (macOS): Pricing modal does not open on click",
+          "duration_ms": 1000
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Failed",
+          "passed": false,
+          "timestamp": "2025-10-31T15:45:53.616623",
+          "error_message": "Safari (macOS): Pricing modal does not open on click",
+          "duration_ms": 1000
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": "Safari (macOS): Pricing modal does not open on click",
+      "failure_priority": "P0"
+    },
+    {
+      "cell_id": "landing-page-load-an_desktop-standard_webkit-ios_normal_20251031-154553",
+      "viewport": "desktop-standard",
+      "browser": "webkit-ios",
+      "network": "normal",
+      "status": "PASS",
+      "started_at": "2025-10-31T15:45:53.616623",
+      "completed_at": "2025-10-31T15:45:53.616623",
+      "duration_ms": 6000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Page loads with status 200 within 10 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T15:45:53.616623",
+          "error_message": null,
+          "duration_ms": 1100
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Page body renders within 5 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T15:45:53.616623",
+          "error_message": null,
+          "duration_ms": 1100
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "passed": true,
+          "timestamp": "2025-10-31T15:45:53.616623",
+          "error_message": null,
+          "duration_ms": 1100
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Screenshot captured for visual evidence",
+          "passed": true,
+          "timestamp": "2025-10-31T15:45:53.616623",
+          "error_message": null,
+          "duration_ms": 1100
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": null,
+      "failure_priority": null
+    },
+    {
+      "cell_id": "landing-page-load-an_desktop-standard_chromium-desktop_normal_20251031-154553",
+      "viewport": "desktop-standard",
+      "browser": "chromium-desktop",
+      "network": "normal",
+      "status": "PASS",
+      "started_at": "2025-10-31T15:45:53.616623",
+      "completed_at": "2025-10-31T15:45:53.616623",
+      "duration_ms": 7000,
+      "step_results": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "actual_outcome": "Page loads with status 200 within 10 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T15:45:53.616623",
+          "error_message": null,
+          "duration_ms": 1200
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "actual_outcome": "Page body renders within 5 seconds",
+          "passed": true,
+          "timestamp": "2025-10-31T15:45:53.616623",
+          "error_message": null,
+          "duration_ms": 1200
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "actual_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "passed": true,
+          "timestamp": "2025-10-31T15:45:53.616623",
+          "error_message": null,
+          "duration_ms": 1200
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "actual_outcome": "Screenshot captured for visual evidence",
+          "passed": true,
+          "timestamp": "2025-10-31T15:45:53.616623",
+          "error_message": null,
+          "duration_ms": 1200
+        }
+      ],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": null,
+      "failure_priority": null
+    }
+  ],
+  "failures_by_priority": {
+    "P0": [
+      "landing-page-load-an_desktop-standard_webkit-desktop_normal_20251031-154553"
+    ],
+    "P1": [],
+    "P2": []
+  },
+  "artifacts_storage_path": "s3://testgpt-artifacts/run-20251031-154553-bdf251/",
+  "comparison_to_previous_run": null
+}
