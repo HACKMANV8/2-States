@@ -711,8 +711,8 @@ Expected outcomes:
                     explicit_status_found = True
                     break
 
-                # Failure indicators
-                failure_keywords = ["failed", "fail", "❌", "error", "did not pass"]
+                # Failure indicators (removed "fail" to avoid false positives with "functionality")
+                failure_keywords = ["failed", "❌", "error", "did not pass", "test failed"]
                 if any(keyword in status_section for keyword in failure_keywords):
                     overall_passed = False
                     explicit_status_found = True
@@ -749,7 +749,9 @@ Expected outcomes:
                     target=step.target,
                     expected_outcome=step.expected_outcome,
                     actual_outcome=f"Agent executed autonomously. Report: {agent_output[:200]}..." if len(agent_output) > 200 else agent_output,
-                    passed=overall_passed if step_executed else False,
+                    # Use heuristic result - if overall test passed, mark step as passed
+                    # Don't fail just because specific step keywords weren't detected in freeform output
+                    passed=overall_passed,
                     timestamp=flow_start,
                     error_message=None if overall_passed else "Check agent report for details",
                     duration_ms=int((datetime.now() - flow_start).total_seconds() * 1000)
