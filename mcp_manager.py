@@ -379,12 +379,12 @@ class DynamicMCPManager:
         """
         instance_id = f"{viewport.name}_{browser.name}"
 
-        if instance_id in self.instances:
-            instance = self.instances[instance_id]
+        if instance_id in self.playwright_instances:
+            instance = self.playwright_instances[instance_id]
             try:
                 print(f"   🧹 Cleaning up MCP instance: {instance_id}")
                 await instance.disconnect()
-                del self.instances[instance_id]
+                del self.playwright_instances[instance_id]
                 print(f"      ✅ MCP instance cleaned up")
             except Exception as e:
                 print(f"      ⚠️  Error cleaning up {instance_id}: {e}")

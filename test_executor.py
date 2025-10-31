@@ -626,7 +626,13 @@ Expected outcomes:
             "overall status:",
             "test results:",
             "test verdict:",
-            "test result:"
+            "test result:",
+            "test completion status:",
+            "completion status:",
+            "test results summary:",
+            "results summary:",
+            "responsiveness score:",
+            "overall score:"
         ]
 
         explicit_status_found = False
@@ -635,13 +641,18 @@ Expected outcomes:
         for indicator in status_indicators:
             if indicator in output_lower:
                 # Agent explicitly declared test status
-                status_section = output_lower.split(indicator)[-1][:100]  # Look at next 100 chars after indicator
+                status_section = output_lower.split(indicator)[-1][:200]  # Look at next 200 chars after indicator
 
-                if "passed" in status_section or "✅" in status_section or "pass" in status_section:
+                # Success indicators
+                success_keywords = ["passed", "pass", "✅", "excellent", "success", "completed successfully", "all tests passed"]
+                if any(keyword in status_section for keyword in success_keywords):
                     overall_passed = True
                     explicit_status_found = True
                     break
-                elif "failed" in status_section or "❌" in status_section or "fail" in status_section:
+
+                # Failure indicators
+                failure_keywords = ["failed", "fail", "❌", "error", "did not pass"]
+                if any(keyword in status_section for keyword in failure_keywords):
                     overall_passed = False
                     explicit_status_found = True
                     break
