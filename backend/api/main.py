@@ -5,12 +5,13 @@ FastAPI server that provides REST endpoints for test management,
 configuration, and execution.
 """
 
-from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi import FastAPI, Depends, HTTPException, Query, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List, Optional
 import sys
 import os
+import asyncio
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -188,6 +189,139 @@ def delete_config(config_id: str, db: Session = Depends(get_db)):
 
 
 # ============================================================================
+# BACKGROUND TEST EXECUTION
+# ============================================================================
+
+async def execute_test_in_background(
+    execution_id: str,
+    test_suite_id: str,
+    browser: str,
+    viewport_width: int,
+    viewport_height: int,
+    network_mode: str
+):
+    """
+    Execute a test in the background and update the execution record.
+
+    This function runs as a background task and updates the database
+    with execution results.
+    """
+    from testgpt_engine import TestGPTEngine
+    from request_parser import ParsedRequest
+    from datetime import datetime
+
+    # Get a new database session for this background task
+    db_gen = get_db()
+    db = next(db_gen)
+
+    try:
+        # Update status to running
+        crud.update_test_execution_status(
+            db,
+            execution_id,
+            status="running",
+            started_at=datetime.utcnow()
+        )
+
+        # Get the test suite
+        suite = crud.get_test_suite(db, test_suite_id)
+        if not suite:
+            crud.update_test_execution_status(
+                db,
+                execution_id,
+                status="failed",
+                completed_at=datetime.utcnow(),
+                error_details="Test suite not found"
+            )
+            return
+
+        # Map browser names to test engine format
+        browser_map = {
+            "chrome": "chromium",
+            "firefox": "firefox",
+            "safari": "webkit",
+            "edge": "chromium"
+        }
+        engine_browser = browser_map.get(browser.lower(), "chromium")
+
+        # Map viewport to device class
+        if viewport_width <= 500:
+            viewports = ["mobile_portrait"]
+        elif viewport_width <= 900:
+            viewports = ["tablet_portrait"]
+        else:
+            viewports = ["desktop_1920"]
+
+        # Map network mode
+        network_map = {
+            "online": "normal",
+            "fast3g": "fast_3g",
+            "slow3g": "slow_3g"
+        }
+        network = network_map.get(network_mode.lower(), "normal")
+
+        # Create a ParsedRequest to execute the test
+        parsed_request = ParsedRequest(
+            raw_message=f"Test: {suite.name}",
+            target_urls=[suite.target_url],
+            requested_viewports=viewports,
+            requested_browsers=[engine_browser],
+            requested_network_conditions=[network],
+            test_flows=[],  # Use test steps from suite
+            custom_instructions=suite.prompt or "",
+            is_rerun=False,
+            rerun_scenario_reference=None
+        )
+
+        # Initialize TestGPT engine and run the test
+        engine = TestGPTEngine()
+
+        try:
+            # Execute the test
+            slack_summary = await engine.process_test_request(
+                slack_message=suite.prompt or f"Test {suite.name} at {suite.target_url}",
+                user_id="api-user"
+            )
+
+            # Update execution with success
+            crud.update_test_execution_status(
+                db,
+                execution_id,
+                status="passed",
+                completed_at=datetime.utcnow(),
+                execution_logs=[{
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "message": slack_summary
+                }]
+            )
+
+        except Exception as test_error:
+            # Update execution with failure
+            crud.update_test_execution_status(
+                db,
+                execution_id,
+                status="failed",
+                completed_at=datetime.utcnow(),
+                error_details=str(test_error)
+            )
+
+    except Exception as e:
+        # Critical error during execution setup
+        try:
+            crud.update_test_execution_status(
+                db,
+                execution_id,
+                status="failed",
+                completed_at=datetime.utcnow(),
+                error_details=f"Execution setup error: {str(e)}"
+            )
+        except:
+            pass
+    finally:
+        db.close()
+
+
+# ============================================================================
 # TEST EXECUTION ENDPOINTS
 # ============================================================================
 
@@ -195,14 +329,15 @@ def delete_config(config_id: str, db: Session = Depends(get_db)):
 async def run_test(
     test_id: str,
     execution: schemas.TestExecutionCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db)
 ):
     """
     Execute a test suite with specified configuration
 
-    This creates an execution record and triggers the test runner.
-    For now, it creates a pending execution that needs to be picked up
-    by the test runner service.
+    This creates an execution record and triggers the test runner
+    in the background. The test runs asynchronously and updates
+    the execution record with results.
     """
     # Verify test suite exists
     suite = crud.get_test_suite(db, test_id)
@@ -218,8 +353,23 @@ async def run_test(
     # Update test suite last_run timestamp
     crud.update_test_suite_last_run(db, test_id)
 
-    # TODO: Trigger actual test execution via test runner
-    # For now, just return the pending execution
+    # Trigger actual test execution in background
+    # Use default values if not provided
+    browser = execution.browser or "chrome"
+    viewport_width = execution.viewport_width or 1920
+    viewport_height = execution.viewport_height or 1080
+    network_mode = execution.network_mode or "online"
+
+    # Schedule background task
+    background_tasks.add_task(
+        execute_test_in_background,
+        db_execution.id,
+        test_id,
+        browser,
+        viewport_width,
+        viewport_height,
+        network_mode
+    )
 
     return db_execution
 

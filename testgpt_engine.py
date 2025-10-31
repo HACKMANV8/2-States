@@ -248,14 +248,98 @@ class TestGPTEngine:
         print(f"   Found scenario: {scenario_dict['scenario_name']}")
         print(f"   Re-executing with saved configuration...\n")
 
-        # Re-run the scenario (implementation would reconstruct and execute)
-        # For now, return a message
-        return (
-            f"🔄 Re-running scenario: {scenario_dict['scenario_name']}\n\n"
-            f"Target: {scenario_dict['target_url']}\n"
-            f"Last run: {scenario_dict.get('last_run_at', 'Never')}\n\n"
-            f"(Re-execution would happen here)"
+        # Reconstruct ParsedRequest from saved scenario
+        from request_parser import ParsedRequest
+        from models import EnvironmentMatrix
+
+        # Reconstruct environment matrix
+        env_matrix_dict = scenario_dict.get('environment_matrix', {})
+        env_matrix = None
+        if env_matrix_dict:
+            env_matrix = EnvironmentMatrix(
+                viewports=env_matrix_dict.get('viewports', []),
+                browsers=env_matrix_dict.get('browsers', []),
+                network_conditions=env_matrix_dict.get('network_conditions', [])
+            )
+
+        # Create a reconstructed ParsedRequest
+        reconstructed_request = ParsedRequest(
+            raw_message=f"Re-run: {scenario_dict['scenario_name']}",
+            target_urls=[scenario_dict['target_url']],
+            requested_viewports=env_matrix.viewports if env_matrix else [],
+            requested_browsers=env_matrix.browsers if env_matrix else [],
+            requested_network_conditions=env_matrix.network_conditions if env_matrix else [],
+            test_flows=scenario_dict.get('flows', []),
+            custom_instructions=scenario_dict.get('preconditions', {}).get('custom_instructions', ''),
+            is_rerun=False,  # Set to False since we're now actually running it
+            rerun_scenario_reference=None
         )
+
+        # Execute the test as if it's a new request
+        print(f"   🚀 Executing re-run...\n")
+
+        # Build test plan from reconstructed request
+        scenario_id = self.parser.get_scenario_id(reconstructed_request)
+        scenario_name = self.parser.get_scenario_name(reconstructed_request)
+
+        test_plan = self.plan_builder.build_test_plan(
+            parsed_request=reconstructed_request,
+            scenario_id=scenario_id,
+            scenario_name=scenario_name,
+            created_by=user_id
+        )
+
+        print(f"   Scenario: {test_plan.scenario_name}")
+        print(f"   Matrix cells: {test_plan.total_cells_to_execute}")
+        print(f"   Estimated duration: {test_plan.estimated_duration_minutes} minutes\n")
+
+        # Execute tests
+        print("▶️  Executing test matrix...")
+        cell_results = await self.executor.execute_test_plan(test_plan)
+        print(f"   Completed {len(cell_results)} cells\n")
+
+        # Aggregate results
+        print("📊 Aggregating results...")
+        run_id = f"run-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:6]}"
+
+        run_artifact = self.formatter.aggregate_results(
+            cell_results=cell_results,
+            scenario_name=test_plan.scenario_name,
+            target_url=test_plan.target_url,
+            run_id=run_id
+        )
+
+        # Fill in additional artifact fields
+        run_artifact.test_plan_id = test_plan.test_plan_id
+        run_artifact.scenario_id = test_plan.scenario_id
+        run_artifact.triggered_by = user_id
+
+        print(f"   Overall status: {run_artifact.overall_status.value}")
+        print(f"   Pass rate: {run_artifact.passed_cells}/{run_artifact.total_cells}\n")
+
+        # Save run artifact
+        print("💾 Saving run artifact...")
+        self.persistence.save_run_artifact(run_artifact)
+
+        # Update scenario's last_run_at timestamp
+        scenario_dict['last_run_at'] = datetime.now().isoformat()
+
+        # Save the updated scenario
+        import json
+        from pathlib import Path
+        scenario_file = self.persistence.scenarios_dir / f"{scenario_dict['scenario_id']}.json"
+        with open(scenario_file, 'w') as f:
+            json.dump(scenario_dict, f, indent=2, default=str)
+
+        # Format Slack summary
+        print("✍️  Formatting Slack summary...\n")
+        slack_summary = self.formatter.format_slack_summary(run_artifact)
+
+        print("=" * 70)
+        print("✅ Re-run Complete")
+        print("=" * 70 + "\n")
+
+        return slack_summary
 
     def _generate_mock_results(self, test_plan: TestPlan):
         """

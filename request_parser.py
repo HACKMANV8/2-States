@@ -369,10 +369,30 @@ class SlackRequestParser:
         - GitHub URL mentioned (for repo testing)
         - Explicit API test patterns ("test the api", "test backend", etc.)
         - API keywords NOT in URLs combined with test actions
+
+        IMPORTANT: Frontend/UI tests take priority. If message contains
+        UI/navigation keywords, this returns False even if API keywords present.
         """
         message_lower = message.lower()
 
-        # Remove URLs from detection to avoid false positives with "http" in URLs
+        # FIRST: Check for UI/frontend test indicators (HIGHEST PRIORITY)
+        # These keywords indicate Playwright browser automation, not API testing
+        frontend_ui_keywords = [
+            "open", "opening", "navigate", "navigating", "go to", "going to",
+            "visit", "visiting", "click", "clicking", "scroll", "scrolling",
+            "page", "website", "site", "button", "modal", "form", "input",
+            "events page", "landing page", "home page", "about page",
+            "responsive", "viewport", "browser", "safari", "chrome", "firefox",
+            "screenshot", "visual", "render", "display", "show", "visible",
+            "hover", "drag", "drop", "select", "type", "fill", "submit"
+        ]
+
+        # If ANY frontend keyword is present, this is NOT a backend test
+        for keyword in frontend_ui_keywords:
+            if keyword in message_lower:
+                return False
+
+        # SECOND: Remove URLs from detection to avoid false positives with "http" in URLs
         # Strip out <url|text> Slack format and regular URLs
         message_without_urls = re.sub(r'<https?://[^>]+>', '', message_lower)
         message_without_urls = re.sub(r'https?://\S+', '', message_without_urls)
@@ -391,6 +411,8 @@ class SlackRequestParser:
             r"api\s+test",
             r"backend\s+test",
             r"test.*endpoints?",
+            r"api\s+health",
+            r"smoke\s+test.*api"
         ]
 
         # Check for explicit patterns (in message without URLs)
