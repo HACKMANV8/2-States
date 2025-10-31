@@ -1,0 +1,618 @@
+"""
+MCP Generator for Dynamic Backend Testing
+
+Generates FastMCP wrapper code from OpenAPI specifications.
+
+This module:
+- Parses OpenAPI specs to extract endpoint information
+- Generates Python code with @mcp.tool() decorators
+- Maps OpenAPI parameters to Python function parameters
+- Adds type hints based on OpenAPI schemas
+- Creates httpx calls to the actual API
+- Minimizes boilerplate by leveraging FastMCP capabilities
+
+The generated code can be executed directly to start an MCP server.
+"""
+
+import json
+from typing import Dict, Any, List, Optional, Set
+from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class MCPGenerator:
+    """
+    Generates FastMCP wrapper code from API specifications.
+
+    This class takes discovered API information (from APIDiscoveryService)
+    and generates complete Python code that wraps all endpoints as MCP tools.
+
+    Example:
+        generator = MCPGenerator()
+        wrapper_code = generator.generate_mcp_wrapper(
+            api_spec=discovered_api,
+            api_base_url="http://localhost:8000"
+        )
+        # wrapper_code is ready-to-execute Python code
+    """
+
+    def __init__(self):
+        """Initialize the MCP generator."""
+        logger.info("MCPGenerator initialized")
+
+    def generate_mcp_wrapper(
+        self,
+        api_spec: Dict[str, Any],
+        api_base_url: str,
+        server_name: Optional[str] = None
+    ) -> str:
+        """
+        Generate complete FastMCP wrapper code from API specification.
+
+        This method generates a complete Python file that:
+        1. Imports necessary modules (fastmcp, httpx, typing)
+        2. Initializes FastMCP with API metadata
+        3. Creates @mcp.tool() decorated functions for each endpoint
+        4. Adds proper type hints and docstrings
+        5. Includes main() function to run the MCP server
+
+        Args:
+            api_spec: API specification from APIDiscoveryService
+            api_base_url: Base URL where the API is running
+            server_name: Optional custom name for the MCP server
+
+        Returns:
+            Complete Python code as a string
+
+        Example output:
+            ```python
+            from fastmcp import FastMCP
+            import httpx
+            from typing import Dict, Any, Optional
+
+            mcp = FastMCP(name="My API Testing Server")
+
+            @mcp.tool()
+            async def get_users(limit: int = 100) -> Dict[str, Any]:
+                '''Get list of users'''
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(
+                        "http://localhost:8000/users",
+                        params={"limit": limit}
+                    )
+                    return {"status": response.status_code, "data": response.json()}
+
+            if __name__ == "__main__":
+                mcp.run()
+            ```
+        """
+        logger.info(f"Generating MCP wrapper for {api_spec.get('metadata', {}).get('title', 'API')}")
+
+        # Extract components
+        endpoints = api_spec.get("endpoints", [])
+        metadata = api_spec.get("metadata", {})
+        openapi_spec = api_spec.get("openapi_spec", {})
+
+        if not endpoints:
+            raise ValueError("No endpoints found in API specification")
+
+        # Generate each section of the code
+        code_sections = []
+
+        # 1. File header with docstring
+        code_sections.append(self._generate_header(metadata))
+
+        # 2. Imports
+        code_sections.append(self._generate_imports())
+
+        # 3. FastMCP initialization
+        code_sections.append(self._generate_mcp_init(metadata, server_name))
+
+        # 4. API base URL constant
+        code_sections.append(self._generate_api_url_constant(api_base_url))
+
+        # 5. Helper function for making requests
+        code_sections.append(self._generate_request_helper())
+
+        # 6. Tool functions (one per endpoint)
+        for endpoint in endpoints:
+            code_sections.append(
+                self._generate_tool_function(endpoint, openapi_spec)
+            )
+
+        # 7. Main function
+        code_sections.append(self._generate_main())
+
+        # Join all sections
+        wrapper_code = "\n\n".join(code_sections)
+
+        logger.info(f"Generated MCP wrapper with {len(endpoints)} tools")
+        return wrapper_code
+
+    def _generate_header(self, metadata: Dict[str, Any]) -> str:
+        """
+        Generate file header with docstring.
+
+        Args:
+            metadata: API metadata
+
+        Returns:
+            Header docstring
+        """
+        title = metadata.get("title", "API")
+        description = metadata.get("description", "Dynamically generated MCP wrapper")
+        version = metadata.get("version", "1.0.0")
+
+        return f'''"""
+{title} - FastMCP Wrapper
+
+{description}
+
+This file was automatically generated by MCPGenerator.
+It wraps API endpoints as MCP tools for use with Agno agents.
+
+API Version: {version}
+Generated: Dynamically at runtime
+"""'''
+
+    def _generate_imports(self) -> str:
+        """
+        Generate import statements.
+
+        Returns:
+            Import statements
+        """
+        return '''from fastmcp import FastMCP
+import httpx
+from typing import Dict, Any, Optional, List
+import logging
+
+logger = logging.getLogger(__name__)'''
+
+    def _generate_mcp_init(
+        self,
+        metadata: Dict[str, Any],
+        server_name: Optional[str]
+    ) -> str:
+        """
+        Generate FastMCP initialization.
+
+        Args:
+            metadata: API metadata
+            server_name: Optional custom server name
+
+        Returns:
+            MCP initialization code
+        """
+        name = server_name or metadata.get("title", "API Testing Server")
+        description = metadata.get("description", "MCP server for API testing")
+
+        return f'''# Initialize FastMCP server
+mcp = FastMCP(
+    name="{name}",
+    instructions="""
+{description}
+
+This MCP server provides tools for testing API endpoints.
+Each tool corresponds to an API endpoint and can be used for automated testing.
+    """.strip()
+)'''
+
+    def _generate_api_url_constant(self, api_base_url: str) -> str:
+        """
+        Generate API base URL constant.
+
+        Args:
+            api_base_url: Base URL of the API
+
+        Returns:
+            Constant definition
+        """
+        return f'''# API base URL
+API_BASE_URL = "{api_base_url}"'''
+
+    def _generate_request_helper(self) -> str:
+        """
+        Generate helper function for making HTTP requests.
+
+        This is a reusable function that all tool functions will use.
+
+        Returns:
+            Helper function code
+        """
+        return '''async def make_api_request(
+    method: str,
+    endpoint: str,
+    params: Optional[Dict[str, Any]] = None,
+    json_data: Optional[Dict[str, Any]] = None,
+    headers: Optional[Dict[str, str]] = None
+) -> Dict[str, Any]:
+    """
+    Make an HTTP request to the API.
+
+    Args:
+        method: HTTP method (GET, POST, PUT, DELETE, etc.)
+        endpoint: API endpoint path
+        params: Query parameters
+        json_data: JSON request body
+        headers: HTTP headers
+
+    Returns:
+        Dictionary with status_code, success, and data/error
+    """
+    url = f"{API_BASE_URL}{endpoint}"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.request(
+                method=method,
+                url=url,
+                params=params,
+                json=json_data,
+                headers=headers,
+                timeout=30.0
+            )
+
+            success = 200 <= response.status_code < 300
+
+            result = {
+                "status_code": response.status_code,
+                "success": success,
+            }
+
+            # Try to parse JSON response
+            try:
+                result["data"] = response.json()
+            except Exception:
+                result["data"] = response.text
+
+            if not success:
+                result["error"] = result["data"]
+
+            return result
+
+        except Exception as e:
+            return {
+                "status_code": 0,
+                "success": False,
+                "error": f"Request failed: {str(e)}"
+            }'''
+
+    def _generate_tool_function(
+        self,
+        endpoint: Dict[str, Any],
+        openapi_spec: Dict[str, Any]
+    ) -> str:
+        """
+        Generate a single MCP tool function for an endpoint.
+
+        This is the core of the generator - it creates a properly typed,
+        documented function with @mcp.tool() decorator.
+
+        Args:
+            endpoint: Endpoint information
+            openapi_spec: Full OpenAPI spec (for schema lookups)
+
+        Returns:
+            Tool function code
+        """
+        # Extract endpoint details
+        path = endpoint.get("path", "")
+        method = endpoint.get("method", "GET").upper()
+        operation_id = endpoint.get("operation_id", "")
+        summary = endpoint.get("summary", "")
+        description = endpoint.get("description", "")
+        parameters = endpoint.get("parameters", [])
+        request_body = endpoint.get("request_body")
+
+        # Generate function name
+        func_name = self._generate_function_name(operation_id, method, path)
+
+        # Generate function parameters
+        func_params = self._generate_function_parameters(parameters, request_body, openapi_spec)
+
+        # Generate docstring
+        docstring = self._generate_docstring(summary, description, parameters, method, path)
+
+        # Generate request parameters
+        request_params = self._generate_request_parameters(parameters, request_body)
+
+        # Build the function
+        function_code = f'''@mcp.tool()
+async def {func_name}({func_params}) -> Dict[str, Any]:
+    """{docstring}"""
+    {request_params}
+
+    result = await make_api_request(
+        method="{method}",
+        endpoint="{path}",
+        params=params,
+        json_data=json_data
+    )
+
+    return result'''
+
+        return function_code
+
+    def _generate_function_name(
+        self,
+        operation_id: str,
+        method: str,
+        path: str
+    ) -> str:
+        """
+        Generate a valid Python function name from endpoint info.
+
+        Args:
+            operation_id: OpenAPI operation ID
+            method: HTTP method
+            path: Endpoint path
+
+        Returns:
+            Valid Python function name
+        """
+        # Use operation_id if available
+        if operation_id:
+            # Clean operation ID to be valid Python identifier
+            name = operation_id.replace("-", "_").replace(".", "_")
+            # Ensure it starts with a letter
+            if not name[0].isalpha():
+                name = f"api_{name}"
+            return name
+
+        # Generate from method and path
+        # Example: GET /users/{id} -> get_users_by_id
+        path_parts = [p for p in path.split("/") if p and not p.startswith("{")]
+        method_lower = method.lower()
+
+        if path_parts:
+            name = f"{method_lower}_{'_'.join(path_parts)}"
+        else:
+            name = f"{method_lower}_root"
+
+        # Handle path parameters
+        if "{" in path:
+            name += "_by_id"  # Simplified for now
+
+        return name.replace("-", "_")
+
+    def _generate_function_parameters(
+        self,
+        parameters: List[Dict[str, Any]],
+        request_body: Optional[Dict[str, Any]],
+        openapi_spec: Dict[str, Any]
+    ) -> str:
+        """
+        Generate function parameter list with type hints.
+
+        Args:
+            parameters: OpenAPI parameters
+            request_body: OpenAPI request body
+            openapi_spec: Full OpenAPI spec
+
+        Returns:
+            Function parameters string
+        """
+        params = []
+
+        # Add query and path parameters
+        for param in parameters:
+            param_name = param.get("name", "param")
+            param_in = param.get("in", "query")
+            required = param.get("required", False)
+            schema = param.get("schema", {})
+
+            # Get Python type from OpenAPI schema
+            python_type = self._openapi_type_to_python(schema)
+
+            # Add default value if not required
+            if required:
+                params.append(f"{param_name}: {python_type}")
+            else:
+                default = self._get_default_value(schema)
+                params.append(f"{param_name}: {python_type} = {default}")
+
+        # Add request body parameters if present
+        if request_body:
+            # For simplicity, accept request body as a dict
+            # In a more sophisticated version, we could generate Pydantic models
+            params.append("request_body: Optional[Dict[str, Any]] = None")
+
+        return ", ".join(params) if params else ""
+
+    def _openapi_type_to_python(self, schema: Dict[str, Any]) -> str:
+        """
+        Convert OpenAPI type to Python type hint.
+
+        Args:
+            schema: OpenAPI schema
+
+        Returns:
+            Python type hint string
+        """
+        openapi_type = schema.get("type", "string")
+
+        type_mapping = {
+            "string": "str",
+            "integer": "int",
+            "number": "float",
+            "boolean": "bool",
+            "array": "List[Any]",
+            "object": "Dict[str, Any]"
+        }
+
+        python_type = type_mapping.get(openapi_type, "Any")
+
+        # Handle nullable
+        if schema.get("nullable"):
+            return f"Optional[{python_type}]"
+
+        return python_type
+
+    def _get_default_value(self, schema: Dict[str, Any]) -> str:
+        """
+        Get default value for a parameter.
+
+        Args:
+            schema: OpenAPI schema
+
+        Returns:
+            Default value as string
+        """
+        # Use schema default if available
+        if "default" in schema:
+            default = schema["default"]
+            if isinstance(default, str):
+                return f'"{default}"'
+            return str(default)
+
+        # Type-based defaults
+        openapi_type = schema.get("type", "string")
+
+        defaults = {
+            "string": '""',
+            "integer": "0",
+            "number": "0.0",
+            "boolean": "False",
+            "array": "[]",
+            "object": "None"
+        }
+
+        return defaults.get(openapi_type, "None")
+
+    def _generate_docstring(
+        self,
+        summary: str,
+        description: str,
+        parameters: List[Dict[str, Any]],
+        method: str,
+        path: str
+    ) -> str:
+        """
+        Generate function docstring.
+
+        Args:
+            summary: Endpoint summary
+            description: Endpoint description
+            parameters: Endpoint parameters
+            method: HTTP method
+            path: Endpoint path
+
+        Returns:
+            Docstring text
+        """
+        lines = []
+
+        # Summary
+        if summary:
+            lines.append(summary)
+        else:
+            lines.append(f"{method} {path}")
+
+        # Description
+        if description and description != summary:
+            lines.append("")
+            lines.append(description)
+
+        # Parameters
+        if parameters:
+            lines.append("")
+            lines.append("Args:")
+            for param in parameters:
+                param_name = param.get("name", "")
+                param_desc = param.get("description", "")
+                lines.append(f"    {param_name}: {param_desc}")
+
+        # Returns
+        lines.append("")
+        lines.append("Returns:")
+        lines.append("    Dictionary with status_code, success, and data/error")
+
+        return "\n    ".join(lines)
+
+    def _generate_request_parameters(
+        self,
+        parameters: List[Dict[str, Any]],
+        request_body: Optional[Dict[str, Any]]
+    ) -> str:
+        """
+        Generate code to build request parameters.
+
+        Args:
+            parameters: OpenAPI parameters
+            request_body: OpenAPI request body
+
+        Returns:
+            Code to build params and json_data dicts
+        """
+        lines = []
+
+        # Build params dict for query parameters
+        query_params = [p for p in parameters if p.get("in") == "query"]
+        if query_params:
+            param_names = [p.get("name") for p in query_params]
+            params_dict = ", ".join([f'"{name}": {name}' for name in param_names])
+            lines.append(f"params = {{{params_dict}}}")
+        else:
+            lines.append("params = None")
+
+        # Build json_data for request body
+        if request_body:
+            lines.append("json_data = request_body")
+        else:
+            lines.append("json_data = None")
+
+        return "\n    ".join(lines)
+
+    def _generate_main(self) -> str:
+        """
+        Generate main() function to run the MCP server.
+
+        Returns:
+            Main function code
+        """
+        return '''def main():
+    """Run the FastMCP server."""
+    print("Starting FastMCP server...")
+    print(f"API Base URL: {API_BASE_URL}")
+    print("Connect via: MCPTools(command='python <this_file>.py')")
+    mcp.run()
+
+
+if __name__ == "__main__":
+    main()'''
+
+    def save_wrapper(
+        self,
+        wrapper_code: str,
+        output_path: Path,
+        filename: str = "mcp_wrapper.py"
+    ) -> Path:
+        """
+        Save generated wrapper code to a file.
+
+        Args:
+            wrapper_code: Generated Python code
+            output_path: Directory to save the file
+            filename: Name of the output file
+
+        Returns:
+            Path to the saved file
+        """
+        output_path = Path(output_path)
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        file_path = output_path / filename
+        file_path.write_text(wrapper_code)
+
+        logger.info(f"Saved MCP wrapper to {file_path}")
+        return file_path
+
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)

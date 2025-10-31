@@ -5,3 +5,11 @@ mcp
 anthropic
 filetype
 streamlit
+
+# FastAPI and FastMCP dependencies for backend API testing
+fastapi>=0.115.0
+uvicorn>=0.32.0
+fastmcp>=0.2.0
+httpx>=0.27.0
+pytest>=8.0.0
+pytest-asyncio>=0.24.0

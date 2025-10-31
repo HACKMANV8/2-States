@@ -1,9 +1,14 @@
 # TestGPT - Multi-Environment QA Testing System
 
+<<<<<<< HEAD
 **🚀 NEW: TestGPT is now a comprehensive multi-environment QA testing platform!**
+=======
+Complete AI agent examples using Agno framework with Model Context Protocol (MCP) integration. Includes Slack bot, web automation, backend API testing, documentation lookup, and file system operations.
+>>>>>>> bf63c08 (feat :  dynamic api mcp server implementation (WIP))
 
 Transform simple Slack messages into complete cross-browser, cross-device, and cross-network test matrices. TestGPT behaves like a professional manual QA engineer, automatically testing your sites across multiple environments and prioritizing failures.
 
+<<<<<<< HEAD
 ## Quick Links
 
 - **📖 [TestGPT Documentation](TESTGPT_README.md)** - Complete guide to the new system
@@ -48,6 +53,14 @@ See [BUG_FIXES_SUMMARY.md](BUG_FIXES_SUMMARY.md) for complete details.
 - All tests automatically saved
 - Re-run with: `"re-run [scenario name]"`
 - Historical comparison support
+=======
+- **AI-Powered**: Uses Claude Sonnet 4 for intelligent task understanding
+- **Multiple MCP Servers**: Context7 docs, Filesystem, Playwright web automation
+- **Dynamic Backend API Testing**: Test ANY user API from repos/PRs automatically
+- **Slack Integration**: Production bot with web automation AND API testing
+- **Persistent Sessions**: Maintains state across tasks
+- **Example Agents**: 6 complete examples + live demos + CI/CD examples
+>>>>>>> bf63c08 (feat :  dynamic api mcp server implementation (WIP))
 
 ## Quick Start
 
@@ -87,6 +100,19 @@ python main.py
 @TestGPT list scenarios
 @TestGPT re-run pointblank responsive test
 ```
+=======
+# Run the Slack bot
+python slack_agent.py
+
+# OR test a GitHub API (NEW!)
+export ANTHROPIC_API_KEY=your_key
+python examples/test_github_repo.py
+```
+
+**📖 See [QUICK_REFERENCE.md](QUICK_REFERENCE.md) for complete usage guide**
+
+## Examples Included
+>>>>>>> bf63c08 (feat :  dynamic api mcp server implementation (WIP))
 
 ---
 
@@ -132,6 +158,16 @@ For the new TestGPT system, see documentation above.
 - Advanced web automation
 - Class-based implementation
 
+### 7. Dynamic Backend API Testing System (NEW!)
+**Directory**: `dynamic_backend_testing/`
+- **Test ANY user-submitted API** from repos, branches, PRs
+- **Automatic OpenAPI introspection** and MCP wrapper generation
+- **Zero manual configuration** - works with unknown APIs
+- **CI/CD ready** - test PRs before merging
+- **Production-ready orchestration** for automated testing
+- Works with FastAPI, Flask, Django automatically
+- **See [dynamic_backend_testing/README.md](dynamic_backend_testing/README.md) for full documentation**
+
 ### Live Demos
 - `demo_google_search.py` - Google search automation
 - `demo_persistent_session.py` - Multi-step browser tasks
@@ -140,6 +176,10 @@ For the new TestGPT system, see documentation above.
 - `test_api_key.py` - Verify API key
 - `test_mcp_connection.py` - Test MCP server connections
 - `test_playwright_mcp.py` - Test Playwright integration
+
+### Examples (NEW!)
+- `examples/test_github_repo.py` - Test any GitHub repository
+- `examples/test_pr.py` - Test pull requests (CI/CD ready)
 
 ## Usage
 
@@ -159,10 +199,17 @@ python demo_google_search.py
 
 # Run Streamlit app
 streamlit run 04_streamlit_app.py
+
+# Test ANY GitHub repo automatically (NEW!)
+python examples/test_github_repo.py
+
+# Test a PR before merging - CI/CD ready (NEW!)
+python examples/test_pr.py --repo https://github.com/user/repo --pr 123
 ```
 
 ## What the Agents Can Do
 
+### Web Automation (Playwright)
 - Navigate websites
 - Search Google, Wikipedia, etc.
 - Fill out forms
@@ -170,6 +217,16 @@ streamlit run 04_streamlit_app.py
 - Extract data from pages
 - Click buttons and links
 - Type and interact with elements
+
+### Backend API Testing (NEW!)
+**Dynamic Testing System** (`dynamic_backend_testing/`)
+- **Test ANY user-submitted API** from repos, branches, or PRs
+- **Zero manual configuration** - auto-detects and wraps APIs
+- **Auto-generates MCP tools** from OpenAPI specs
+- **CI/CD integration** - test PRs before merging
+- **Multi-framework support** - FastAPI, Flask, Django
+- **Automated test suites** - smoke tests, comprehensive tests
+- **Production-ready** orchestration and error handling
 
 ## Configuration
 
@@ -180,15 +237,47 @@ Required environment variables in `.env`:
 
 ## Architecture
 
+### Frontend Testing
 ```
 Slack → Agno Agent → Playwright MCP → Web Automation → Results
 ```
 
+### Full Stack Testing (NEW!)
+```
+                    ┌─→ Playwright MCP → Web Testing
+Agno Agent → Tools ─┼─→ Dynamic Backend Testing → API Testing
+                    ├─→ Context7 MCP → Documentation
+                    └─→ Filesystem MCP → File Operations
+```
+
+### Dynamic Backend Testing Flow
+```
+GitHub Repo/PR → Clone → Discover API → Generate MCP Tools → Test → Results
+```
+
 ## Tech Stack
 
-- Slack Bolt - Slack integration
-- Agno - AI agent framework
-- Claude Sonnet 4 - AI model
-- Playwright MCP - Web automation
-- Model Context Protocol - Tool integration
+- **Slack Bolt** - Slack integration
+- **Agno** - AI agent framework
+- **Claude Sonnet 4** - AI model
+- **Playwright MCP** - Web automation
+- **FastMCP** - Dynamic backend API testing (NEW!)
+- **Model Context Protocol** - Tool integration
+- **Git/GitHub** - Repository management
+- **OpenAPI** - API introspection
+
+## Documentation
+
+### Quick Reference
+- **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Quick start guide and common use cases
+- **[examples/README.md](examples/README.md)** - Example scripts and CI/CD integration
+
+### Complete Documentation
+- **[dynamic_backend_testing/README.md](dynamic_backend_testing/README.md)** - Full dynamic testing system docs
+- **[DYNAMIC_SYSTEM_IMPLEMENTATION.md](DYNAMIC_SYSTEM_IMPLEMENTATION.md)** - Architecture and design details
+
+### Implementation History
+- **[FINAL_STATE_VERIFICATION.md](FINAL_STATE_VERIFICATION.md)** - Current state verification
+- **[FINAL_IMPLEMENTATION_SUMMARY.md](FINAL_IMPLEMENTATION_SUMMARY.md)** - What was built
+- **[CLEANUP_SUMMARY.md](CLEANUP_SUMMARY.md)** - What was removed and why
 
