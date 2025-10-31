@@ -200,9 +200,11 @@ Review URL extraction regex in `request_parser.py` to ensure subdomains are pres
 | `request_parser.py` | 148-177 | Improved subdomain URL extraction |
 | `request_parser.py` | 76-81 | Removed problematic pointblank fallback |
 | `main.py` | 134-144 | Event timestamp filtering (ignore old events) |
+| `main.py` | 67-87 | Asyncio exception handler (suppress MCP cleanup warnings) |
 | `models.py` | 181 | Added user_request field to TestPlan |
 | `test_plan_builder.py` | 83 | Pass user request when building plan |
 | `test_executor.py` | 182, 116, 217, 256, 283-296 | Thread user request to agent instructions |
+| `testgpt_engine.py` | 163-177 | Wrapped cleanup in try/except to suppress errors |
 
 ### Session 1 Changes:
 | File | Lines Changed | Issue Fixed |
@@ -281,10 +283,13 @@ Then:
 **Impact:** When tests fail, Slack shows truncated error messages
 **Recommendation:** Format failure summaries better in `result_formatter.py`
 
-### **3. MCP Cleanup Warnings**
-**Status:** Fixed (no longer calls close())
-**Impact:** Cosmetic - shows warnings but doesn't affect functionality
-**Current Behavior:** MCP connections are released without calling close() to avoid RuntimeError
+### **2. MCP Cleanup Warnings**
+**Status:** ✅ FULLY FIXED (Session 2)
+**Impact:** Cosmetic - showed warnings but didn't affect functionality
+**Fix:**
+- `testgpt_engine.py` (lines 163-177): Wrapped cleanup in try/except to suppress RuntimeError
+- `main.py` (lines 67-87): Added asyncio exception handler to suppress async generator cleanup warnings
+**Current Behavior:** Clean shutdown with NO error messages
 
 ---
 

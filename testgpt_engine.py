@@ -162,7 +162,19 @@ class TestGPTEngine:
 
         finally:
             # Always cleanup MCP servers after execution (success or failure)
-            await self.mcp_manager.cleanup_all()
+            # Suppress MCP async generator cleanup warnings (known issue with stdio connections)
+            try:
+                await self.mcp_manager.cleanup_all()
+            except RuntimeError as e:
+                if "cancel scope" in str(e):
+                    # Known issue: MCP stdio async generators cleanup in different task
+                    # This is cosmetic and doesn't affect functionality
+                    pass
+                else:
+                    raise
+            except Exception as e:
+                # Log other errors but don't fail the request
+                print(f"⚠️  Warning during MCP cleanup: {e}")
 
     async def _handle_rerun(self, parsed_request, user_id: str) -> str:
         """

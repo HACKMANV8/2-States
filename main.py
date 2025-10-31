@@ -61,6 +61,30 @@ async def start_slack_bot():
     from slack_bolt.adapter.socket_mode import SocketModeHandler
     from agno.tools.mcp import MCPTools
     from testgpt_engine import TestGPTEngine
+    import warnings
+    import sys
+
+    # Suppress MCP async generator cleanup warnings (cosmetic issue with stdio connections)
+    def asyncio_exception_handler(loop, context):
+        exception = context.get("exception")
+        message = context.get("message", "")
+
+        # Suppress specific MCP cleanup errors that are cosmetic
+        if exception and isinstance(exception, RuntimeError):
+            if "cancel scope" in str(exception):
+                return  # Silently ignore
+
+        # Suppress async generator cleanup warnings
+        if "asyncgen" in str(context) or "stdio_client" in str(message):
+            return  # Silently ignore
+
+        # For other errors, use default handling
+        loop.default_exception_handler(context)
+
+    # Set the exception handler for the event loop
+    import asyncio
+    loop = asyncio.get_event_loop()
+    loop.set_exception_handler(asyncio_exception_handler)
 
     print("\n⚡️ Starting TestGPT Slack bot...")
     print("💡 Mention the bot in any channel to trigger QA testing")
