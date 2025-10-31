@@ -192,7 +192,7 @@ export function TestConfigForm({ initialData, onSubmit }: TestConfigFormProps) {
           <div>
             <Label htmlFor="aspectRatio">Aspect Ratio</Label>
             <Select
-              value={formData.aspectRatio}
+              value={formData.aspectRatio || undefined}
               onValueChange={(value) =>
                 setFormData({ ...formData, aspectRatio: value })
               }
@@ -216,7 +216,7 @@ export function TestConfigForm({ initialData, onSubmit }: TestConfigFormProps) {
               <Input
                 id="screenWidth"
                 type="number"
-                value={formData.screenWidth}
+                value={formData.screenWidth ?? 1920}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -230,7 +230,7 @@ export function TestConfigForm({ initialData, onSubmit }: TestConfigFormProps) {
               <Input
                 id="screenHeight"
                 type="number"
-                value={formData.screenHeight}
+                value={formData.screenHeight ?? 1080}
                 onChange={(e) =>
                   setFormData({
                     ...formData,

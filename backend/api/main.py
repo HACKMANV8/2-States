@@ -12,6 +12,10 @@ from typing import List, Optional
 import sys
 import os
 import asyncio
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -192,7 +196,7 @@ def delete_config(config_id: str, db: Session = Depends(get_db)):
 # BACKGROUND TEST EXECUTION
 # ============================================================================
 
-async def execute_test_in_background(
+def execute_test_in_background(
     execution_id: str,
     test_suite_id: str,
     browser: str,
@@ -206,8 +210,8 @@ async def execute_test_in_background(
     This function runs as a background task and updates the database
     with execution results.
     """
+    import asyncio
     from testgpt_engine import TestGPTEngine
-    from request_parser import ParsedRequest
     from datetime import datetime
 
     # Get a new database session for this background task
@@ -260,28 +264,57 @@ async def execute_test_in_background(
         }
         network = network_map.get(network_mode.lower(), "normal")
 
-        # Create a ParsedRequest to execute the test
-        parsed_request = ParsedRequest(
-            raw_message=f"Test: {suite.name}",
-            target_urls=[suite.target_url],
-            requested_viewports=viewports,
-            requested_browsers=[engine_browser],
-            requested_network_conditions=[network],
-            test_flows=[],  # Use test steps from suite
-            custom_instructions=suite.prompt or "",
-            is_rerun=False,
-            rerun_scenario_reference=None
-        )
+        # Build proper test message from test steps
+        test_steps_text = ""
+        if suite.test_steps:
+            steps = []
+            for step in suite.test_steps:
+                # Handle both dict and object types
+                if isinstance(step, dict):
+                    step_num = step.get('step_number', 0)
+                    action = step.get('action', '')
+                    target = step.get('target', '')
+                    value = step.get('value', '')
+                    expected = step.get('expected_outcome', '')
+                else:
+                    step_num = step.step_number
+                    action = step.action
+                    target = step.target
+                    value = step.value if hasattr(step, 'value') else ''
+                    expected = step.expected_outcome
+
+                step_text = f"{step_num}. {action} {target}"
+                if value:
+                    step_text += f" with value '{value}'"
+                step_text += f" - Expected: {expected}"
+                steps.append(step_text)
+
+            test_steps_text = "\n".join(steps)
+
+        # Build Slack-style test message
+        slack_message = f"test {suite.target_url}"
+        if test_steps_text:
+            slack_message += f"\n\nTest Steps:\n{test_steps_text}"
+        if suite.description:
+            slack_message += f"\n\nDescription: {suite.description}"
+
+        # Add browser and viewport info
+        slack_message += f" browser:{browser} viewport:{viewport_width}x{viewport_height}"
+
+        print(f"🚀 Starting API test execution for suite: {suite.name}")
+        print(f"📝 Test message: {slack_message[:200]}...")
 
         # Initialize TestGPT engine and run the test
         engine = TestGPTEngine()
 
         try:
             # Execute the test
-            slack_summary = await engine.process_test_request(
-                slack_message=suite.prompt or f"Test {suite.name} at {suite.target_url}",
+            print("🤖 Calling TestGPT engine.process_test_request()...")
+            slack_summary = asyncio.run(engine.process_test_request(
+                slack_message=slack_message,
                 user_id="api-user"
-            )
+            ))
+            print(f"✅ Test execution completed: {slack_summary[:100]}...")
 
             # Update execution with success
             crud.update_test_execution_status(
@@ -324,6 +357,49 @@ async def execute_test_in_background(
 # ============================================================================
 # TEST EXECUTION ENDPOINTS
 # ============================================================================
+
+# NOTE: Batch execution must come BEFORE parameterized routes to avoid path conflicts
+@app.post("/api/tests/batch/run", response_model=schemas.BatchExecutionResponse)
+async def run_batch_tests(
+    batch: schemas.BatchExecutionCreate,
+    db: Session = Depends(get_db)
+):
+    """
+    Run multiple test suites with the same configuration
+
+    Creates execution records for all specified test suites.
+    """
+    execution_ids = []
+
+    for test_suite_id in batch.test_suite_ids:
+        # Verify test suite exists
+        suite = crud.get_test_suite(db, test_suite_id)
+        if not suite:
+            continue
+
+        # Create execution
+        execution = schemas.TestExecutionCreate(
+            test_suite_id=test_suite_id,
+            config_id=batch.config_id,
+            triggered_by=batch.triggered_by,
+            triggered_by_user=batch.triggered_by_user,
+        )
+
+        db_execution = crud.create_test_execution(db, execution)
+        execution_ids.append(db_execution.id)
+
+        # Update last_run
+        crud.update_test_suite_last_run(db, test_suite_id)
+
+    batch_id = f"batch-{execution_ids[0]}" if execution_ids else "batch-empty"
+
+    return {
+        "batch_id": batch_id,
+        "execution_ids": execution_ids,
+        "total_tests": len(execution_ids),
+        "status": "pending",
+    }
+
 
 @app.post("/api/tests/{test_id}/run", response_model=schemas.TestExecutionResponse)
 async def run_test(
@@ -430,52 +506,6 @@ def get_test_history(
 
 
 # ============================================================================
-# BATCH EXECUTION
-# ============================================================================
-
-@app.post("/api/tests/batch/run", response_model=schemas.BatchExecutionResponse)
-async def run_batch_tests(
-    batch: schemas.BatchExecutionCreate,
-    db: Session = Depends(get_db)
-):
-    """
-    Run multiple test suites with the same configuration
-
-    Creates execution records for all specified test suites.
-    """
-    execution_ids = []
-
-    for test_suite_id in batch.test_suite_ids:
-        # Verify test suite exists
-        suite = crud.get_test_suite(db, test_suite_id)
-        if not suite:
-            continue
-
-        # Create execution
-        execution = schemas.TestExecutionCreate(
-            test_suite_id=test_suite_id,
-            config_id=batch.config_id,
-            triggered_by=batch.triggered_by,
-            triggered_by_user=batch.triggered_by_user,
-        )
-
-        db_execution = crud.create_test_execution(db, execution)
-        execution_ids.append(db_execution.id)
-
-        # Update last_run
-        crud.update_test_suite_last_run(db, test_suite_id)
-
-    batch_id = f"batch-{execution_ids[0]}" if execution_ids else "batch-empty"
-
-    return {
-        "batch_id": batch_id,
-        "execution_ids": execution_ids,
-        "total_tests": len(execution_ids),
-        "status": "pending",
-    }
-
-
-# ============================================================================
 # STATISTICS
 # ============================================================================
 
@@ -499,19 +529,49 @@ async def migrate_json_to_db(db: Session = Depends(get_db)):
     scenarios into the new database.
     """
     from persistence import PersistenceLayer
+    import json
+    from pathlib import Path
 
     persistence = PersistenceLayer()
-    scenarios = persistence.list_all_scenarios()
+    scenarios_dir = Path("./testgpt_data/scenarios")
 
     migrated = 0
     errors = []
 
-    for scenario_dict in scenarios:
+    # Read full scenario files directly
+    for file_path in scenarios_dir.glob("*.json"):
+        try:
+            with open(file_path, 'r') as f:
+                scenario_dict = json.load(f)
+        except Exception as e:
+            errors.append({"file": str(file_path), "error": f"Failed to read file: {str(e)}"})
+            continue
         try:
             # Check if already exists
             existing = crud.get_test_suite(db, scenario_dict["scenario_id"])
             if existing:
+                # Update existing with steps if they don't have any
+                if not existing.test_steps or len(existing.test_steps) == 0:
+                    # Extract test steps from flows
+                    test_steps = []
+                    flows = scenario_dict.get("flows", [])
+                    for flow in flows:
+                        steps = flow.get("steps", [])
+                        test_steps.extend(steps)
+
+                    if test_steps:
+                        existing.test_steps = test_steps
+                        db.commit()
+                        db.refresh(existing)
+                        migrated += 1
                 continue
+
+            # Extract test steps from flows
+            test_steps = []
+            flows = scenario_dict.get("flows", [])
+            for flow in flows:
+                steps = flow.get("steps", [])
+                test_steps.extend(steps)
 
             # Create test suite from scenario
             suite_create = schemas.TestSuiteCreate(
@@ -519,7 +579,7 @@ async def migrate_json_to_db(db: Session = Depends(get_db)):
                 description=f"Migrated from JSON: {scenario_dict.get('scenario_id')}",
                 prompt=scenario_dict.get("target_url", ""),
                 target_url=scenario_dict.get("target_url", ""),
-                test_steps=[],  # Steps would need proper conversion
+                test_steps=[schemas.TestStepSchema(**step) for step in test_steps] if test_steps else [],
                 created_by=scenario_dict.get("created_by", "migration"),
                 source_type="manual",
                 tags=scenario_dict.get("tags", []),

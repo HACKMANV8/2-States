@@ -25,13 +25,13 @@ export const dynamic = "force-dynamic";
 export default function GitHubIntegrationPage() {
   // Placeholder data - will be replaced with actual API calls
   const isConnected = false;
-  const monitoredRepos = [
+  const monitoredRepos: Array<{ url: string; active: boolean }> = [
     // Placeholder examples
     // { url: "https://github.com/example/repo1", active: true },
     // { url: "https://github.com/example/repo2", active: true },
   ];
 
-  const recentPRs = [
+  const recentPRs: Array<{ number: number; title: string; repo: string; status: string }> = [
     // Placeholder examples
     // { number: 123, title: "Add new feature", repo: "example/repo1", status: "passed" },
   ];

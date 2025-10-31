@@ -38,7 +38,7 @@ export default async function TestLibraryPage() {
             Manage and run your saved test suites
           </p>
         </div>
-        <Link href="/test-library/new">
+        <Link href="/test-config">
           <Button>
             <PlayCircle className="mr-2 h-4 w-4" />
             Create New Test
@@ -54,7 +54,7 @@ export default async function TestLibraryPage() {
             <p className="mb-6 text-sm text-gray-500">
               Create your first test suite to get started
             </p>
-            <Link href="/test-library/new">
+            <Link href="/test-config">
               <Button>Create Test Suite</Button>
             </Link>
           </CardContent>

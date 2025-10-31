@@ -20,8 +20,14 @@ from test_plan_builder import TestPlanBuilder
 from test_executor import TestExecutor
 from result_formatter import ResultFormatter
 from persistence import PersistenceLayer
-from models import RunArtifact, TestPlan
+from models import RunArtifact, TestPlan, TestStatus
 from mcp_manager import get_mcp_manager
+
+# Import database persistence
+from sqlalchemy.orm import Session
+from backend.database import SessionLocal, TestSuite
+from backend import crud
+from backend.schemas import TestExecutionCreate, TestSuiteCreate, TestStepSchema
 
 # Suppress known asyncio warnings from MCP async generator cleanup
 # These are cosmetic errors related to Python 3.13 async context handling
@@ -180,6 +186,9 @@ class TestGPTEngine:
             print("💾 Step 6: Saving run artifact...")
             self.persistence.save_run_artifact(run_artifact)
             self.persistence.update_scenario_last_run(scenario_id, datetime.now())
+
+            # Save to database for frontend display
+            self._save_execution_to_database(run_artifact, test_plan)
             print()
 
             # Step 8: Format Slack summary
@@ -219,6 +228,28 @@ class TestGPTEngine:
 
         reference = parsed_request.rerun_scenario_reference
 
+        # Handle special keywords like "last", "last test", "latest", etc.
+        if reference and reference.lower() in ['last', 'last test', 'most recent', 'latest']:
+            # Get the most recently run scenario
+            all_scenarios = self.persistence.list_all_scenarios()
+            if all_scenarios:
+                # Load full scenario data to get last_run_at
+                scenarios_with_dates = []
+                for s in all_scenarios:
+                    full_scenario = self.persistence.load_scenario(s['scenario_id'])
+                    if full_scenario:
+                        scenarios_with_dates.append(full_scenario)
+
+                # Sort by last_run_at or created_at
+                sorted_scenarios = sorted(
+                    scenarios_with_dates,
+                    key=lambda s: s.get('last_run_at') or s.get('created_at', ''),
+                    reverse=True
+                )
+                if sorted_scenarios:
+                    reference = sorted_scenarios[0]['scenario_id']
+                    print(f"   🔍 'last test' resolved to: {sorted_scenarios[0]['scenario_name']}")
+
         # Try to find matching scenario
         # First by exact ID
         scenario_dict = self.persistence.load_scenario(reference)
@@ -248,31 +279,44 @@ class TestGPTEngine:
         print(f"   Found scenario: {scenario_dict['scenario_name']}")
         print(f"   Re-executing with saved configuration...\n")
 
-        # Reconstruct ParsedRequest from saved scenario
-        from request_parser import ParsedRequest
+        # Reconstruct ParsedSlackRequest from saved scenario
+        from request_parser import ParsedSlackRequest
         from models import EnvironmentMatrix
 
         # Reconstruct environment matrix
         env_matrix_dict = scenario_dict.get('environment_matrix', {})
         env_matrix = None
         if env_matrix_dict:
+            # Note: EnvironmentMatrix expects 'networks', not 'network_conditions'
             env_matrix = EnvironmentMatrix(
                 viewports=env_matrix_dict.get('viewports', []),
                 browsers=env_matrix_dict.get('browsers', []),
-                network_conditions=env_matrix_dict.get('network_conditions', [])
+                networks=env_matrix_dict.get('network_conditions', env_matrix_dict.get('networks', []))
             )
 
-        # Create a reconstructed ParsedRequest
-        reconstructed_request = ParsedRequest(
-            raw_message=f"Re-run: {scenario_dict['scenario_name']}",
+        # Create a reconstructed ParsedSlackRequest
+        # Extract viewport/browser/network names from the environment matrix
+        # Note: EnvironmentMatrix stores these as List[str], not List[dict]
+        viewport_names = env_matrix.viewports if env_matrix else ['desktop-standard']
+        browser_names = env_matrix.browsers if env_matrix else ['chromium-desktop']
+        network_names = env_matrix.networks if env_matrix else ['normal']
+
+        # Extract flow names from the saved flows (which are dicts with 'flow_name' key)
+        flow_dicts = scenario_dict.get('flows', [])
+        flow_names = [flow['flow_name'] if isinstance(flow, dict) else flow for flow in flow_dicts]
+
+        reconstructed_request = ParsedSlackRequest(
             target_urls=[scenario_dict['target_url']],
-            requested_viewports=env_matrix.viewports if env_matrix else [],
-            requested_browsers=env_matrix.browsers if env_matrix else [],
-            requested_network_conditions=env_matrix.network_conditions if env_matrix else [],
-            test_flows=scenario_dict.get('flows', []),
-            custom_instructions=scenario_dict.get('preconditions', {}).get('custom_instructions', ''),
+            flows=flow_names,
+            required_viewports=viewport_names if viewport_names else ['desktop-standard'],
+            required_browsers=browser_names if browser_names else ['chromium-desktop'],
+            required_networks=network_names if network_names else ['normal'],
+            explicit_expectations=scenario_dict.get('preconditions', {}).get('custom_instructions', '').split('\n') if scenario_dict.get('preconditions', {}).get('custom_instructions') else [],
             is_rerun=False,  # Set to False since we're now actually running it
-            rerun_scenario_reference=None
+            rerun_scenario_reference=None,
+            raw_message=f"Re-run: {scenario_dict['scenario_name']}",
+            is_backend_api_test=False,
+            is_pr_test=False
         )
 
         # Execute the test as if it's a new request
@@ -320,6 +364,9 @@ class TestGPTEngine:
         # Save run artifact
         print("💾 Saving run artifact...")
         self.persistence.save_run_artifact(run_artifact)
+
+        # Save to database for frontend display
+        self._save_execution_to_database(run_artifact, test_plan)
 
         # Update scenario's last_run_at timestamp
         scenario_dict['last_run_at'] = datetime.now().isoformat()
@@ -842,3 +889,134 @@ class TestGPTEngine:
         lines.append(f"⏱️  *Completed at:* {backend_result['completed_at'].strftime('%Y-%m-%d %H:%M:%S')}")
 
         return "\n".join(lines)
+
+    def _save_execution_to_database(self, run_artifact: RunArtifact, test_plan: TestPlan):
+        """
+        Save test execution to database for frontend display.
+
+        Args:
+            run_artifact: Complete test execution artifact
+            test_plan: Original test plan with test suite info
+        """
+        try:
+            db = SessionLocal()
+
+            # First, check if test suite exists in database
+            test_suite_id = None
+            existing_suite = crud.get_test_suite_by_name(db, run_artifact.scenario_name)
+
+            if not existing_suite:
+                # Create test suite if it doesn't exist
+                # Extract test steps from test plan if available
+                test_steps = []
+                if hasattr(test_plan, 'test_steps') and test_plan.test_steps:
+                    test_steps = [
+                        TestStepSchema(
+                            step_number=i+1,
+                            action=step.get('action', 'unknown'),
+                            target=step.get('target', ''),
+                            expected_outcome=step.get('expected_outcome', ''),
+                            timeout_seconds=step.get('timeout_seconds', 30)
+                        )
+                        for i, step in enumerate(test_plan.test_steps)
+                    ]
+
+                suite_create = TestSuiteCreate(
+                    name=run_artifact.scenario_name,
+                    description=f"Test suite for {run_artifact.target_url}",
+                    prompt=f"Automated test for {run_artifact.scenario_name}",
+                    target_url=run_artifact.target_url,
+                    test_steps=test_steps,
+                    created_by=run_artifact.triggered_by,
+                    source_type="slack_trigger",
+                    tags=[]
+                )
+
+                new_suite = crud.create_test_suite(db, suite_create)
+                test_suite_id = new_suite.id
+                print(f"   📝 Created test suite: {test_suite_id}")
+            else:
+                test_suite_id = existing_suite.id
+                print(f"   📝 Using existing test suite: {test_suite_id}")
+
+            # Determine status based on run_artifact.overall_status
+            status_map = {
+                TestStatus.PASS: "passed",
+                TestStatus.FAIL: "failed",
+                TestStatus.TIMED_OUT: "failed"
+            }
+            status = status_map.get(run_artifact.overall_status, "failed")
+
+            # Extract browser and viewport info from first cell result if available
+            browser = "chromium"
+            viewport_width = 1920
+            viewport_height = 1080
+            network_mode = "normal"
+
+            if run_artifact.cell_results and len(run_artifact.cell_results) > 0:
+                first_cell = run_artifact.cell_results[0]
+                browser = first_cell.browser_config.profile_name if hasattr(first_cell, 'browser_config') else "chromium"
+                if hasattr(first_cell, 'viewport_config'):
+                    viewport_width = first_cell.viewport_config.width
+                    viewport_height = first_cell.viewport_config.height
+                if hasattr(first_cell, 'network_config'):
+                    network_mode = first_cell.network_config.profile_name if first_cell.network_config.profile_name else "normal"
+
+            # Create execution record
+            execution_create = TestExecutionCreate(
+                test_suite_id=test_suite_id,
+                config_id=None,  # No config template for Slack-triggered tests
+                browser=browser,
+                viewport_width=viewport_width,
+                viewport_height=viewport_height,
+                network_mode=network_mode,
+                triggered_by="slack",
+                triggered_by_user=run_artifact.triggered_by
+            )
+
+            execution = crud.create_test_execution(db, execution_create)
+
+            # Update execution with completion details
+            execution.status = status
+            execution.started_at = run_artifact.started_at
+            execution.completed_at = run_artifact.completed_at
+            execution.execution_time_ms = run_artifact.duration_total_seconds * 1000
+
+            # Store execution logs as JSON
+            execution_logs = []
+            for cell_result in run_artifact.cell_results:
+                log_entry = {
+                    "cell_id": cell_result.cell_id,
+                    "status": cell_result.status.value,
+                    "browser": browser,
+                    "viewport": f"{viewport_width}x{viewport_height}",
+                    "network": network_mode
+                }
+                if cell_result.error_message:
+                    log_entry["error"] = cell_result.error_message
+                execution_logs.append(log_entry)
+
+            import json
+            execution.execution_logs = json.dumps(execution_logs)
+
+            # Store error details if test failed
+            if status == "failed":
+                error_messages = []
+                for cell_result in run_artifact.cell_results:
+                    if cell_result.error_message:
+                        error_messages.append(f"{cell_result.cell_id}: {cell_result.error_message}")
+                if error_messages:
+                    execution.error_details = "\n".join(error_messages)
+
+            db.commit()
+            db.refresh(execution)
+
+            print(f"   💾 Saved execution to database: {execution.id}")
+            print(f"   📊 Status: {status}, Suite ID: {test_suite_id}")
+
+        except Exception as e:
+            print(f"   ⚠️  Warning: Failed to save execution to database: {e}")
+            import traceback
+            traceback.print_exc()
+        finally:
+            db.close()

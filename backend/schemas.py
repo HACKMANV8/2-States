@@ -214,7 +214,7 @@ class ExecutionHistoryResponse(BaseModel):
 class BatchExecutionCreate(BaseModel):
     """Request to run multiple tests"""
     test_suite_ids: List[str]
-    config_id: str
+    config_id: Optional[str] = None
     triggered_by: Literal["slack", "manual", "github"] = "manual"
     triggered_by_user: Optional[str] = None
 

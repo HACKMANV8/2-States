@@ -75,61 +75,30 @@ export default async function DashboardPage() {
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* Recent Executions */}
         <div className="lg:col-span-2">
           <RecentExecutions executions={recentExecutions} />
         </div>
 
         {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+        <Card className="h-fit">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Quick Actions</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-2">
             <Link href="/test-config" className="block">
-              <Button className="w-full" variant="outline">
+              <Button className="w-full" variant="outline" size="sm">
                 <PlayCircle className="mr-2 h-4 w-4" />
                 Create New Test
               </Button>
             </Link>
-            <Link href="/test-executions" className="block">
-              <Button className="w-full" variant="outline">
+            <Link href="/test-library" className="block">
+              <Button className="w-full" variant="outline" size="sm">
                 <Clock className="mr-2 h-4 w-4" />
-                View All Executions
+                View Test Library
               </Button>
             </Link>
-          </CardContent>
-        </Card>
-
-        {/* Integration Status */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Integration Status</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-gray-500" />
-                <span className="font-medium">Slack</span>
-              </div>
-              <Link href="/integrations/slack">
-                <Button variant="ghost" size="sm">
-                  Configure
-                </Button>
-              </Link>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Github className="h-5 w-5 text-gray-500" />
-                <span className="font-medium">GitHub</span>
-              </div>
-              <Link href="/integrations/github">
-                <Button variant="ghost" size="sm">
-                  Configure
-                </Button>
-              </Link>
-            </div>
           </CardContent>
         </Card>
       </div>

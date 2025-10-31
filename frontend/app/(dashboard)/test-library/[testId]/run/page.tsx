@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { apiClient, TestSuite, ConfigurationTemplate } from "@/lib/api/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,32 +13,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PlayCircle, ArrowLeft, Loader2, Settings } from "lucide-react";
+import { PlayCircle, ArrowLeft, Loader2, Settings, MessageSquare } from "lucide-react";
 import Link from "next/link";
 
 export default function RunTestPage({
   params,
 }: {
-  params: { testId: string };
+  params: Promise<{ testId: string }>;
 }) {
   const router = useRouter();
+  const { testId } = use(params);
   const [testSuite, setTestSuite] = useState<TestSuite | null>(null);
   const [configs, setConfigs] = useState<ConfigurationTemplate[]>([]);
-  const [selectedConfig, setSelectedConfig] = useState<string>("");
+  const [selectedConfig, setSelectedConfig] = useState<string>("custom");
   const [selectedBrowser, setSelectedBrowser] = useState<string>("chrome");
   const [selectedViewport, setSelectedViewport] = useState<string>("desktop");
-  const [selectedNetwork, setSelectedNetwork] = useState<string>("online");
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
 
   useEffect(() => {
     loadData();
-  }, [params.testId]);
+  }, [testId]);
 
   const loadData = async () => {
     try {
       const [suite, configList] = await Promise.all([
-        apiClient.getTestSuite(params.testId),
+        apiClient.getTestSuite(testId),
         apiClient.listConfigs({ limit: 100 }),
       ]);
 
@@ -71,12 +71,11 @@ export default function RunTestPage({
 
       const viewport = viewportDimensions[selectedViewport] || viewportDimensions.desktop;
 
-      const execution = await apiClient.runTest(params.testId, {
-        config_id: selectedConfig || undefined,
+      const execution = await apiClient.runTest(testId, {
+        config_id: selectedConfig === "custom" ? undefined : selectedConfig,
         browser: selectedBrowser,
         viewport_width: viewport.width,
         viewport_height: viewport.height,
-        network_mode: selectedNetwork,
         triggered_by: "manual",
       });
 
@@ -112,13 +111,30 @@ export default function RunTestPage({
     );
   }
 
-  const selectedConfigData = configs.find((c) => c.id === selectedConfig);
+  const selectedConfigData = selectedConfig !== "custom" ? configs.find((c) => c.id === selectedConfig) : null;
+
+  // Build dynamic Slack command based on selections
+  const buildSlackCommand = () => {
+    let command = `@TestGPT test ${testSuite?.target_url}`;
+
+    // Add browser if not default
+    if (selectedBrowser !== "chrome") {
+      command += ` browser:${selectedBrowser}`;
+    }
+
+    // Add viewport if not default
+    if (selectedViewport !== "desktop") {
+      command += ` viewport:${selectedViewport}`;
+    }
+
+    return command;
+  };
 
   return (
     <div className="mx-auto max-w-4xl p-6">
       {/* Header */}
       <div className="mb-6">
-        <Link href={`/test-library/${params.testId}`}>
+        <Link href={`/test-library/${testId}`}>
           <Button variant="ghost" size="sm" className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Test Details
@@ -128,6 +144,71 @@ export default function RunTestPage({
         <h1 className="text-3xl font-bold text-gray-900">Run Test</h1>
         <p className="mt-2 text-gray-600">{testSuite.name}</p>
       </div>
+
+      {/* Run Button - Two Options */}
+      <Card className="mb-6 border-green-200 bg-green-50">
+        <CardContent className="pt-6">
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <PlayCircle className="h-6 w-6 text-green-600 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-green-900 mb-2">Two Ways to Run Tests</h3>
+                <div className="space-y-2 text-sm text-green-800">
+                  <div>
+                    <strong>1. API (Direct):</strong> Click the button below to execute immediately via API
+                  </div>
+                  <div>
+                    <strong>2. Slack (Recommended):</strong> Copy the command above for interactive execution in Slack
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Link href={`/test-library/${testId}`}>
+                <Button variant="outline" disabled={running}>
+                  Cancel
+                </Button>
+              </Link>
+              <Button onClick={handleRun} disabled={running} size="lg">
+                {running ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Starting Test...
+                  </>
+                ) : (
+                  <>
+                    <PlayCircle className="mr-2 h-5 w-5" />
+                    Run Test via API
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Slack Instructions */}
+      <Card className="mb-6 border-blue-200 bg-blue-50">
+        <CardContent className="pt-6">
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <MessageSquare className="h-6 w-6 text-blue-600 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-blue-900 mb-2">Execute in Slack</h3>
+                <p className="text-sm text-blue-800 mb-3">
+                  Copy this command and paste it in Slack to run the test:
+                </p>
+                <div className="rounded bg-white p-3 font-mono text-sm border border-blue-200 break-all select-all">
+                  {buildSlackCommand()}
+                </div>
+                <p className="text-xs text-blue-700 mt-2">
+                  💡 The AI agent will execute your test steps automatically with Playwright
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="space-y-6">
         {/* Configuration Template */}
@@ -147,7 +228,7 @@ export default function RunTestPage({
                     <SelectValue placeholder="Select a configuration" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Custom Configuration</SelectItem>
+                    <SelectItem value="custom">Custom Configuration</SelectItem>
                     {configs.map((config) => (
                       <SelectItem key={config.id} value={config.id}>
                         {config.name}
@@ -205,48 +286,6 @@ export default function RunTestPage({
             </Select>
           </CardContent>
         </Card>
-
-        {/* Network Conditions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Network Conditions</CardTitle>
-            <CardDescription>Simulate different network speeds</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Select value={selectedNetwork} onValueChange={setSelectedNetwork}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="online">Normal (Online)</SelectItem>
-                <SelectItem value="fast3g">Fast 3G</SelectItem>
-                <SelectItem value="slow3g">Slow 3G</SelectItem>
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-
-        {/* Run Button */}
-        <div className="flex justify-end gap-3">
-          <Link href={`/test-library/${params.testId}`}>
-            <Button variant="outline" disabled={running}>
-              Cancel
-            </Button>
-          </Link>
-          <Button onClick={handleRun} disabled={running} size="lg">
-            {running ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Starting Test...
-              </>
-            ) : (
-              <>
-                <PlayCircle className="mr-2 h-5 w-5" />
-                Run Test
-              </>
-            )}
-          </Button>
-        </div>
       </div>
     </div>
   );

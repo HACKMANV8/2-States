@@ -10,6 +10,7 @@ import {
   Github,
   MessageSquare,
   Menu,
+  Library,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -22,30 +23,14 @@ const navItems = [
     icon: LayoutDashboard,
   },
   {
+    name: "Test Library",
+    href: "/test-library",
+    icon: Library,
+  },
+  {
     name: "Test Configuration",
     href: "/test-config",
     icon: TestTube2,
-  },
-  {
-    name: "Test Executions",
-    href: "/test-executions",
-    icon: PlayCircle,
-  },
-  {
-    name: "Integrations",
-    icon: Settings,
-    submenu: [
-      {
-        name: "Slack",
-        href: "/integrations/slack",
-        icon: MessageSquare,
-      },
-      {
-        name: "GitHub",
-        href: "/integrations/github",
-        icon: Github,
-      },
-    ],
   },
   {
     name: "Settings",

@@ -38,11 +38,12 @@ async function getTestHistory(testId: string) {
 export default async function TestDetailPage({
   params,
 }: {
-  params: { testId: string };
+  params: Promise<{ testId: string }>;
 }) {
+  const { testId } = await params;
   const [testSuite, history] = await Promise.all([
-    getTestSuite(params.testId),
-    getTestHistory(params.testId),
+    getTestSuite(testId),
+    getTestHistory(testId),
   ]);
 
   if (!testSuite) {
@@ -67,7 +68,7 @@ export default async function TestDetailPage({
               <p className="mt-2 text-gray-600">{testSuite.description}</p>
             )}
           </div>
-          <Link href={`/test-library/${params.testId}/run`}>
+          <Link href={`/test-library/${testId}/run`}>
             <Button size="lg">
               <PlayCircle className="mr-2 h-5 w-5" />
               Run Test

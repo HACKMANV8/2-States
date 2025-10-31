@@ -3,7 +3,10 @@ import Database from "better-sqlite3";
 import * as schema from "./schema";
 import path from "path";
 
-// Use the same database path as the backend API (testgpt.db in this directory)
-const dbPath = path.join(__dirname, "testgpt.db");
+// Use the database file relative to the frontend directory
+// In development, process.cwd() points to the frontend directory
+const dbPath = path.join(process.cwd(), "lib", "db", "testgpt.db");
+
+// Create database with proper error handling
 const sqlite = new Database(dbPath);
 export const db = drizzle(sqlite, { schema });

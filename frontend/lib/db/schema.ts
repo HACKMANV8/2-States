@@ -35,25 +35,55 @@ export const testConfigurations = sqliteTable("test_configurations", {
     .$defaultFn(() => new Date()),
 });
 
+// Configuration Templates - from FastAPI backend system
+export const configurationTemplates = sqliteTable("configuration_templates", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  browsers: text("browsers"), // JSON array
+  viewports: text("viewports"), // JSON array
+  networkModes: text("network_modes"), // JSON array
+  userAgentStrings: text("user_agent_strings"), // JSON array
+  screenshotOnFailure: integer("screenshot_on_failure", { mode: "boolean" }),
+  videoRecording: integer("video_recording", { mode: "boolean" }),
+  parallelExecution: integer("parallel_execution", { mode: "boolean" }),
+  maxWorkers: integer("max_workers"),
+  defaultTimeout: integer("default_timeout"),
+  createdAt: text("created_at"),
+  updatedAt: text("updated_at"),
+});
+
 // Test Executions - stores test runs
-export const testExecutions = sqliteTable("test_executions", {
+export const testExecutions = sqliteTable("test_executions_v2", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),
-  configId: text("config_id").references(() => testConfigurations.id, {
-    onDelete: "set null",
-  }),
+  testSuiteId: text("test_suite_id"), // Link to test suite
+  configId: text("config_id"),
 
   // Execution metadata
   status: text("status", { enum: ["pending", "running", "passed", "failed"] })
     .notNull()
     .default("pending"),
 
+  // Execution details
+  startedAt: text("started_at"),
+  completedAt: text("completed_at"),
+  executionTimeMs: integer("execution_time_ms"),
+  executionLogs: text("execution_logs"), // JSON
+  screenshots: text("screenshots"), // JSON
+  videoUrl: text("video_url"),
+  errorDetails: text("error_details"),
+
+  // Browser/environment info
+  browser: text("browser"),
+  viewportWidth: integer("viewport_width"),
+  viewportHeight: integer("viewport_height"),
+  networkMode: text("network_mode"),
+
   // Trigger source
-  triggeredBy: text("triggered_by", { enum: ["slack", "manual", "github"] })
-    .notNull()
-    .default("manual"),
-  triggeredByUser: text("triggered_by_user"), // Username or Slack user ID
+  triggeredBy: text("triggered_by"),
+  triggeredByUser: text("triggered_by_user"),
 
   // Slack integration data
   slackChannelId: text("slack_channel_id"),
@@ -66,23 +96,8 @@ export const testExecutions = sqliteTable("test_executions", {
   githubPrTitle: text("github_pr_title"),
   githubCommitSha: text("github_commit_sha"),
 
-  // Test results
-  playwrightOutput: text("playwright_output"), // Full Playwright logs
-  aiGeneratedTests: text("ai_generated_tests"), // AI-generated test code (for re-running)
-  screenshotUrls: text("screenshot_urls"), // JSON array of screenshot URLs
-
-  // Performance metrics
-  executionTimeMs: integer("execution_time_ms"),
-  networkSimulationResults: text("network_simulation_results"), // JSON
-
-  // Error information
-  errorMessage: text("error_message"),
-  errorStack: text("error_stack"),
-
-  startedAt: integer("started_at", { mode: "timestamp" }),
-  completedAt: integer("completed_at", { mode: "timestamp" }),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date()),
+  // Timestamps
+  createdAt: text("created_at"),
 });
 
 // Integration Settings - stores Slack and GitHub connection info

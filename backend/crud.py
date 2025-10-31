@@ -49,6 +49,11 @@ def get_test_suite(db: Session, suite_id: str) -> Optional[TestSuite]:
     return db.query(TestSuite).filter(TestSuite.id == suite_id).first()
 
 
+def get_test_suite_by_name(db: Session, name: str) -> Optional[TestSuite]:
+    """Get a test suite by name"""
+    return db.query(TestSuite).filter(TestSuite.name == name).first()
+
+
 def get_test_suites(
     db: Session,
     skip: int = 0,
@@ -337,6 +342,32 @@ def get_statistics(db: Session) -> dict:
 
     avg_execution_time = db.query(func.avg(TestExecution.execution_time_ms)).scalar()
 
+    # Get most run test
+    most_run_test = None
+    try:
+        # Query to find test suite with most executions
+        result = (
+            db.query(
+                TestExecution.test_suite_id,
+                func.count(TestExecution.id).label("run_count")
+            )
+            .filter(TestExecution.test_suite_id.isnot(None))
+            .group_by(TestExecution.test_suite_id)
+            .order_by(desc("run_count"))
+            .first()
+        )
+
+        if result:
+            suite = db.query(TestSuite).filter(TestSuite.id == result[0]).first()
+            if suite:
+                most_run_test = {
+                    "id": suite.id,
+                    "name": suite.name,
+                    "run_count": result[1]
+                }
+    except Exception:
+        pass  # If no executions exist, return None
+
     # Get recent failures
     recent_failures = (
         db.query(TestExecution)
@@ -353,5 +384,6 @@ def get_statistics(db: Session) -> dict:
         "failed_executions": failed_executions or 0,
         "running_executions": running_executions or 0,
         "average_execution_time_ms": avg_execution_time,
+        "most_run_test": most_run_test,
         "recent_failures": recent_failures,
     }
