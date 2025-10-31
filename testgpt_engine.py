@@ -647,18 +647,18 @@ class TestGPTEngine:
             # Get MCP manager and create instance for this test
             print(f"   🔧 Starting Playwright MCP instance...")
 
-            # Use multiple browsers for comprehensive testing
-            # For now use chromium as primary, but structure for easy extension
-            browsers = ["chromium"]  # Can add ["chromium", "webkit", "firefox"] for multi-browser
+            # Use desktop-standard viewport and chromium-desktop browser
+            # This matches the normal testing flow configuration
+            from models import ViewportProfile, BrowserProfile
+            from config import VIEWPORT_PROFILES, BROWSER_PROFILES
 
-            # Use first browser for primary test
-            browser = browsers[0]
-            mcp_command = f'npx -y @playwright/mcp@latest --browser {browser}'
-            print(f"   🌐 Testing with {browser} browser")
+            viewport = VIEWPORT_PROFILES["desktop-standard"]
+            browser_profile = BROWSER_PROFILES["chromium-desktop"]
 
-            # Connect to MCP
-            mcp_tools = MCPTools(command=mcp_command)
-            await mcp_tools.connect()
+            print(f"   🌐 Testing with {browser_profile.name} browser")
+
+            # Connect to MCP using the proper manager (same as normal tests)
+            mcp_tools = await self.mcp_manager.get_mcp_tools_for_cell(viewport, browser_profile)
 
             print(f"   ✅ Playwright MCP connected")
 

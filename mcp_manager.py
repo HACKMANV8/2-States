@@ -59,7 +59,10 @@ class MCPServerInstance:
         print(f"   🔌 Connecting to MCP server for {self.viewport.name} on {self.browser.name}")
         print(f"      Command: {full_command}")
 
-        self.mcp_tools = MCPTools(command=full_command)
+        self.mcp_tools = MCPTools(
+            command=full_command,
+            exclude_tools=["browser_install", "browser_resize"]
+        )
 
         await self.mcp_tools.connect()
         self.connected = True
