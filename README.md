@@ -1,66 +1,41 @@
 # TestGPT - Multi-Environment QA Testing Platform
 
-<<<<<<< HEAD
-**🚀 NEW: TestGPT is now a comprehensive multi-environment QA testing platform!**
-=======
 Complete AI agent examples using Agno framework with Model Context Protocol (MCP) integration. Includes Slack bot, web automation, backend API testing, documentation lookup, and file system operations.
->>>>>>> bf63c08 (feat :  dynamic api mcp server implementation (WIP))
 
 Transform simple Slack messages into complete cross-browser, cross-device, and cross-network test matrices. TestGPT behaves like a professional manual QA engineer, automatically testing your sites across multiple environments and prioritizing failures.
 
-<<<<<<< HEAD
-## Quick Links
+## Features
 
-- **📖 [TestGPT Documentation](TESTGPT_README.md)** - Complete guide to the new system
-- **✅ [Implementation Summary](IMPLEMENTATION_COMPLETE.md)** - Full specification compliance report
-- **🐛 [Bug Fixes Summary](BUG_FIXES_SUMMARY.md)** - All issues fixed and resolutions
-- **🧪 [Original Examples](#original-examples)** - Simple AI agent examples (legacy)
-
-## 🆕 Recent Updates (2025-10-31)
-
-### Fixed Issues:
-- ✅ **Subdomain URL Support** - Now correctly handles `careers.pointblank.club`, `api.github.com`, etc.
-- ✅ **Custom User Instructions** - Agent now understands requests like "view repositories of SkySingh04"
-- ✅ **Old Event Filtering** - Bot ignores messages older than 5 minutes on restart
-- ✅ **Test Status Detection** - Improved parsing to prevent false FAILED results
-- ✅ **Event Deduplication** - Prevents processing the same Slack message multiple times
-- ✅ **MCP Cleanup** - Fixed RuntimeError on shutdown
-
-See [BUG_FIXES_SUMMARY.md](BUG_FIXES_SUMMARY.md) for complete details.
-
-## TestGPT Features
-
-### 🎯 Multi-Environment Testing
-- **10 viewport profiles** (iPhone SE → desktop ultrawide)
-- **4 browser engines** (Chrome, Safari, Firefox)
-- **3 network conditions** (normal, slow 3G, flaky)
-- **Automatic matrix expansion** (one request → N test runs)
-- **REAL Playwright MCP execution** (actual browsers, not mocked)
-
-### 🧠 Intelligent Test Planning
-- **Natural language parsing** from Slack
-- **Deterministic test flows** with objective checkpoints
-- **Automatic scenario persistence** for re-running
-- **Failure prioritization** (P0 critical → P2 edge cases)
-
-### 📊 Comprehensive Reporting
-- **Formatted Slack summaries** with environment breakdown
-- **Per-dimension statistics** (by viewport, browser, network)
-- **Actionable next steps** for fixing issues
-- **Evidence collection** (screenshots, console errors)
-
-### 🔄 Re-run Capability
-- All tests automatically saved
-- Re-run with: `"re-run [scenario name]"`
-- Historical comparison support
-=======
 - **AI-Powered**: Uses Claude Sonnet 4 for intelligent task understanding
 - **Multiple MCP Servers**: Context7 docs, Filesystem, Playwright web automation
 - **Dynamic Backend API Testing**: Test ANY user API from repos/PRs automatically
 - **Slack Integration**: Production bot with web automation AND API testing
 - **Persistent Sessions**: Maintains state across tasks
 - **Example Agents**: 6 complete examples + live demos + CI/CD examples
->>>>>>> bf63c08 (feat :  dynamic api mcp server implementation (WIP))
+
+### Multi-Environment Testing
+- **10 viewport profiles** (iPhone SE → desktop ultrawide)
+- **4 browser engines** (Chrome, Safari, Firefox)
+- **3 network conditions** (normal, slow 3G, flaky)
+- **Automatic matrix expansion** (one request → N test runs)
+- **REAL Playwright MCP execution** (actual browsers, not mocked)
+
+### Intelligent Test Planning
+- **Natural language parsing** from Slack
+- **Deterministic test flows** with objective checkpoints
+- **Automatic scenario persistence** for re-running
+- **Failure prioritization** (P0 critical → P2 edge cases)
+
+### Comprehensive Reporting
+- **Formatted Slack summaries** with environment breakdown
+- **Per-dimension statistics** (by viewport, browser, network)
+- **Actionable next steps** for fixing issues
+- **Evidence collection** (screenshots, console errors)
+
+### Re-run Capability
+- All tests automatically saved
+- Re-run with: `"re-run [scenario name]"`
+- Historical comparison support
 
 ## Quick Start
 
@@ -86,6 +61,13 @@ cp .env.example .env
 python main.py
 ```
 
+### Run Backend API Testing
+```bash
+# Test a GitHub API
+export ANTHROPIC_API_KEY=your_key
+python examples/test_github_repo.py
+```
+
 ### Example Slack Commands
 ```
 # Basic testing
@@ -99,29 +81,15 @@ python main.py
 # Scenario management
 @TestGPT list scenarios
 @TestGPT re-run pointblank responsive test
-```
-=======
-# Run the Slack bot
-python slack_agent.py
 
-# OR test a GitHub API (NEW!)
-export ANTHROPIC_API_KEY=your_key
-python examples/test_github_repo.py
+# Backend API testing
+@TestGPT test the backend API health
+@TestGPT run smoke tests on all endpoints
 ```
-
-**📖 See [QUICK_REFERENCE.md](QUICK_REFERENCE.md) for complete usage guide**
 
 ## Examples Included
->>>>>>> bf63c08 (feat :  dynamic api mcp server implementation (WIP))
 
----
-
-## Original Examples
-
-The following are the original simple AI agent examples (legacy).
-For the new TestGPT system, see documentation above.
-
-### 1. Original Slack Bot (Legacy)
+### 1. Slack Bot
 **File**: `slack_agent.py`
 - Production-ready Slack bot with Playwright MCP
 - Responds to channel mentions
@@ -158,7 +126,7 @@ For the new TestGPT system, see documentation above.
 - Advanced web automation
 - Class-based implementation
 
-### 7. Dynamic Backend API Testing System (NEW!)
+### 7. Dynamic Backend API Testing System
 **Directory**: `dynamic_backend_testing/`
 - **Test ANY user-submitted API** from repos, branches, PRs
 - **Automatic OpenAPI introspection** and MCP wrapper generation
@@ -177,7 +145,7 @@ For the new TestGPT system, see documentation above.
 - `test_mcp_connection.py` - Test MCP server connections
 - `test_playwright_mcp.py` - Test Playwright integration
 
-### Examples (NEW!)
+### Examples
 - `examples/test_github_repo.py` - Test any GitHub repository
 - `examples/test_pr.py` - Test pull requests (CI/CD ready)
 
@@ -210,6 +178,9 @@ streamlit run 04_streamlit_app.py
 - Extract data from pages
 - Click buttons and links
 - Type and interact with elements
+- Test backend APIs
+- Validate API responses
+- Run comprehensive test suites
 
 ## Configuration
 
@@ -217,10 +188,6 @@ Required environment variables in `.env`:
 - `ANTHROPIC_API_KEY` - Get from console.anthropic.com
 - `SLACK_BOT_TOKEN` - Your Slack bot token (xoxb-...)
 - `SLACK_APP_TOKEN` - Your Slack app token (xapp-...)
-
----
-
-## Configuration
 
 ### Adding New Viewports
 
@@ -258,63 +225,120 @@ And `config.py`:
 )
 ```
 
-### Adding Custom Test Flows
+## Dynamic Backend API Testing
 
-Edit `agent_instructions.py`:
-```python
-def get_custom_flow():
-    return {
-        "flow_name": "Custom Checkout Flow",
-        "steps": [
-            {"action": "navigate", "target": "/products", ...},
-            {"action": "click", "target": "button.add-to-cart", ...},
-            ...
-        ]
-    }
+The dynamic backend testing system automatically tests user-submitted APIs with zero configuration.
+
+### Key Features
+
+- **Zero Configuration**: Test any API with one line of code
+- **OpenAPI Introspection**: Automatically extracts API specifications
+- **MCP Wrapper Generation**: Creates FastMCP tools on-the-fly
+- **Repository Support**: Clone, test, and cleanup GitHub repos
+- **CI/CD Ready**: Perfect for automated testing pipelines
+- **Multi-Framework**: Works with FastAPI, Flask, Django
+
+### Architecture
+
+```
+User Input (Repo URL + Branch/PR)
+         ↓
+RepoManager: Clone & Install
+         ↓
+APIDiscoveryService: Load App & Extract OpenAPI
+         ↓
+MCPGenerator: Generate @mcp.tool() Code
+         ↓
+DynamicServerManager: Start API + MCP Servers
+         ↓
+Agno Agent: Test via MCPTools
+         ↓
+Results + Cleanup
 ```
 
----
+### Components
+
+**RepoManager** - Git operations (clone, checkout, dependency installation)
+**APIDiscoveryService** - API discovery and OpenAPI extraction
+**MCPGenerator** - Dynamic MCP tool code generation
+**DynamicServerManager** - Server lifecycle management
+**DynamicBackendOrchestrator** - End-to-end coordination
+
+### Usage Example
+
+```python
+from dynamic_backend_testing import DynamicBackendOrchestrator
+
+orchestrator = DynamicBackendOrchestrator()
+
+# Test a GitHub repo
+result = await orchestrator.test_repo(
+    repo_url="https://github.com/user/api-repo",
+    branch="feature-branch",
+    test_suite="comprehensive"
+)
+
+if result['overall_success']:
+    print(f"✅ All {len(result['test_results'])} tests passed")
+```
+
+### CI/CD Integration
+
+```bash
+# Test a pull request
+python examples/test_pr.py \
+  --repo https://github.com/user/repo \
+  --pr 123
+```
+
+For complete documentation, see:
+- [dynamic_backend_testing/README.md](dynamic_backend_testing/README.md) - Full system documentation
+- [DYNAMIC_SYSTEM_IMPLEMENTATION.md](DYNAMIC_SYSTEM_IMPLEMENTATION.md) - Architecture details
+- [FINAL_IMPLEMENTATION_SUMMARY.md](FINAL_IMPLEMENTATION_SUMMARY.md) - Implementation summary
 
 ## Bug Fixes & Improvements
 
-### Recent Fixes (2025-10-31)
+### Recent Fixes
 
-#### ✅ Test Status Detection Fixed
+#### Test Status Detection Fixed
 **Issue:** Tests marked as FAILED despite agent reporting SUCCESS
-**Fix:** Added multiple status indicator formats (`"test results:"`, `"test verdict:"`, etc.)
+**Fix:** Added multiple status indicator formats
 **Location:** `test_executor.py:505-530`
 
-#### ✅ MCP Server Isolation Fixed
+#### MCP Server Isolation Fixed
 **Issue:** Different browsers testing on same MCP instance
 **Fix:** Added MCP cleanup after each cell execution
 **Location:** `test_executor.py:239-244`, `mcp_manager.py:172-192`
 
-#### ✅ Subdomain URL Support Fixed
+#### Subdomain URL Support Fixed
 **Issue:** careers.pointblank.club → pointblank.club
 **Fix:** Improved URL extraction regex to handle subdomains
 **Location:** `request_parser.py:148-177`
 
-#### ✅ Custom User Instructions Support
+#### Custom User Instructions Support
 **Issue:** Agent only performed generic tests
 **Fix:** Thread user's raw message to agent instructions
 **Location:** `test_executor.py:283-296`
 
-#### ✅ Old Event Filtering
+#### Old Event Filtering
 **Issue:** Bot processing messages from 5+ minutes ago
 **Fix:** Added timestamp-based filtering (5-minute cutoff)
 **Location:** `main.py:134-144`
 
-#### ✅ Event Deduplication
+#### Event Deduplication
 **Issue:** Slack bot processing same message multiple times
 **Fix:** Added event ID tracking with deduplication
 **Location:** `main.py:126-141`
 
-#### ✅ MCP Cleanup Warnings Suppressed
+#### MCP Cleanup Warnings Suppressed
 **Issue:** Cosmetic RuntimeError warnings on shutdown
 **Fix:** Added try/except wrappers and asyncio exception handler
 **Location:** `testgpt_engine.py:163-177`, `main.py:67-87`
 
----
+#### API Discovery Enhanced
+**Issue:** Failed to load apps from nested directories (e.g., src/app/main.py)
+**Fix:** Added intelligent path resolution and environment variable setup
+**Location:** `dynamic_backend_testing/api_discovery.py`
 
 ## Debugging
 
@@ -340,75 +364,24 @@ cat logs/latest.log | grep "✅ Autonomous execution completed"
 - All tool calls and results
 - Detailed error traces with stack traces
 
-### Check Active MCP Servers
-```python
-from mcp_manager import get_mcp_manager
-
-manager = get_mcp_manager()
-info = manager.get_instance_info()
-print(info)
-```
-
-### Test Single Cell
-```python
-from testgpt_engine import TestGPTEngine
-
-engine = TestGPTEngine()
-result = await engine.process_test_request(
-    "test pointblank.club on iPhone"
-)
-```
-
----
-
-## Extending TestGPT
-
-### Add API Validation (Future)
-When HTTP MCP is available:
-```python
-# In test_executor.py
-async def _validate_api_response(self, endpoint):
-    # Call HTTP MCP to validate backend
-    response = await self.api_mcp.get(endpoint)
-    assert response.status == 200
-    assert "expected_field" in response.json()
-```
-
-### Add Database Validation (Future)
-When Postgres MCP is available:
-```python
-# In test_executor.py
-async def _validate_db_state(self, query):
-    # Call Postgres MCP to verify database
-    result = await self.db_mcp.query(query)
-    assert result.row_count > 0
-```
-
----
-
 ## Tech Stack
 
 - **Slack Bolt** - Slack integration
 - **Agno** - AI agent framework
 - **Claude Sonnet 4** - AI model
 - **Playwright MCP** - Web automation
-- **FastMCP** - Dynamic backend API testing (NEW!)
+- **FastMCP** - Dynamic backend API testing
 - **Model Context Protocol** - Tool integration
 - **Git/GitHub** - Repository management
 - **OpenAPI** - API introspection
 
 ## Documentation
 
-### Quick Reference
-- **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Quick start guide and common use cases
-- **[examples/README.md](examples/README.md)** - Example scripts and CI/CD integration
-
-### Complete Documentation
 - **[dynamic_backend_testing/README.md](dynamic_backend_testing/README.md)** - Full dynamic testing system docs
 - **[DYNAMIC_SYSTEM_IMPLEMENTATION.md](DYNAMIC_SYSTEM_IMPLEMENTATION.md)** - Architecture and design details
+- **[FINAL_IMPLEMENTATION_SUMMARY.md](FINAL_IMPLEMENTATION_SUMMARY.md)** - Implementation summary
+- **[examples/README.md](examples/README.md)** - Example scripts and CI/CD integration
 
-### Implementation History
-- **[FINAL_STATE_VERIFICATION.md](FINAL_STATE_VERIFICATION.md)** - Current state verification
-- **[FINAL_IMPLEMENTATION_SUMMARY.md](FINAL_IMPLEMENTATION_SUMMARY.md)** - What was built
-- **[CLEANUP_SUMMARY.md](CLEANUP_SUMMARY.md)** - What was removed and why
+## License
 
+MIT License - See LICENSE file for details
