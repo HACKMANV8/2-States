@@ -51,6 +51,54 @@ class APIDiscoveryService:
     def __init__(self):
         """Initialize the API discovery service."""
         logger.info("APIDiscoveryService initialized")
+        self._original_env = {}  # Store original environment variables
+
+    def _setup_minimal_env(self):
+        """
+        Setup minimal environment variables required by common frameworks.
+
+        Many FastAPI/Flask apps require certain env vars at import time
+        (e.g., DATABASE_URL, SECRET_KEY). This sets dummy values to allow
+        the app to be imported and introspected.
+
+        Stores original values to restore later.
+        """
+        import os
+
+        # Common environment variables and their dummy values
+        dummy_env_vars = {
+            "DATABASE_URL": "sqlite:///:memory:",  # In-memory SQLite for testing
+            "SECRET_KEY": "test-secret-key-for-discovery",
+            "API_KEY": "test-api-key",
+            "JWT_SECRET": "test-jwt-secret",
+            "REDIS_URL": "redis://localhost:6379",
+            "MONGODB_URL": "mongodb://localhost:27017",
+        }
+
+        for key, value in dummy_env_vars.items():
+            if key not in os.environ:
+                os.environ[key] = value
+                self._original_env[key] = None  # Mark as newly added
+                logger.debug(f"Set dummy env var: {key}={value}")
+            else:
+                # Keep track of original value
+                if key not in self._original_env:
+                    self._original_env[key] = os.environ[key]
+
+    def _restore_env(self):
+        """Restore original environment variables."""
+        import os
+
+        for key, original_value in self._original_env.items():
+            if original_value is None:
+                # Was added by us, remove it
+                if key in os.environ:
+                    del os.environ[key]
+            else:
+                # Restore original value
+                os.environ[key] = original_value
+
+        self._original_env.clear()
 
     async def discover_api(
         self,
@@ -87,8 +135,18 @@ class APIDiscoveryService:
         """
         logger.info(f"Discovering API in {repo_path}")
 
-        # Add repo to Python path
-        sys.path.insert(0, str(repo_path))
+        # Add common source directories to Python path for module resolution
+        # Check for src/, source/, app/ subdirectories which are common patterns
+        python_paths_to_add = [str(repo_path)]
+        for subdir in ["src", "source", "app", "backend"]:
+            subdir_path = repo_path / subdir
+            if subdir_path.exists() and subdir_path.is_dir():
+                python_paths_to_add.append(str(subdir_path))
+
+        # Add all paths to sys.path (in reverse order so repo_path is first)
+        for path in reversed(python_paths_to_add):
+            if path not in sys.path:
+                sys.path.insert(0, path)
 
         try:
             # Step 1: Load the application
@@ -127,9 +185,13 @@ class APIDiscoveryService:
             raise RuntimeError(error_msg) from e
 
         finally:
-            # Remove repo from Python path
-            if str(repo_path) in sys.path:
-                sys.path.remove(str(repo_path))
+            # Remove all added paths from Python path
+            for path in python_paths_to_add:
+                if path in sys.path:
+                    sys.path.remove(path)
+
+            # Restore original environment variables
+            self._restore_env()
 
     async def _load_app(
         self,
@@ -143,8 +205,9 @@ class APIDiscoveryService:
 
         Tries multiple methods:
         1. Direct import from module path (e.g., "main:app")
-        2. Import from specific file
-        3. Auto-detection of common app locations
+        2. Try with common package prefixes (e.g., "app.main:app", "src.main:app")
+        3. Import from specific file
+        4. Auto-detection of common app locations
 
         Args:
             repo_path: Path to the repository
@@ -160,14 +223,19 @@ class APIDiscoveryService:
         """
         logger.debug(f"Loading app from module: {app_module}")
 
+        # Parse the app_module
+        if ":" in app_module:
+            module_name, app_attr = app_module.split(":", 1)
+        else:
+            module_name = app_module
+            app_attr = "app"  # Default app name
+
+        # Setup minimal environment variables for common requirements
+        # Many FastAPI apps need DATABASE_URL or similar env vars at import time
+        self._setup_minimal_env()
+
         # Method 1: Try direct import from module path
         try:
-            if ":" in app_module:
-                module_name, app_attr = app_module.split(":", 1)
-            else:
-                module_name = app_module
-                app_attr = "app"  # Default app name
-
             # Import the module
             module = importlib.import_module(module_name)
 
@@ -179,7 +247,26 @@ class APIDiscoveryService:
                 return app_instance
 
         except Exception as e:
-            logger.warning(f"Failed to load app from module path: {e}")
+            logger.warning(f"Failed to load app from module path '{module_name}': {e}")
+
+        # Method 1b: Try with common package prefixes if simple module name failed
+        # For repos with structure like src/app/main.py, try "app.main" if "main" failed
+        if "." not in module_name:
+            common_prefixes = ["app", "src", "api", "backend"]
+            for prefix in common_prefixes:
+                try:
+                    prefixed_module = f"{prefix}.{module_name}"
+                    logger.debug(f"Trying prefixed module: {prefixed_module}")
+                    module = importlib.import_module(prefixed_module)
+                    app_instance = getattr(module, app_attr, None)
+
+                    if app_instance:
+                        logger.info(f"Successfully loaded app from {prefixed_module}:{app_attr}")
+                        return app_instance
+
+                except Exception as e:
+                    logger.debug(f"Failed to load with prefix '{prefix}': {e}")
+                    continue
 
         # Method 2: Try loading from specific file
         if app_file:
@@ -235,6 +322,7 @@ class APIDiscoveryService:
         Searches for:
         - main.py, app.py, api.py in root
         - app/main.py, src/main.py, etc.
+        - Nested structures like src/app/main.py
 
         Args:
             repo_path: Path to the repository
@@ -247,13 +335,16 @@ class APIDiscoveryService:
         # Common file names
         common_names = ["main.py", "app.py", "api.py", "server.py", "application.py"]
 
-        # Common directory structures
+        # Common directory structures (including nested)
         common_paths = [
             repo_path,
             repo_path / "app",
             repo_path / "src",
             repo_path / "api",
             repo_path / "backend",
+            repo_path / "src" / "app",  # nested like src/app/
+            repo_path / "src" / "api",  # nested like src/api/
+            repo_path / "backend" / "app",  # nested like backend/app/
         ]
 
         # Try each combination
