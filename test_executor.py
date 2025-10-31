@@ -113,7 +113,7 @@ class TestExecutor:
             print(f"▶️  Executing cell {i}/{len(test_plan.matrix_cells)}: {cell.cell_id}")
 
             try:
-                result = await self.execute_cell(cell, test_plan.target_url)
+                result = await self.execute_cell(cell, test_plan.target_url, test_plan.user_request)
                 cell_results.append(result)
 
                 status_emoji = "✅" if result.status == TestStatus.PASS else "❌"
@@ -179,13 +179,14 @@ Be thorough but efficient. Report clear outcomes.""",
                 markdown=False
             )
 
-    async def execute_cell(self, cell: MatrixCell, target_url: str) -> CellResult:
+    async def execute_cell(self, cell: MatrixCell, target_url: str, user_request: str = "") -> CellResult:
         """
         Execute a single matrix cell (one environment combination).
 
         Args:
             cell: MatrixCell to execute
             target_url: Base target URL
+            user_request: Original user message for custom test instructions
 
         Returns:
             CellResult with all execution details
@@ -213,7 +214,7 @@ Be thorough but efficient. Report clear outcomes.""",
         # NEW APPROACH: Give agent the full flow goal, let it decide the steps
         if self.agent is not None:
             self._log(f"   🤖 Letting AI agent execute flow autonomously...")
-            flow_result = await self._execute_flow_autonomously(cell)
+            flow_result = await self._execute_flow_autonomously(cell, user_request)
             step_results = flow_result["step_results"]
             overall_passed = flow_result["passed"]
         else:
@@ -252,7 +253,7 @@ Be thorough but efficient. Report clear outcomes.""",
             failure_priority=failure_priority
         )
 
-    async def _execute_flow_autonomously(self, cell: MatrixCell) -> dict:
+    async def _execute_flow_autonomously(self, cell: MatrixCell, user_request: str = "") -> dict:
         """
         Execute entire test flow autonomously by giving agent the high-level goal.
 
@@ -277,6 +278,24 @@ Be thorough but efficient. Report clear outcomes.""",
 
         # Build the high-level goal for the agent
         flow_description = self._build_flow_goal_description(cell)
+
+        # Include user's custom request if provided
+        if user_request and len(user_request.strip()) > 0:
+            mission_section = f"""USER REQUEST:
+"{user_request}"
+
+YOUR GOAL:
+Interpret the user's request above and execute it autonomously on the target website.
+Make decisions about how to accomplish the user's goal, including:
+- Which pages to navigate to
+- Which elements to interact with
+- What information to gather or verify
+- How to report your findings
+
+Pre-defined test flow (for reference):
+{flow_description}"""
+        else:
+            mission_section = flow_description
 
         # Give agent the full scenario with device emulation instructions
         autonomous_instruction = f"""AUTONOMOUS WEB TEST EXECUTION
@@ -310,7 +329,7 @@ IMPORTANT:
 - If you get "browser not installed" error, just navigate directly - the browser IS installed
 
 YOUR MISSION:
-{flow_description}
+{mission_section}
 
 CORRECT PLAYWRIGHT DEVICE EMULATION PATTERN:
 {self._get_device_emulation_example(cell)}
@@ -413,7 +432,7 @@ Step 1: Navigate directly to target URL
 {{
   "tool": "browser_navigate",
   "arguments": {{
-    "url": "https://pointblank.club"  // Replace with actual target URL
+    "url": "YOUR_TARGET_URL_HERE"
   }}
 }}
 
@@ -482,17 +501,30 @@ Expected outcomes:
 
         output_lower = agent_output.lower()
 
-        # Check for explicit test status from agent
-        if "test status:" in output_lower:
-            # Agent explicitly declared test status
-            if "✅ passed" in output_lower or "passed" in output_lower.split("test status:")[-1]:
-                overall_passed = True
-            elif "❌ failed" in output_lower or "failed" in output_lower.split("test status:")[-1]:
-                overall_passed = False
-            else:
-                # Fallback to heuristic
-                overall_passed = self._heuristic_success_detection(output_lower)
-        else:
+        # Check for explicit test status from agent (multiple formats)
+        status_indicators = [
+            "test status:",
+            "test outcome:",
+            "final status:",
+            "overall status:"
+        ]
+
+        explicit_status_found = False
+        for indicator in status_indicators:
+            if indicator in output_lower:
+                # Agent explicitly declared test status
+                status_section = output_lower.split(indicator)[-1][:100]  # Look at next 100 chars after indicator
+
+                if "✅ passed" in output_lower or "passed" in status_section:
+                    overall_passed = True
+                    explicit_status_found = True
+                    break
+                elif "❌ failed" in output_lower or "failed" in status_section:
+                    overall_passed = False
+                    explicit_status_found = True
+                    break
+
+        if not explicit_status_found:
             # Use heuristic if no explicit status
             overall_passed = self._heuristic_success_detection(output_lower)
 

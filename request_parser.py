@@ -73,13 +73,12 @@ class SlackRequestParser:
         # Extract target URLs
         urls = self._extract_urls(message)
 
-        # If no URL found, check for implicit pointblank.club reference
+        # If no URL found, only default to pointblank if explicitly mentioned WITHOUT subdomain
         if not urls:
-            if any(keyword in message_lower for keyword in ["pointblank", "demo", "showcase"]):
+            # Only use pointblank.club if user explicitly said "pointblank" without a subdomain
+            if "pointblank.club" in message_lower and "." not in message_lower.split("pointblank")[0][-10:]:
                 urls = ["https://pointblank.club"]
-            elif any(keyword in message_lower for keyword in ["test", "check", "run"]):
-                # Default to pointblank for demo purposes
-                urls = ["https://pointblank.club"]
+                print(f"   ℹ️  Using default demo site: pointblank.club")
 
         # Extract flows/scenarios mentioned
         flows = self._extract_flows(message_lower)
@@ -152,20 +151,29 @@ class SlackRequestParser:
         slack_urls = slack_url_pattern.findall(message)
 
         if slack_urls:
+            print(f"   📎 Extracted Slack-formatted URL: {slack_urls}")
             return slack_urls
 
         # Standard URL extraction
         urls = self.url_pattern.findall(message)
+        if urls:
+            print(f"   📎 Extracted URL with protocol: {urls}")
+            return urls
 
-        # Also check for domain mentions without protocol
-        if not urls:
-            domain_match = re.search(r'([\w-]+\.[\w]+(?:\.[\w]+)?)', message)
-            if domain_match:
-                domain = domain_match.group(1)
-                if any(tld in domain for tld in ['.com', '.org', '.net', '.io', '.club', '.dev']):
-                    urls = [f"https://{domain}"]
+        # Check for domain mentions without protocol (supports subdomains)
+        # Pattern matches: subdomain.domain.tld OR domain.tld
+        # Examples: careers.pointblank.club, pointblank.club, api.github.com, github.com
+        domain_pattern = r'\b((?:[\w-]+\.)+[\w-]+\.(?:com|org|net|io|club|dev|ai|tech|app|co))\b'
+        domain_match = re.search(domain_pattern, message, re.IGNORECASE)
 
-        return urls
+        if domain_match:
+            domain = domain_match.group(1)
+            print(f"   📎 Extracted domain without protocol: {domain}")
+            urls = [f"https://{domain}"]
+            return urls
+
+        print(f"   ⚠️  No URL found in message: {message[:100]}")
+        return []
 
     def _extract_flows(self, message: str) -> List[str]:
         """

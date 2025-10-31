@@ -79,7 +79,8 @@ class TestPlanBuilder:
             matrix_cells=matrix_cells,
             total_cells_to_execute=total_cells,
             estimated_duration_minutes=estimated_duration_minutes,
-            tags=self._generate_tags(parsed_request)
+            tags=self._generate_tags(parsed_request),
+            user_request=parsed_request.raw_message
         )
 
     def _build_flows(self, parsed_request: ParsedSlackRequest) -> List[TestFlow]:

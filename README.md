@@ -8,7 +8,20 @@ Transform simple Slack messages into complete cross-browser, cross-device, and c
 
 - **📖 [TestGPT Documentation](TESTGPT_README.md)** - Complete guide to the new system
 - **✅ [Implementation Summary](IMPLEMENTATION_COMPLETE.md)** - Full specification compliance report
+- **🐛 [Bug Fixes Summary](BUG_FIXES_SUMMARY.md)** - All issues fixed and resolutions
 - **🧪 [Original Examples](#original-examples)** - Simple AI agent examples (legacy)
+
+## 🆕 Recent Updates (2025-10-31)
+
+### Fixed Issues:
+- ✅ **Subdomain URL Support** - Now correctly handles `careers.pointblank.club`, `api.github.com`, etc.
+- ✅ **Custom User Instructions** - Agent now understands requests like "view repositories of SkySingh04"
+- ✅ **Old Event Filtering** - Bot ignores messages older than 5 minutes on restart
+- ✅ **Test Status Detection** - Improved parsing to prevent false FAILED results
+- ✅ **Event Deduplication** - Prevents processing the same Slack message multiple times
+- ✅ **MCP Cleanup** - Fixed RuntimeError on shutdown
+
+See [BUG_FIXES_SUMMARY.md](BUG_FIXES_SUMMARY.md) for complete details.
 
 ## TestGPT Features
 
@@ -49,18 +62,28 @@ python test_testgpt.py
 # Install dependencies
 pip install -r requirements.txt
 
+# Install Playwright browsers (required for testing)
+npx playwright install
+
 # Configure .env with your tokens
 cp .env.example .env
 # Edit .env with your API keys
 
-# Run the new TestGPT bot
-python slack_agent_testgpt.py
+# Run TestGPT (Slack bot mode)
+python main.py
 ```
 
 ### Example Slack Commands
 ```
+# Basic testing
 @TestGPT test pointblank.club responsive on safari and iphone
 @TestGPT run checkout flow on chrome desktop and ipad under slow network
+
+# Custom instructions (NEW!)
+@TestGPT Test github.com, are you able to view the repositories of SkySingh04?
+@TestGPT Test careers.pointblank.club and check if the job listings load
+
+# Scenario management
 @TestGPT list scenarios
 @TestGPT re-run pointblank responsive test
 ```

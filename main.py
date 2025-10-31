@@ -123,12 +123,41 @@ async def start_slack_bot():
             print(f"❌ Error in run_testgpt_task: {error_details}")
             return f"❌ Error: {str(e)}\n\nPlease try again or rephrase your request."
 
+    # Track processed events to prevent duplicates
+    processed_events = set()
+
     @app.event("app_mention")
     def handle_mention(event, say):
         """Handle when the bot is mentioned in Slack."""
+        import time
+
+        # Get event timestamp
+        event_id = event.get("event_ts") or event.get("ts")
+        event_ts = float(event_id) if event_id else time.time()
+        current_time = time.time()
+
+        # Ignore events older than 5 minutes (300 seconds)
+        # This prevents processing old messages if bot restarts or Slack retries
+        age_seconds = current_time - event_ts
+        if age_seconds > 300:
+            print(f"⚠️  Skipping old event (age: {age_seconds:.1f}s): {event_id}")
+            return
+
+        # Deduplicate events (Slack may retry)
+        if event_id in processed_events:
+            print(f"⚠️  Skipping duplicate event: {event_id}")
+            return
+
+        processed_events.add(event_id)
+        # Keep only last 1000 event IDs to prevent memory leak
+        if len(processed_events) > 1000:
+            processed_events.clear()
+
         channel = event["channel"]
         user_id = event.get("user", "unknown")
         user_text = event.get("text", "")
+
+        print(f"\n📨 Event ID: {event_id}, Age: {age_seconds:.1f}s")
 
         # Extract the actual message (remove the bot mention)
         parts = user_text.split(">", 1)

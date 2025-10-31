@@ -178,6 +178,7 @@ class TestPlan:
     total_cells_to_execute: int
     estimated_duration_minutes: int
     tags: List[str] = field(default_factory=list)
+    user_request: str = ""  # Original user message for custom test instructions
 
 
 # ============================================================================
