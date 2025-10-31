@@ -32,10 +32,14 @@ Transform simple Slack messages into complete cross-browser, cross-device, and c
 - **Actionable next steps** for fixing issues
 - **Evidence collection** (screenshots, console errors)
 
-### Re-run Capability
-- All tests automatically saved
-- Re-run with: `"re-run [scenario name]"`
-- Historical comparison support
+### Test Persistence & Re-run (NEW!)
+- **Test Library**: Save AI-generated tests to database
+- **Configuration Templates**: Reusable test configs (regression, smoke, mobile, etc.)
+- **Re-run with different settings**: Change browser, viewport, network conditions
+- **Execution History**: Track all test runs with detailed results
+- **Batch Execution**: Run multiple tests with same configuration
+- **REST API**: Full backend API for test management
+- **Modern Dashboard**: Next.js UI for test library and execution tracking
 
 ## Quick Start
 
@@ -66,6 +70,22 @@ python main.py
 # Test a GitHub API
 export ANTHROPIC_API_KEY=your_key
 python examples/test_github_repo.py
+```
+
+### Setup Test Persistence & Management (NEW!)
+```bash
+# One-command setup
+bash setup_persistence.sh
+
+# Start backend API server
+bash start_backend.sh
+
+# Start frontend (in another terminal)
+cd frontend && npm run dev
+
+# Access:
+# - API: http://localhost:8000/docs
+# - Frontend: http://localhost:3000/test-library
 ```
 
 ### Example Slack Commands
@@ -370,6 +390,13 @@ cat logs/latest.log | grep "✅ Autonomous execution completed"
 - **Agno** - AI agent framework
 - **Claude Sonnet 4** - AI model
 - **Playwright MCP** - Web automation
+- **FastAPI** - Backend REST API server
+- **SQLAlchemy** - Database ORM
+- **SQLite** - Database storage
+- **Next.js** - Frontend framework
+- **TypeScript** - Type-safe frontend code
+- **Drizzle ORM** - Frontend database access
+- **Tailwind CSS** - UI styling
 - **FastMCP** - Dynamic backend API testing
 - **Model Context Protocol** - Tool integration
 - **Git/GitHub** - Repository management
@@ -377,10 +404,34 @@ cat logs/latest.log | grep "✅ Autonomous execution completed"
 
 ## Documentation
 
-- **[dynamic_backend_testing/README.md](dynamic_backend_testing/README.md)** - Full dynamic testing system docs
-- **[DYNAMIC_SYSTEM_IMPLEMENTATION.md](DYNAMIC_SYSTEM_IMPLEMENTATION.md)** - Architecture and design details
-- **[FINAL_IMPLEMENTATION_SUMMARY.md](FINAL_IMPLEMENTATION_SUMMARY.md)** - Implementation summary
+### Test Persistence & Re-run System
+- **[PERSISTENCE_AND_RERUN_IMPLEMENTATION.md](PERSISTENCE_AND_RERUN_IMPLEMENTATION.md)** - Complete implementation guide for test persistence
+  - Architecture overview
+  - Database schema
+  - API endpoints reference
+  - Frontend components
+  - Configuration file format
+  - Usage examples
+  - Setup instructions
+  - Integration with existing TestGPT
+
+### Other Documentation
 - **[examples/README.md](examples/README.md)** - Example scripts and CI/CD integration
+
+## API Reference
+
+Once the backend is running, access interactive API documentation:
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+Main API endpoints:
+- `POST /api/tests` - Create test suite
+- `GET /api/tests` - List test suites
+- `GET /api/tests/{id}` - Get test details
+- `POST /api/tests/{id}/run` - Execute test
+- `GET /api/configs` - List configuration templates
+- `GET /api/executions` - List test executions
+- `GET /api/statistics` - Get test statistics
 
 ## License
 
