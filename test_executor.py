@@ -127,6 +127,116 @@ class TestExecutor:
 
         return cell_results
 
+    async def execute_backend_api_test(
+        self,
+        repo_url: Optional[str] = None,
+        api_path: Optional[str] = None,
+        app_module: str = "main:app",
+        test_instructions: str = "Run comprehensive API tests"
+    ) -> dict:
+        """
+        Execute backend API testing using dynamic backend testing MCP.
+
+        Args:
+            repo_url: GitHub repository URL to clone and test
+            api_path: Local path to API code
+            app_module: Module path for API (e.g., "main:app")
+            test_instructions: Instructions for what to test
+
+        Returns:
+            dict with test results from backend testing agent
+        """
+        from pathlib import Path
+
+        print(f"\n🧪 Executing backend API test")
+        if repo_url:
+            print(f"   Repository: {repo_url}")
+        elif api_path:
+            print(f"   Local API: {api_path}")
+        print(f"   App module: {app_module}")
+        print(f"   Instructions: {test_instructions}\n")
+
+        started_at = datetime.now()
+
+        try:
+            # Get backend testing MCP tools
+            print("🔌 Connecting to backend testing MCP server...")
+            backend_mcp_tools = await self.mcp_manager.get_backend_mcp_tools(
+                repo_url=repo_url,
+                api_path=Path(api_path) if api_path else None,
+                app_module=app_module
+            )
+
+            # Create agent with backend testing tools
+            print("🤖 Initializing backend testing agent...")
+            backend_agent = Agent(
+                name="BackendAPITestAgent",
+                model=Claude(id="claude-sonnet-4-20250514"),
+                tools=[backend_mcp_tools],
+                debug_mode=True,
+                instructions="""You are a backend API testing agent with access to FastMCP tools.
+
+You can:
+- Test API endpoints (GET, POST, PUT, DELETE)
+- Run CRUD operation tests
+- Execute smoke test suites
+- Verify request/response behavior
+- Check error handling
+- Validate data integrity
+- Generate test reports
+
+Available tools depend on the API being tested. Use list_tools to see what's available.
+
+Be thorough and report clear results.""",
+                markdown=True
+            )
+
+            # Run the test with the agent
+            print(f"🧪 Running backend API tests...")
+            print(f"   Instructions: {test_instructions}\n")
+
+            response = await backend_agent.arun(test_instructions)
+            result_content = response.content if hasattr(response, 'content') else str(response)
+
+            completed_at = datetime.now()
+            duration_ms = int((completed_at - started_at).total_seconds() * 1000)
+
+            print(f"\n✅ Backend API testing completed")
+            print(f"   Duration: {duration_ms}ms\n")
+
+            return {
+                "status": "completed",
+                "started_at": started_at,
+                "completed_at": completed_at,
+                "duration_ms": duration_ms,
+                "result": result_content,
+                "repo_url": repo_url,
+                "api_path": api_path,
+                "app_module": app_module
+            }
+
+        except Exception as e:
+            import traceback
+            error_traceback = traceback.format_exc()
+
+            completed_at = datetime.now()
+            duration_ms = int((completed_at - started_at).total_seconds() * 1000)
+
+            print(f"\n❌ Backend API testing failed")
+            print(f"   Error: {str(e)}\n")
+
+            return {
+                "status": "error",
+                "started_at": started_at,
+                "completed_at": completed_at,
+                "duration_ms": duration_ms,
+                "error": str(e),
+                "error_traceback": error_traceback,
+                "repo_url": repo_url,
+                "api_path": api_path,
+                "app_module": app_module
+            }
+
     async def _initialize_agent(self, mcp_tools):
         """
         Initialize Agno agent with Playwright MCP tools for this specific cell.

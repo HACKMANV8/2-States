@@ -115,6 +115,25 @@ class TestGPTEngine:
 
         # Step 5: Execute tests (if executor available)
         try:
+            # Check if this is a backend API test
+            if parsed_request.is_backend_api_test:
+                print("🧪 Step 4: Executing backend API tests...")
+
+                # Build test instructions from parsed request
+                test_instructions = self._build_backend_test_instructions(parsed_request)
+
+                # Execute backend API test
+                backend_result = await self.executor.execute_backend_api_test(
+                    repo_url=parsed_request.backend_repo_url,
+                    api_path=parsed_request.backend_api_path,
+                    app_module=parsed_request.backend_app_module,
+                    test_instructions=test_instructions
+                )
+
+                # Format backend result as a Slack message and return immediately
+                return self._format_backend_test_slack_summary(backend_result, parsed_request)
+
+            # Regular Playwright testing
             if self.executor:
                 print("▶️  Step 4: Executing test matrix...")
                 cell_results = await self.executor.execute_test_plan(test_plan)
@@ -317,5 +336,97 @@ class TestGPTEngine:
             lines.append(f"  Tags: {', '.join(scenario.get('tags', []))}")
             lines.append(f"  Re-run: \"re-run {scenario['scenario_name'].split(' - ')[0].lower()}\"")
             lines.append("")
+
+        return "\n".join(lines)
+
+    def _build_backend_test_instructions(self, parsed_request) -> str:
+        """
+        Build test instructions for backend API testing from parsed request.
+
+        Args:
+            parsed_request: ParsedSlackRequest with backend test details
+
+        Returns:
+            Test instructions string for the backend testing agent
+        """
+        # Start with base instruction
+        instructions = []
+
+        # Add flows/scenarios if specified
+        if parsed_request.flows:
+            flow_descriptions = ', '.join(parsed_request.flows)
+            instructions.append(f"Test the following API flows: {flow_descriptions}")
+        else:
+            instructions.append("Run comprehensive API tests")
+
+        # Add explicit expectations
+        if parsed_request.explicit_expectations:
+            expectations = '\n'.join(f"- {exp}" for exp in parsed_request.explicit_expectations)
+            instructions.append(f"\nVerify these expectations:\n{expectations}")
+
+        # Add general testing guidelines
+        instructions.append("\nInclude:")
+        instructions.append("1. API health check")
+        instructions.append("2. Test all available endpoints")
+        instructions.append("3. Verify CRUD operations work correctly")
+        instructions.append("4. Check error handling")
+        instructions.append("5. Run smoke tests if available")
+
+        # Use raw message for additional context
+        if parsed_request.raw_message:
+            instructions.append(f"\nOriginal request: {parsed_request.raw_message}")
+
+        return "\n".join(instructions)
+
+    def _format_backend_test_slack_summary(self, backend_result: dict, parsed_request) -> str:
+        """
+        Format backend API test results as a Slack summary message.
+
+        Args:
+            backend_result: Result dict from execute_backend_api_test
+            parsed_request: Original ParsedSlackRequest
+
+        Returns:
+            Formatted Slack message string
+        """
+        lines = []
+
+        # Header
+        if backend_result["status"] == "completed":
+            lines.append("✅ **Backend API Testing Completed**\n")
+        else:
+            lines.append("❌ **Backend API Testing Failed**\n")
+
+        # Test details
+        if backend_result.get("repo_url"):
+            lines.append(f"**Repository:** {backend_result['repo_url']}")
+        elif backend_result.get("api_path"):
+            lines.append(f"**API Path:** {backend_result['api_path']}")
+
+        lines.append(f"**App Module:** {backend_result.get('app_module', 'main:app')}")
+        lines.append(f"**Duration:** {backend_result['duration_ms']}ms\n")
+
+        # Results
+        if backend_result["status"] == "completed":
+            lines.append("**Test Results:**")
+            lines.append("```")
+            lines.append(backend_result["result"])
+            lines.append("```\n")
+        else:
+            lines.append("**Error:**")
+            lines.append("```")
+            lines.append(backend_result.get("error", "Unknown error"))
+            lines.append("```\n")
+
+            if backend_result.get("error_traceback"):
+                lines.append("**Traceback:**")
+                lines.append("```")
+                lines.append(backend_result["error_traceback"])
+                lines.append("```\n")
+
+        # Footer
+        lines.append("---")
+        lines.append(f"🤖 *TestGPT Backend API Testing*")
+        lines.append(f"⏱️  *Completed at:* {backend_result['completed_at'].strftime('%Y-%m-%d %H:%M:%S')}")
 
         return "\n".join(lines)

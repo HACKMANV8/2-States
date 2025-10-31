@@ -370,3 +370,8 @@ class ParsedSlackRequest:
     is_rerun: bool = False
     rerun_scenario_reference: Optional[str] = None
     raw_message: str = ""
+    # Backend API testing fields
+    is_backend_api_test: bool = False
+    backend_repo_url: Optional[str] = None
+    backend_api_path: Optional[str] = None
+    backend_app_module: str = "main:app"

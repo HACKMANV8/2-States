@@ -37,6 +37,11 @@ class SlackRequestParser:
             r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+[^\s]*'
         )
 
+        # GitHub URL pattern
+        self.github_url_pattern = re.compile(
+            r'https?://github\.com/([\w-]+)/([\w-]+)'
+        )
+
         # Initialize Claude parser if available and requested
         self.use_claude_parser = use_claude_parser and CLAUDE_PARSER_AVAILABLE
         if self.use_claude_parser:
@@ -116,6 +121,22 @@ class SlackRequestParser:
         # Extract explicit expectations
         expectations = self._extract_expectations(message)
 
+        # Detect backend API testing
+        is_backend_test = self._detect_backend_api_test(message)
+        backend_repo_url = None
+        backend_app_module = "main:app"
+
+        if is_backend_test:
+            # Extract GitHub URL if present
+            backend_repo_url = self._extract_github_url(message)
+            # Extract app module if specified
+            backend_app_module = self._extract_app_module(message)
+
+            print(f"   🔍 Detected backend API testing request")
+            if backend_repo_url:
+                print(f"      Repository: {backend_repo_url}")
+            print(f"      App module: {backend_app_module}")
+
         return ParsedSlackRequest(
             target_urls=urls if urls else ["https://pointblank.club"],
             flows=flows,
@@ -125,7 +146,10 @@ class SlackRequestParser:
             explicit_expectations=expectations,
             is_rerun=is_rerun,
             rerun_scenario_reference=rerun_ref,
-            raw_message=message
+            raw_message=message,
+            is_backend_api_test=is_backend_test,
+            backend_repo_url=backend_repo_url,
+            backend_app_module=backend_app_module
         )
 
     def _detect_rerun(self, message: str) -> tuple[bool, Optional[str]]:
@@ -277,6 +301,90 @@ class SlackRequestParser:
                 expectations.append(expectation)
 
         return expectations
+
+    def _detect_backend_api_test(self, message: str) -> bool:
+        """
+        Detect if this is a backend API testing request.
+
+        Indicators:
+        - GitHub URL mentioned
+        - API-related keywords (api, endpoint, backend, server, rest)
+        - Test keywords combined with API keywords
+        """
+        message_lower = message.lower()
+
+        # Check for GitHub URL
+        if self.github_url_pattern.search(message):
+            return True
+
+        # API-related keywords
+        api_keywords = [
+            "api", "endpoint", "backend", "server", "rest api",
+            "fastapi", "flask", "django", "express", "graphql",
+            "http", "crud", "database", "auth api"
+        ]
+
+        # Test + API combinations
+        test_api_patterns = [
+            r"test\s+(the\s+)?api",
+            r"test\s+(the\s+)?backend",
+            r"test\s+(the\s+)?endpoints?",
+            r"api\s+test",
+            r"backend\s+test",
+            r"test.*endpoints?",
+        ]
+
+        # Check for explicit patterns
+        for pattern in test_api_patterns:
+            if re.search(pattern, message_lower):
+                return True
+
+        # Check for API keywords
+        for keyword in api_keywords:
+            if keyword in message_lower:
+                # If API keyword + test/check/verify, it's likely a backend test
+                if any(action in message_lower for action in ["test", "check", "verify", "run"]):
+                    return True
+
+        return False
+
+    def _extract_github_url(self, message: str) -> Optional[str]:
+        """Extract GitHub repository URL from message."""
+        # Handle Slack-formatted URLs: <http://github.com/user/repo|github.com/user/repo>
+        slack_github_pattern = re.compile(r'<(https?://github\.com/[\w-]+/[\w-]+)(?:\|[^>]+)?>')
+        slack_match = slack_github_pattern.search(message)
+
+        if slack_match:
+            return slack_match.group(1)
+
+        # Standard GitHub URL
+        match = self.github_url_pattern.search(message)
+        if match:
+            return match.group(0)
+
+        return None
+
+    def _extract_app_module(self, message: str) -> str:
+        """
+        Extract app module path from message.
+
+        Examples:
+        - "app module is server:app" → "server:app"
+        - "use main.py" → "main:app"
+        """
+        # Look for explicit module specification
+        module_patterns = [
+            r"(?:app\s+)?module\s+(?:is\s+)?([a-zA-Z_][a-zA-Z0-9_]*:[a-zA-Z_][a-zA-Z0-9_]*)",
+            r"app\s*=\s*([a-zA-Z_][a-zA-Z0-9_]*:[a-zA-Z_][a-zA-Z0-9_]*)",
+        ]
+
+        for pattern in module_patterns:
+            match = re.search(pattern, message.lower())
+            if match:
+                return match.group(1)
+
+        # Default
+        return "main:app"
 
     def should_create_matrix(self, parsed: ParsedSlackRequest) -> bool:
         """
