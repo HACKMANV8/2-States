@@ -32,10 +32,14 @@ export default function RunTestPage({
   const [running, setRunning] = useState(false);
 
   useEffect(() => {
-    loadData();
+    if (testId) {
+      loadData();
+    }
   }, [testId]);
 
   const loadData = async () => {
+    if (!testId) return;
+
     try {
       const [suite, configList] = await Promise.all([
         apiClient.getTestSuite(testId),

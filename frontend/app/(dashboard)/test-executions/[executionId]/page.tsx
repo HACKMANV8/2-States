@@ -80,7 +80,7 @@ export default async function TestExecutionDetailPage({
       .limit(1);
   }
 
-  const statusCfg = statusConfig[execution.status];
+  const statusCfg = statusConfig[execution.status] || statusConfig.pending;
   const StatusIcon = statusCfg.icon;
 
   return (
