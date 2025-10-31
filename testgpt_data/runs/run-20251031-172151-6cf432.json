@@ -1,0 +1,91 @@
+{
+  "run_id": "run-20251031-172151-6cf432",
+  "test_plan_id": "plan-0c57946c8b1f",
+  "scenario_id": "scenario-pointblank-club-signup-131",
+  "scenario_name": "Pointblank.Club - Signup - Cross-Browser Test",
+  "target_url": "http://pointblank.club",
+  "triggered_by": "U09QJMKUB7A",
+  "triggered_at": "2025-10-31T17:21:51.793820",
+  "started_at": "2025-10-31T17:21:51.793820",
+  "completed_at": "2025-10-31T17:21:51.793842",
+  "duration_total_seconds": 0,
+  "overall_status": "FAIL",
+  "total_cells": 3,
+  "passed_cells": 0,
+  "failed_cells": 0,
+  "timed_out_cells": 0,
+  "environment_summary": {
+    "viewports_tested": [
+      "desktop-standard"
+    ],
+    "browsers_tested": [
+      "chromium-desktop",
+      "webkit-desktop",
+      "webkit-ios"
+    ],
+    "networks_tested": [
+      "normal"
+    ]
+  },
+  "cell_results": [
+    {
+      "cell_id": "recruitment/signup-r_desktop-standard_chromium-desktop_normal_20251031-172151",
+      "viewport": "desktop-standard",
+      "browser": "chromium-desktop",
+      "network": "normal",
+      "status": "ERROR",
+      "started_at": "2025-10-31T17:21:51.793820",
+      "completed_at": "2025-10-31T17:21:51.793820",
+      "duration_ms": 0,
+      "step_results": [],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": "Cell execution error: 'ViewportProfile' object has no attribute 'display_name'",
+      "failure_priority": "P0"
+    },
+    {
+      "cell_id": "recruitment/signup-r_desktop-standard_webkit-desktop_normal_20251031-172151",
+      "viewport": "desktop-standard",
+      "browser": "webkit-desktop",
+      "network": "normal",
+      "status": "ERROR",
+      "started_at": "2025-10-31T17:21:51.793835",
+      "completed_at": "2025-10-31T17:21:51.793835",
+      "duration_ms": 0,
+      "step_results": [],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": "Cell execution error: 'ViewportProfile' object has no attribute 'display_name'",
+      "failure_priority": "P0"
+    },
+    {
+      "cell_id": "recruitment/signup-r_desktop-standard_webkit-ios_normal_20251031-172151",
+      "viewport": "desktop-standard",
+      "browser": "webkit-ios",
+      "network": "normal",
+      "status": "ERROR",
+      "started_at": "2025-10-31T17:21:51.793842",
+      "completed_at": "2025-10-31T17:21:51.793842",
+      "duration_ms": 0,
+      "step_results": [],
+      "screenshots": [],
+      "console_errors": [],
+      "network_requests": [],
+      "failure_summary": "Cell execution error: 'ViewportProfile' object has no attribute 'display_name'",
+      "failure_priority": "P0"
+    }
+  ],
+  "failures_by_priority": {
+    "P0": [
+      "recruitment/signup-r_desktop-standard_chromium-desktop_normal_20251031-172151",
+      "recruitment/signup-r_desktop-standard_webkit-desktop_normal_20251031-172151",
+      "recruitment/signup-r_desktop-standard_webkit-ios_normal_20251031-172151"
+    ],
+    "P1": [],
+    "P2": []
+  },
+  "artifacts_storage_path": "s3://testgpt-artifacts/run-20251031-172151-6cf432/",
+  "comparison_to_previous_run": null
+}

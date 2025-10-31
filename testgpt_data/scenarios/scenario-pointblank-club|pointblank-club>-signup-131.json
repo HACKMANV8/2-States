@@ -1,0 +1,70 @@
+{
+  "scenario_id": "scenario-pointblank-club|pointblank-club>-signup-131",
+  "scenario_name": "Pointblank.Club|Pointblank.Club> - Signup - Cross-Browser Test",
+  "target_url": "http://pointblank.club|pointblank.club>",
+  "created_at": "2025-10-31T15:55:30.803415",
+  "created_by": "U09QJMKUB7A",
+  "last_run_at": "2025-10-31T15:55:30.804986",
+  "flows": [
+    {
+      "flow_name": "Landing Page Load and Hero CTA Visibility",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "navigate",
+          "target": "https://pointblank.club",
+          "expected_outcome": "Page loads with status 200 within 10 seconds",
+          "timeout_seconds": 10,
+          "value": null
+        },
+        {
+          "step_number": 2,
+          "action": "wait_for_selector",
+          "target": "body",
+          "expected_outcome": "Page body renders within 5 seconds",
+          "timeout_seconds": 5,
+          "value": null
+        },
+        {
+          "step_number": 3,
+          "action": "assert_in_viewport",
+          "target": "button, a[class*='cta'], a[class*='btn']",
+          "expected_outcome": "Primary CTA button is visible in viewport without scrolling",
+          "timeout_seconds": 3,
+          "value": null
+        },
+        {
+          "step_number": 4,
+          "action": "screenshot",
+          "target": "hero-section-loaded",
+          "expected_outcome": "Screenshot captured for visual evidence",
+          "timeout_seconds": 2,
+          "value": null
+        }
+      ]
+    }
+  ],
+  "steps": [],
+  "environment_matrix": {
+    "viewports": [
+      "desktop-standard"
+    ],
+    "browsers": [
+      "chromium-desktop",
+      "webkit-ios",
+      "webkit-desktop"
+    ],
+    "networks": [
+      "normal"
+    ]
+  },
+  "tags": [
+    "pointblank.club|pointblank.club>",
+    "signup",
+    "cross-browser",
+    "pointblank",
+    "demo",
+    "safari"
+  ],
+  "preconditions": {}
+}
