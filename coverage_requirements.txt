@@ -1,0 +1,17 @@
+# TestGPT Coverage System - Python Requirements
+# Install with: pip install -r coverage_requirements.txt
+
+# Core dependencies
+sqlalchemy>=1.4.0,<2.0.0  # Database ORM
+# astor>=0.8.1            # Python AST code generation (optional - Python 3.9+ has ast.unparse built-in)
+
+# Optional but recommended
+typing-extensions>=4.0.0  # Type hints support
+
+# For development/testing
+pytest>=7.0.0            # Testing framework
+pytest-asyncio>=0.21.0   # Async test support
+
+# Note: The following are planned for future phases
+# babel>=2.10.0          # JavaScript instrumentation (Phase 2)
+# coverage>=6.5.0        # Python coverage hooks (Phase 2)
