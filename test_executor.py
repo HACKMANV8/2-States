@@ -480,21 +480,21 @@ Expected outcomes:
         """
         step_results = []
 
-        # Simple heuristic: if agent report contains error keywords, mark as failed
         output_lower = agent_output.lower()
-        has_errors = any(keyword in output_lower for keyword in [
-            "error", "failed", "could not", "unable to", "cannot", "timeout",
-            "not found", "exception", "crashed"
-        ])
 
-        # Check for success indicators
-        has_success = any(keyword in output_lower for keyword in [
-            "successfully", "completed", "verified", "confirmed", "passed",
-            "loaded", "clicked", "filled", "visible", "screenshot captured"
-        ])
-
-        # Determine overall outcome
-        overall_passed = has_success and not has_errors
+        # Check for explicit test status from agent
+        if "test status:" in output_lower:
+            # Agent explicitly declared test status
+            if "✅ passed" in output_lower or "passed" in output_lower.split("test status:")[-1]:
+                overall_passed = True
+            elif "❌ failed" in output_lower or "failed" in output_lower.split("test status:")[-1]:
+                overall_passed = False
+            else:
+                # Fallback to heuristic
+                overall_passed = self._heuristic_success_detection(output_lower)
+        else:
+            # Use heuristic if no explicit status
+            overall_passed = self._heuristic_success_detection(output_lower)
 
         # Create step results based on original expected steps
         for i, step in enumerate(cell.steps, 1):
@@ -529,6 +529,34 @@ Expected outcomes:
             ))
 
         return step_results
+
+    def _heuristic_success_detection(self, output_lower: str) -> bool:
+        """
+        Detect if test succeeded based on heuristics.
+
+        More sophisticated than simple keyword matching - looks for actual failures
+        vs mentions of avoiding errors.
+        """
+        # Check for success indicators
+        has_success = any(keyword in output_lower for keyword in [
+            "successfully", "completed", "verified", "confirmed",
+            "loaded", "clicked", "filled", "visible", "screenshot captured",
+            "test execution completed", "all objectives", "all test objectives"
+        ])
+
+        # Check for ACTUAL failure indicators (not just mentions of "error")
+        # Only flag as error if the agent reports actual problems
+        failure_patterns = [
+            "failed to", "could not", "unable to", "cannot find",
+            "timeout occurred", "exception occurred", "crashed",
+            "test failed", "execution failed", "blocked",
+            "did not work", "does not work", "broken"
+        ]
+
+        has_actual_failures = any(pattern in output_lower for pattern in failure_patterns)
+
+        # Overall passed if has success indicators and no actual failures
+        return has_success and not has_actual_failures
 
     def _check_step_mentioned_in_output(self, step: 'TestStep', output: str) -> bool:
         """Check if agent's output mentions executing this step."""
