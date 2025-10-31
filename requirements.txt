@@ -4,3 +4,4 @@ agno
 mcp
 anthropic
 filetype
+streamlit
