@@ -366,24 +366,24 @@ class SlackRequestParser:
         Detect if this is a backend API testing request.
 
         Indicators:
-        - GitHub URL mentioned
-        - API-related keywords (api, endpoint, backend, server, rest)
-        - Test keywords combined with API keywords
+        - GitHub URL mentioned (for repo testing)
+        - Explicit API test patterns ("test the api", "test backend", etc.)
+        - API keywords NOT in URLs combined with test actions
         """
         message_lower = message.lower()
 
-        # Check for GitHub URL
+        # Remove URLs from detection to avoid false positives with "http" in URLs
+        # Strip out <url|text> Slack format and regular URLs
+        message_without_urls = re.sub(r'<https?://[^>]+>', '', message_lower)
+        message_without_urls = re.sub(r'https?://\S+', '', message_without_urls)
+
+        # Check for GitHub URL (repo testing)
         if self.github_url_pattern.search(message):
-            return True
+            # Only if it's explicitly an API test request
+            if any(keyword in message_without_urls for keyword in ["api", "backend", "endpoint"]):
+                return True
 
-        # API-related keywords
-        api_keywords = [
-            "api", "endpoint", "backend", "server", "rest api",
-            "fastapi", "flask", "django", "express", "graphql",
-            "http", "crud", "database", "auth api"
-        ]
-
-        # Test + API combinations
+        # Test + API combinations (explicit patterns)
         test_api_patterns = [
             r"test\s+(the\s+)?api",
             r"test\s+(the\s+)?backend",
@@ -393,16 +393,22 @@ class SlackRequestParser:
             r"test.*endpoints?",
         ]
 
-        # Check for explicit patterns
+        # Check for explicit patterns (in message without URLs)
         for pattern in test_api_patterns:
-            if re.search(pattern, message_lower):
+            if re.search(pattern, message_without_urls):
                 return True
 
-        # Check for API keywords
-        for keyword in api_keywords:
-            if keyword in message_lower:
+        # API-specific keywords (excluding generic ones like "http", "server")
+        api_specific_keywords = [
+            "api", "endpoint", "rest api", "fastapi", "flask",
+            "django", "express", "graphql", "crud", "auth api"
+        ]
+
+        # Check for API-specific keywords (NOT in URLs)
+        for keyword in api_specific_keywords:
+            if keyword in message_without_urls:
                 # If API keyword + test/check/verify, it's likely a backend test
-                if any(action in message_lower for action in ["test", "check", "verify", "run"]):
+                if any(action in message_without_urls for action in ["test", "check", "verify", "run"]):
                     return True
 
         return False
