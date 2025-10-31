@@ -506,20 +506,25 @@ Expected outcomes:
             "test status:",
             "test outcome:",
             "final status:",
-            "overall status:"
+            "overall status:",
+            "test results:",
+            "test verdict:",
+            "test result:"
         ]
 
         explicit_status_found = False
+        overall_passed = False  # Default to false
+
         for indicator in status_indicators:
             if indicator in output_lower:
                 # Agent explicitly declared test status
                 status_section = output_lower.split(indicator)[-1][:100]  # Look at next 100 chars after indicator
 
-                if "✅ passed" in output_lower or "passed" in status_section:
+                if "passed" in status_section or "✅" in status_section or "pass" in status_section:
                     overall_passed = True
                     explicit_status_found = True
                     break
-                elif "❌ failed" in output_lower or "failed" in status_section:
+                elif "failed" in status_section or "❌" in status_section or "fail" in status_section:
                     overall_passed = False
                     explicit_status_found = True
                     break
@@ -528,26 +533,9 @@ Expected outcomes:
             # Use heuristic if no explicit status
             overall_passed = self._heuristic_success_detection(output_lower)
 
-        # Create step results based on original expected steps
-        for i, step in enumerate(cell.steps, 1):
-            # Try to find evidence of this step in agent output
-            step_executed = self._check_step_mentioned_in_output(step, agent_output)
-
-            step_result = StepResult(
-                step_number=i,
-                action=step.action.value,
-                target=step.target,
-                expected_outcome=step.expected_outcome,
-                actual_outcome=f"Agent executed autonomously. Report: {agent_output[:200]}..." if len(agent_output) > 200 else agent_output,
-                passed=overall_passed if step_executed else False,
-                timestamp=flow_start,
-                error_message=None if overall_passed else "Check agent report for details",
-                duration_ms=int((datetime.now() - flow_start).total_seconds() * 1000)
-            )
-            step_results.append(step_result)
-
-        # If no steps defined, create one result for the whole flow
-        if not step_results:
+        # If explicit status found or no predefined steps, create single result for whole flow
+        # This handles custom user requests better
+        if explicit_status_found or not cell.steps:
             step_results.append(StepResult(
                 step_number=1,
                 action="autonomous_flow",
@@ -559,6 +547,25 @@ Expected outcomes:
                 error_message=None if overall_passed else "Flow execution encountered issues",
                 duration_ms=int((datetime.now() - flow_start).total_seconds() * 1000)
             ))
+        else:
+            # Create step results based on original expected steps
+            # Only used when no explicit status and we have predefined steps
+            for i, step in enumerate(cell.steps, 1):
+                # Try to find evidence of this step in agent output
+                step_executed = self._check_step_mentioned_in_output(step, agent_output)
+
+                step_result = StepResult(
+                    step_number=i,
+                    action=step.action.value,
+                    target=step.target,
+                    expected_outcome=step.expected_outcome,
+                    actual_outcome=f"Agent executed autonomously. Report: {agent_output[:200]}..." if len(agent_output) > 200 else agent_output,
+                    passed=overall_passed if step_executed else False,
+                    timestamp=flow_start,
+                    error_message=None if overall_passed else "Check agent report for details",
+                    duration_ms=int((datetime.now() - flow_start).total_seconds() * 1000)
+                )
+                step_results.append(step_result)
 
         return step_results
 
