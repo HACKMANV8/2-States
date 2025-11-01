@@ -397,7 +397,38 @@ class PRTestOrchestrator:
         if test_execution_result:
             passed = test_execution_result.get("passed_count", 0)
             total = test_execution_result.get("total_count", 0)
-            lines.append(f"**Test Results:** {passed}/{total} scenarios passed")
+            overall_status = test_execution_result.get("overall_status", "UNKNOWN")
+
+            status_emoji = "✅" if overall_status == "PASS" else "❌"
+            lines.append(f"{status_emoji} **Test Results:** {passed}/{total} scenarios passed")
+
+            # Add coverage information if available
+            if test_execution_result.get("coverage_enabled"):
+                coverage_pct = test_execution_result.get("coverage_percentage", 0)
+                lines.append(f"📊 **Code Coverage:** {coverage_pct:.1f}% of changed lines")
+
+                # Link to HTML report if available
+                if test_execution_result.get("coverage_html_path"):
+                    html_path = test_execution_result["coverage_html_path"]
+                    lines.append(f"📄 **Detailed Report:** `{html_path}`")
+
+            # Show brief test summary from agent
+            if test_execution_result.get("agent_response"):
+                agent_summary = test_execution_result["agent_response"]
+
+                # Extract just the summary section if present
+                if "## Summary" in agent_summary or "## Final" in agent_summary:
+                    # Try to extract summary section
+                    summary_start = agent_summary.find("## Summary")
+                    if summary_start == -1:
+                        summary_start = agent_summary.find("## Final")
+
+                    if summary_start != -1:
+                        # Get next 500 characters after summary header
+                        summary_text = agent_summary[summary_start:summary_start+500]
+                        lines.append("")
+                        lines.append("**Test Summary:**")
+                        lines.append(f"_{summary_text[:300]}..._")
 
             if test_execution_result.get("failures"):
                 lines.append("")

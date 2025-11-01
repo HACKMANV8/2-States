@@ -24,6 +24,9 @@ interface PRTestResult {
   github_comment_posted: boolean;
   github_comment_url: string | null;
   slack_message_posted: boolean;
+  coverage_enabled: boolean;
+  coverage_percentage: number | null;
+  coverage_html_path: string | null;
   started_at: string;
   completed_at: string | null;
   created_at: string;

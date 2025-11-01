@@ -7,12 +7,14 @@ configuration, and execution.
 
 from fastapi import FastAPI, Depends, HTTPException, Query, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, HTMLResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
 import sys
 import os
 import asyncio
 from dotenv import load_dotenv
+from pathlib import Path
 
 # Load environment variables
 load_dotenv()
@@ -514,6 +516,49 @@ def get_statistics(db: Session = Depends(get_db)):
     """Get overall testing statistics"""
     stats = crud.get_statistics(db)
     return stats
+
+
+# ============================================================================
+# COVERAGE REPORT DOWNLOAD
+# ============================================================================
+
+@app.get("/api/coverage/report/{run_id}")
+def download_coverage_report(run_id: str):
+    """
+    Download coverage HTML report for a specific test run.
+
+    Args:
+        run_id: Test run ID (coverage-{run_id}.html)
+
+    Returns:
+        HTML file response
+
+    Raises:
+        HTTPException: If report file not found
+    """
+    # Coverage reports are stored in the root directory's coverage_reports folder
+    project_root = Path(__file__).parent.parent.parent
+    coverage_reports_dir = project_root / "coverage_reports"
+
+    # Support both formats: "coverage-{run_id}.html" and just "{run_id}"
+    if run_id.startswith("coverage-"):
+        filename = f"{run_id}.html"
+    else:
+        filename = f"coverage-{run_id}.html"
+
+    report_path = coverage_reports_dir / filename
+
+    if not report_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=f"Coverage report not found: {filename}"
+        )
+
+    return FileResponse(
+        path=str(report_path),
+        media_type="text/html",
+        filename=filename
+    )
 
 
 # ============================================================================

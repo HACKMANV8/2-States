@@ -71,6 +71,10 @@ def create_pr_test_run(db: Session, pr_test_data: Dict[str, Any]) -> PRTestRun:
         custom_instructions=pr_test_data.get("custom_instructions"),
         github_api_calls=pr_test_data.get("github_api_calls", 0),
         total_processing_time_ms=pr_test_data.get("total_processing_time_ms"),
+        coverage_enabled=pr_test_data.get("coverage_enabled", False),
+        coverage_percentage=pr_test_data.get("coverage_percentage"),
+        coverage_html_path=pr_test_data.get("coverage_html_path"),
+        coverage_report_data=pr_test_data.get("coverage_report"),
     )
 
     db.add(pr_test)

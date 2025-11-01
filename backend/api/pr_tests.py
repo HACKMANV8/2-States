@@ -50,6 +50,9 @@ class PRTestRunResponse(BaseModel):
     github_comment_posted: bool
     github_comment_url: Optional[str]
     slack_message_posted: bool
+    coverage_enabled: bool
+    coverage_percentage: Optional[float]
+    coverage_html_path: Optional[str]
     started_at: Optional[datetime]
     completed_at: Optional[datetime]
     created_at: datetime
@@ -113,6 +116,9 @@ class PRTestDetailResponse(BaseModel):
     github_comment_posted: bool
     github_comment_url: Optional[str]
     slack_message_posted: bool
+    coverage_enabled: bool
+    coverage_percentage: Optional[float]
+    coverage_html_path: Optional[str]
     triggered_by: str
     triggered_by_user: Optional[str]
     custom_instructions: Optional[str]

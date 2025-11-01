@@ -233,6 +233,12 @@ class PRTestRun(Base):
     github_api_calls = Column(Integer)
     total_processing_time_ms = Column(Integer)
 
+    # Coverage Information
+    coverage_enabled = Column(Boolean, default=False)
+    coverage_percentage = Column(Float)
+    coverage_html_path = Column(String)
+    coverage_report_data = Column(JSON)  # Full coverage report
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

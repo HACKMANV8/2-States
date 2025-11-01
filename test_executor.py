@@ -30,16 +30,22 @@ class TestExecutor:
     detailed results for each step, screenshot, and error.
     """
 
-    def __init__(self, mcp_tools=None):
+    def __init__(self, mcp_tools=None, coverage_enabled=False, coverage_orchestrator=None):
         """
         Initialize executor.
 
         Args:
             mcp_tools: (Deprecated) Legacy single MCP connection - no longer used
+            coverage_enabled: Whether to track code coverage during testing
+            coverage_orchestrator: CoverageOrchestrator instance for tracking coverage
         """
         # Use dynamic MCP manager instead of single connection
         self.mcp_manager = get_mcp_manager()
         self.agent = None
+
+        # Coverage support
+        self.coverage_enabled = coverage_enabled
+        self.coverage_orchestrator = coverage_orchestrator
 
         # Setup file logging
         self.log_file = None
@@ -161,7 +167,14 @@ class TestExecutor:
         """
         print(f"\n🎯 Executing test plan: {test_plan.scenario_name}")
         print(f"   Total cells to execute: {test_plan.total_cells_to_execute}")
-        print(f"   Estimated duration: {test_plan.estimated_duration_minutes} minutes\n")
+        print(f"   Estimated duration: {test_plan.estimated_duration_minutes} minutes")
+
+        # Start coverage tracking if enabled
+        if self.coverage_enabled and self.coverage_orchestrator:
+            print(f"   📊 Coverage tracking: ENABLED\n")
+            await self.coverage_orchestrator.start_coverage()
+        else:
+            print()
 
         cell_results = []
 
@@ -174,7 +187,27 @@ class TestExecutor:
                 cell_results.append(result)
 
                 status_emoji = "✅" if result.status == TestStatus.PASS else "❌"
-                print(f"{status_emoji} Cell completed: {result.status.value}\n")
+                print(f"{status_emoji} Cell completed: {result.status.value}")
+
+                # Record coverage after each test
+                if self.coverage_enabled and self.coverage_orchestrator:
+                    await self.coverage_orchestrator.record_test_execution(
+                        test_id=cell.cell_id,
+                        test_name=cell.cell_id,
+                        execution_time_ms=result.duration_ms
+                    )
+
+                    # Check if we should stop testing early
+                    decision = await self.coverage_orchestrator.should_stop_testing()
+                    if decision.should_stop:
+                        print(f"\n🛑 COVERAGE STOP DECISION: {decision.reason}")
+                        print(f"   Confidence: {decision.confidence_score:.0%}")
+                        print(f"   Tests executed: {i}/{len(test_plan.matrix_cells)}")
+                        print(f"   Coverage achieved: {self.coverage_orchestrator._calculate_current_coverage():.1f}%")
+                        print(f"   ⚡️ Stopping early to save time!\n")
+                        break
+
+                print()
 
             except Exception as e:
                 print(f"❌ Cell execution failed with error: {str(e)}\n")

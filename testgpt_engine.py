@@ -23,6 +23,9 @@ from persistence import PersistenceLayer
 from models import RunArtifact, TestPlan, TestStatus
 from mcp_manager import get_mcp_manager
 
+# Import coverage system
+from coverage import CoverageOrchestrator, CoverageConfig
+
 # Import database persistence
 from sqlalchemy.orm import Session
 from backend.database import SessionLocal, TestSuite
@@ -59,6 +62,9 @@ class TestGPTEngine:
         self.persistence = PersistenceLayer(storage_dir)
         self.mcp_manager = get_mcp_manager()
 
+        # Store original message for coverage detection
+        self.original_message = ""
+
     async def process_test_request(
         self,
         slack_message: str,
@@ -88,6 +94,9 @@ class TestGPTEngine:
         print("=" * 70)
         print(f"Message: {slack_message}")
         print(f"User: {user_id}\n")
+
+        # Store original message for coverage detection
+        self.original_message = slack_message
 
         # Step 1: Parse request
         print("📋 Step 1: Parsing Slack request...")
@@ -643,6 +652,20 @@ class TestGPTEngine:
         from agno.tools.mcp import MCPTools
         from datetime import datetime
 
+        # Detect if coverage tracking is requested
+        coverage_enabled = ("with coverage" in self.original_message.lower() or
+                          "coverage" in self.original_message.lower())
+
+        coverage_orchestrator = None
+        if coverage_enabled:
+            print(f"   📊 Coverage tracking ENABLED")
+            config = CoverageConfig.default()
+            coverage_orchestrator = CoverageOrchestrator(
+                pr_url=pr_context.get("pr_url", ""),
+                config=config.to_dict()
+            )
+            await coverage_orchestrator.start_coverage()
+
         try:
             # Get MCP manager and create instance for this test
             print(f"   🔧 Starting Playwright MCP instance...")
@@ -686,25 +709,68 @@ class TestGPTEngine:
             print(f"   ✅ Test execution completed ({duration_ms}ms)")
 
             # Parse results from agent response
-            response_text = str(response)
+            # Extract only the final content from the agent's response, not the entire debug log
+            if hasattr(response, 'content'):
+                response_text = str(response.content)
+            elif hasattr(response, 'messages') and len(response.messages) > 0:
+                # Get the last assistant message
+                last_message = response.messages[-1]
+                response_text = str(last_message.content) if hasattr(last_message, 'content') else str(last_message)
+            else:
+                response_text = str(response)
 
             # Simple pass/fail detection
             test_passed = any(indicator in response_text.lower() for indicator in [
                 "all tests passed",
                 "all scenarios passed",
                 "✅",
-                "success"
+                "success",
+                "passed",
+                "deployment approved"
             ])
 
             test_failed = any(indicator in response_text.lower() for indicator in [
                 "failed",
                 "error",
                 "❌",
-                "failure"
-            ])
+                "failure",
+                "critical"
+            ]) and not test_passed  # Don't count as failed if also passed
 
             # Count scenarios (rough estimate from response)
             scenario_count = len(pr_context.get("test_context", {}).get("test_scenarios", []))
+
+            # Record coverage if enabled
+            coverage_report_data = None
+            coverage_html_path = None
+            if coverage_enabled and coverage_orchestrator:
+                print(f"   📊 Recording coverage data...")
+                await coverage_orchestrator.record_test_execution(
+                    test_id=f"pr-test-{pr_context.get('test_run_id', 'unknown')}",
+                    test_name=f"PR Test: {pr_context.get('pr_url', 'unknown')}",
+                    execution_time_ms=duration_ms
+                )
+
+                # Generate coverage reports
+                print(f"   📈 Generating coverage reports...")
+                summary_report = await coverage_orchestrator.generate_report("summary")
+                html_report = await coverage_orchestrator.generate_report("html")
+                coverage_report_data = summary_report.report_data
+
+                # Save HTML report to file
+                import os
+                reports_dir = os.path.join(os.getcwd(), "coverage_reports")
+                os.makedirs(reports_dir, exist_ok=True)
+
+                run_id = coverage_orchestrator.run.run_id if hasattr(coverage_orchestrator, 'run') and coverage_orchestrator.run else pr_context.get('test_run_id', 'unknown')
+                html_filename = f"coverage-{run_id}.html"
+                coverage_html_path = os.path.join(reports_dir, html_filename)
+
+                with open(coverage_html_path, 'w') as f:
+                    f.write(html_report.report_data)
+
+                print(f"   📄 HTML report saved: {coverage_html_path}")
+                print(f"   ✅ Coverage: {coverage_orchestrator._calculate_current_coverage():.1f}%")
 
             # Cleanup MCP with proper error handling
             try:
@@ -718,7 +784,22 @@ class TestGPTEngine:
             except Exception as e:
                 print(f"   ⚠️  MCP cleanup error: {e}")
 
-            return {
+            # Extract clean summary from agent response
+            agent_summary = response_text[:1500]  # Limit to 1500 chars
+
+            # Try to extract just the summary/verdict section
+            if "## Summary" in response_text:
+                summary_start = response_text.find("## Summary")
+                summary_end = response_text.find("##", summary_start + 12)  # Find next section
+                if summary_end > summary_start:
+                    agent_summary = response_text[summary_start:summary_end]
+                else:
+                    agent_summary = response_text[summary_start:summary_start+1000]
+            elif "## Final Verdict" in response_text:
+                verdict_start = response_text.find("## Final Verdict")
+                agent_summary = response_text[verdict_start:verdict_start+1000]
+
+            result = {
                 "success": True,
                 "test_run_id": pr_context.get("test_run_id"),
                 "deployment_url": deployment_url,
@@ -726,13 +807,23 @@ class TestGPTEngine:
                 "passed_count": scenario_count if test_passed else 0,
                 "total_count": scenario_count,
                 "duration_ms": duration_ms,
-                "agent_response": response_text[:2000],  # Truncate for summary
+                "agent_response": agent_summary,  # Clean summary only
+                "agent_response_full": response_text,  # Store full response separately (not sent to Slack)
                 "scenario_results": self._parse_scenario_results(response_text, pr_context),
                 "failures": self._extract_failures(response_text) if test_failed else [],
                 "console_errors": [],
                 "started_at": start_time,
                 "completed_at": end_time
             }
+
+            # Add coverage data if available
+            if coverage_enabled and coverage_report_data:
+                result["coverage_enabled"] = True
+                result["coverage_report"] = coverage_report_data
+                result["coverage_percentage"] = coverage_orchestrator._calculate_current_coverage()
+                result["coverage_html_path"] = coverage_html_path
+
+            return result
 
         except Exception as e:
             import traceback
@@ -943,7 +1034,7 @@ class TestGPTEngine:
             status_map = {
                 TestStatus.PASS: "passed",
                 TestStatus.FAIL: "failed",
-                TestStatus.TIMED_OUT: "failed"
+                TestStatus.TIMEOUT: "failed"
             }
             status = status_map.get(run_artifact.overall_status, "failed")
 
