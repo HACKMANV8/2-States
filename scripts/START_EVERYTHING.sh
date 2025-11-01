@@ -14,6 +14,16 @@ if [ -f "../.env" ]; then
     export $(cat ../.env | grep GITHUB_TOKEN | xargs)
 fi
 
+# Ensure all Playwright browsers are installed
+echo "🎭 Ensuring Playwright browsers are installed..."
+npx playwright install chromium webkit firefox > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+    echo "✅ All browsers installed (Chrome, Safari, Firefox)"
+else
+    echo "⚠️  Browser installation had issues, but continuing..."
+fi
+echo ""
+
 # Check if backend is already running
 curl -s http://localhost:8000/api/pr-tests/ > /dev/null 2>&1
 if [ $? -eq 0 ]; then

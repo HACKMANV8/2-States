@@ -61,7 +61,7 @@ class MCPServerInstance:
 
         self.mcp_tools = MCPTools(
             command=full_command,
-            exclude_tools=["browser_resize"]
+            exclude_tools=["browser_install", "browser_resize"]
         )
 
         await self.mcp_tools.connect()
