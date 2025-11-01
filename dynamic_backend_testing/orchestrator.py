@@ -151,9 +151,9 @@ class DynamicBackendOrchestrator:
             )
 
             if result['overall_success']:
-                print(f"✅ All {len(result['test_results'])} tests passed")
+                print(f" All {len(result['test_results'])} tests passed")
             else:
-                print(f"❌ {result['failed_count']} tests failed")
+                print(f" {result['failed_count']} tests failed")
         """
         logger.info(f"Starting repo test: {repo_url}")
 

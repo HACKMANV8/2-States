@@ -30,10 +30,10 @@ def check_module(module_name: str, package_name: str = None) -> bool:
     try:
         mod = importlib.import_module(module_name)
         version = getattr(mod, '__version__', 'unknown')
-        print(f"  ✓ {package_name:20s} (version: {version})")
+        print(f"   {package_name:20s} (version: {version})")
         return True
     except ImportError:
-        print(f"  ✗ {package_name:20s} NOT INSTALLED")
+        print(f"   {package_name:20s} NOT INSTALLED")
         return False
 
 
@@ -45,11 +45,11 @@ def verify_installation() -> Tuple[List[str], List[str]]:
         Tuple of (installed_packages, missing_packages)
     """
     print("""
-╔══════════════════════════════════════════════════════════════════════╗
-║                                                                      ║
-║        Backend API Testing - Installation Verification              ║
-║                                                                      ║
-╚══════════════════════════════════════════════════════════════════════╝
+
+                                                                      
+        Backend API Testing - Installation Verification              
+                                                                      
+
     """)
 
     print(f"Python version: {sys.version.split()[0]}")
@@ -118,10 +118,10 @@ def check_environment():
         if value:
             # Show partial value for security
             masked = value[:8] + "..." if len(value) > 8 else "***"
-            print(f"  ✓ {var_name:20s} = {masked} ({description})")
+            print(f"   {var_name:20s} = {masked} ({description})")
         else:
             required = "Required" in description
-            symbol = "✗" if required else "○"
+            symbol = "" if required else ""
             print(f"  {symbol} {var_name:20s} NOT SET ({description})")
 
 
@@ -148,9 +148,9 @@ def check_file_structure():
     for file_path in required_files:
         full_path = base_dir / file_path
         if full_path.exists():
-            print(f"  ✓ {file_path}")
+            print(f"   {file_path}")
         else:
-            print(f"  ✗ {file_path} MISSING")
+            print(f"   {file_path} MISSING")
             all_exist = False
 
     return all_exist
@@ -185,20 +185,20 @@ def main():
         print(f"  pip install {' '.join(missing)}")
 
     if not files_ok:
-        print("\n⚠️  Some required files are missing!")
+        print("\n  Some required files are missing!")
         print("Please ensure you have all the backend API testing files.")
 
     # Final status
     print("\n" + "=" * 70)
     if not missing and files_ok:
-        print("✅ ALL CHECKS PASSED - Ready to use backend API testing!")
+        print(" ALL CHECKS PASSED - Ready to use backend API testing!")
         print("\nNext steps:")
         print("  1. Set ANTHROPIC_API_KEY in .env file")
         print("  2. Run: python 06_backend_api_testing_agent.py")
         print("  3. Or run tests: pytest tests/test_backend_api.py -v")
         return 0
     else:
-        print("❌ SOME CHECKS FAILED - Please fix the issues above")
+        print(" SOME CHECKS FAILED - Please fix the issues above")
         return 1
 
 

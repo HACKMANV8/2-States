@@ -206,7 +206,7 @@ export default function RunTestPage({
                   {buildSlackCommand()}
                 </div>
                 <p className="text-xs text-blue-700 mt-2">
-                  💡 The AI agent will execute your test steps automatically with Playwright
+                   The AI agent will execute your test steps automatically with Playwright
                 </p>
               </div>
             </div>

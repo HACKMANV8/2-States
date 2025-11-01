@@ -31,28 +31,28 @@ async def test_browser(browser_type: str):
             else:
                 raise ValueError(f"Unknown browser: {browser_type}")
 
-            print(f"✅ {browser_type} launched successfully")
+            print(f" {browser_type} launched successfully")
 
             # Create page
             page = await browser.new_page()
-            print(f"✅ Created new page")
+            print(f" Created new page")
 
             # Navigate to a test URL
             await page.goto("https://example.com", wait_until="networkidle")
-            print(f"✅ Navigated to example.com")
+            print(f" Navigated to example.com")
 
             # Get title
             title = await page.title()
-            print(f"✅ Page title: {title}")
+            print(f" Page title: {title}")
 
             # Close
             await browser.close()
-            print(f"✅ {browser_type} test PASSED")
+            print(f" {browser_type} test PASSED")
 
             return True
 
         except Exception as e:
-            print(f"❌ {browser_type} test FAILED: {e}")
+            print(f" {browser_type} test FAILED: {e}")
             return False
 
 
@@ -74,7 +74,7 @@ async def main():
 
     all_passed = True
     for browser_type, passed in results.items():
-        status = "✅ PASSED" if passed else "❌ FAILED"
+        status = " PASSED" if passed else " FAILED"
         print(f"{browser_type:12} {status}")
         if not passed:
             all_passed = False
@@ -82,10 +82,10 @@ async def main():
     print("="*60)
 
     if all_passed:
-        print("\n✅ ALL BROWSERS WORKING CORRECTLY!")
+        print("\n ALL BROWSERS WORKING CORRECTLY!")
         return 0
     else:
-        print("\n❌ SOME BROWSERS FAILED. Run ./scripts/ENSURE_BROWSERS_INSTALLED.sh")
+        print("\n SOME BROWSERS FAILED. Run ./scripts/ENSURE_BROWSERS_INSTALLED.sh")
         return 1
 
 

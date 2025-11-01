@@ -26,10 +26,10 @@ def seed_default_configs():
         # Check if configs already exist
         existing = get_config_templates(db, limit=1)
         if existing:
-            print("⚠️  Configuration templates already exist. Skipping seed.")
+            print("  Configuration templates already exist. Skipping seed.")
             return
 
-        print("🌱 Seeding default configuration templates...")
+        print(" Seeding default configuration templates...")
 
         # 1. Regression Suite - Comprehensive testing
         regression_config = ConfigurationTemplateCreate(
@@ -49,7 +49,7 @@ def seed_default_configs():
             default_timeout=30000,
         )
         create_config_template(db, regression_config)
-        print("  ✅ Created: Regression Suite")
+        print("   Created: Regression Suite")
 
         # 2. Smoke Tests - Quick validation
         smoke_config = ConfigurationTemplateCreate(
@@ -67,7 +67,7 @@ def seed_default_configs():
             default_timeout=15000,
         )
         create_config_template(db, smoke_config)
-        print("  ✅ Created: Smoke Tests")
+        print("   Created: Smoke Tests")
 
         # 3. Mobile Testing - Mobile devices only
         mobile_config = ConfigurationTemplateCreate(
@@ -87,7 +87,7 @@ def seed_default_configs():
             default_timeout=45000,
         )
         create_config_template(db, mobile_config)
-        print("  ✅ Created: Mobile Testing")
+        print("   Created: Mobile Testing")
 
         # 4. Cross-Browser - All browsers, standard viewport
         cross_browser_config = ConfigurationTemplateCreate(
@@ -105,7 +105,7 @@ def seed_default_configs():
             default_timeout=30000,
         )
         create_config_template(db, cross_browser_config)
-        print("  ✅ Created: Cross-Browser")
+        print("   Created: Cross-Browser")
 
         # 5. Performance Testing - Network condition focus
         performance_config = ConfigurationTemplateCreate(
@@ -123,7 +123,7 @@ def seed_default_configs():
             default_timeout=60000,
         )
         create_config_template(db, performance_config)
-        print("  ✅ Created: Performance Testing")
+        print("   Created: Performance Testing")
 
         # 6. Quick Debug - Single config for debugging
         debug_config = ConfigurationTemplateCreate(
@@ -141,12 +141,12 @@ def seed_default_configs():
             default_timeout=120000,
         )
         create_config_template(db, debug_config)
-        print("  ✅ Created: Quick Debug")
+        print("   Created: Quick Debug")
 
-        print("\n✨ Successfully seeded 6 configuration templates!")
+        print("\n Successfully seeded 6 configuration templates!")
 
     except Exception as e:
-        print(f"❌ Error seeding data: {str(e)}")
+        print(f" Error seeding data: {str(e)}")
         raise
     finally:
         db.close()

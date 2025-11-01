@@ -38,7 +38,7 @@ class GitHubService:
         self.api_base = api_base.rstrip("/")
 
         if not self.token:
-            print("⚠️  Warning: No GitHub token provided. API rate limits will be restrictive.")
+            print("  Warning: No GitHub token provided. API rate limits will be restrictive.")
 
         self.headers = {
             "Accept": "application/vnd.github.v3+json",
@@ -345,7 +345,7 @@ class GitHubService:
                         "state": issue_data["state"],
                     })
                 except Exception as e:
-                    print(f"⚠️  Could not fetch issue #{issue_num}: {e}")
+                    print(f"  Could not fetch issue #{issue_num}: {e}")
 
         return linked_issues
 
@@ -428,7 +428,7 @@ class GitHubService:
         Returns:
             Complete PR context including metadata, diff, comments, etc.
         """
-        print(f"\n🔍 Fetching PR context from GitHub...")
+        print(f"\n Fetching PR context from GitHub...")
 
         # Parse PR URL
         pr_info = self.parse_pr_url(pr_url)
@@ -452,10 +452,10 @@ class GitHubService:
         try:
             ci_status = await self.get_ci_status(owner, repo, metadata["head_sha"])
         except Exception as e:
-            print(f"   ℹ️  Could not fetch CI status: {e}")
+            print(f"   ℹ  Could not fetch CI status: {e}")
             ci_status = {"state": "unknown", "statuses": []}
 
-        print(f"   ✅ Fetched PR context")
+        print(f"    Fetched PR context")
         print(f"      Title: {metadata['title']}")
         print(f"      Author: {metadata['author']}")
         print(f"      Files changed: {len(files)}")

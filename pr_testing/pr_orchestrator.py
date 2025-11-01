@@ -55,7 +55,7 @@ class PRTestOrchestrator:
             Dict with complete test results
         """
         print("\n" + "=" * 80)
-        print("🚀 STARTING PR-BASED TESTING")
+        print(" STARTING PR-BASED TESTING")
         print("=" * 80)
         print(f"PR URL: {pr_url}")
         print(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -78,7 +78,7 @@ class PRTestOrchestrator:
 
         try:
             # STEP 1: Fetch PR Context from GitHub
-            print("📥 STEP 1: Fetching PR Context from GitHub")
+            print(" STEP 1: Fetching PR Context from GitHub")
             print("-" * 80)
 
             pr_context = await self.github_service.get_full_pr_context(pr_url)
@@ -87,7 +87,7 @@ class PRTestOrchestrator:
             pr_info = pr_context["pr_info"]
             pr_metadata = pr_context["metadata"]
 
-            print(f"\n✅ PR Context Retrieved")
+            print(f"\n PR Context Retrieved")
             print(f"   Title: {pr_metadata['title']}")
             print(f"   Author: @{pr_metadata['author']}")
             print(f"   Status: {pr_metadata['state']}")
@@ -95,7 +95,7 @@ class PRTestOrchestrator:
             print("")
 
             # STEP 2: Detect and Validate Deployment URL
-            print("🔍 STEP 2: Detecting Deployment URL")
+            print(" STEP 2: Detecting Deployment URL")
             print("-" * 80)
 
             deployment_info = await self.deployment_detector.find_and_validate_deployment(pr_context)
@@ -103,7 +103,7 @@ class PRTestOrchestrator:
 
             if not deployment_info["found"] or not deployment_info["accessible"]:
                 error_msg = "Could not find an accessible deployment URL for this PR"
-                print(f"\n❌ {error_msg}")
+                print(f"\n {error_msg}")
                 print("   Please ensure the PR has a deployment preview URL in:")
                 print("   - PR description")
                 print("   - PR comments")
@@ -118,7 +118,7 @@ class PRTestOrchestrator:
             deployment_url = deployment_info["deployment_url"]
             platform = self.deployment_detector.detect_platform(deployment_url)
 
-            print(f"\n✅ Deployment Found and Validated")
+            print(f"\n Deployment Found and Validated")
             print(f"   URL: {deployment_url}")
             print(f"   Platform: {platform}")
             print(f"   HTTP Status: {deployment_info['validation']['status_code']}")
@@ -126,7 +126,7 @@ class PRTestOrchestrator:
             print("")
 
             # STEP 3: Analyze Codebase
-            print("📚 STEP 3: Analyzing Codebase Structure")
+            print(" STEP 3: Analyzing Codebase Structure")
             print("-" * 80)
 
             codebase_analysis = await self.codebase_analyzer.analyze_repository(
@@ -137,13 +137,13 @@ class PRTestOrchestrator:
             )
             result["codebase_analysis"] = codebase_analysis
 
-            print(f"\n✅ Codebase Analysis Complete")
+            print(f"\n Codebase Analysis Complete")
             print(f"   Project Type: {codebase_analysis['project_type']}")
             print(f"   Tech Stack: {', '.join(codebase_analysis['tech_stack']) if codebase_analysis['tech_stack'] else 'Unknown'}")
             print("")
 
             # STEP 4: Build Test Context
-            print("📝 STEP 4: Building Test Context")
+            print(" STEP 4: Building Test Context")
             print("-" * 80)
 
             context_document = self.context_builder.build_context_document(
@@ -171,13 +171,13 @@ class PRTestOrchestrator:
                 "deployment_url": deployment_url
             }
 
-            print(f"\n✅ Test Context Prepared")
+            print(f"\n Test Context Prepared")
             print(f"   Scenarios: {len(test_scenarios)}")
             print(f"   Deployment URL: {deployment_url}")
             print("")
 
             # STEP 5: Execute Tests (this will be handled by TestGPT engine)
-            print("🧪 STEP 5: Test Execution Ready")
+            print(" STEP 5: Test Execution Ready")
             print("-" * 80)
             print("   Test context prepared for Playwright agent")
             print("   Will be executed by TestGPT engine")
@@ -187,7 +187,7 @@ class PRTestOrchestrator:
             result["completed_at"] = datetime.now()
 
             print("=" * 80)
-            print("✅ PR TESTING PREPARATION COMPLETE")
+            print(" PR TESTING PREPARATION COMPLETE")
             print("=" * 80)
             print(f"Test Run ID: {test_run_id}")
             print(f"Ready to execute {len(test_scenarios)} test scenarios")
@@ -199,7 +199,7 @@ class PRTestOrchestrator:
             import traceback
             error_trace = traceback.format_exc()
 
-            print(f"\n❌ ERROR: {str(e)}")
+            print(f"\n ERROR: {str(e)}")
             print(f"\nTraceback:\n{error_trace}")
 
             result["status"] = "failed"
@@ -224,7 +224,7 @@ class PRTestOrchestrator:
         Returns:
             Dict with posting result
         """
-        print("\n📤 Posting test results to GitHub...")
+        print("\n Posting test results to GitHub...")
 
         # Parse PR URL
         pr_info = self.github_service.parse_pr_url(pr_url)
@@ -243,7 +243,7 @@ class PRTestOrchestrator:
                 comment_body=comment_body
             )
 
-            print(f"   ✅ Comment posted successfully")
+            print(f"    Comment posted successfully")
             print(f"   Comment URL: {comment_result['html_url']}")
 
             return {
@@ -253,7 +253,7 @@ class PRTestOrchestrator:
             }
 
         except Exception as e:
-            print(f"   ❌ Failed to post comment: {e}")
+            print(f"    Failed to post comment: {e}")
             return {"success": False, "error": str(e)}
 
     def _format_github_comment(self, test_results: Dict[str, Any]) -> str:
@@ -269,17 +269,17 @@ class PRTestOrchestrator:
         lines = []
 
         # Header
-        lines.append("## 🤖 TestGPT PR Testing Results")
+        lines.append("##  TestGPT PR Testing Results")
         lines.append("")
 
         # Status badge
         overall_status = test_results.get("overall_status", "unknown")
         if overall_status == "PASS":
-            lines.append("### ✅ All Tests Passed")
+            lines.append("###  All Tests Passed")
         elif overall_status == "FAIL":
-            lines.append("### ❌ Some Tests Failed")
+            lines.append("###  Some Tests Failed")
         else:
-            lines.append("### ⚠️ Tests Completed with Issues")
+            lines.append("###  Tests Completed with Issues")
 
         lines.append("")
 
@@ -293,21 +293,21 @@ class PRTestOrchestrator:
 
         # Scenario results
         if test_results.get("scenario_results"):
-            lines.append("### 📋 Scenario Results")
+            lines.append("###  Scenario Results")
             lines.append("")
 
             for scenario in test_results["scenario_results"]:
-                status_emoji = "✅" if scenario["passed"] else "❌"
+                status_emoji = "" if scenario["passed"] else ""
                 lines.append(f"{status_emoji} **{scenario['name']}** - {scenario['priority']} priority")
 
                 if not scenario["passed"]:
-                    lines.append(f"   - ❌ {scenario.get('failure_reason', 'Test failed')}")
+                    lines.append(f"   -  {scenario.get('failure_reason', 'Test failed')}")
 
                 lines.append("")
 
         # Failures detail
         if test_results.get("failures"):
-            lines.append("### ❌ Failed Tests Details")
+            lines.append("###  Failed Tests Details")
             lines.append("")
 
             for failure in test_results["failures"]:
@@ -319,7 +319,7 @@ class PRTestOrchestrator:
 
         # Console errors
         if test_results.get("console_errors"):
-            lines.append("### ⚠️ Console Errors")
+            lines.append("###  Console Errors")
             lines.append("")
             lines.append("```")
             for error in test_results["console_errors"][:5]:  # Limit to 5
@@ -329,8 +329,8 @@ class PRTestOrchestrator:
 
         # Footer
         lines.append("---")
-        lines.append(f"🤖 *Automated testing by [TestGPT](https://github.com/yourusername/TestGPT)*")
-        lines.append(f"⏱️ *Completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}*")
+        lines.append(f" *Automated testing by [TestGPT](https://github.com/yourusername/TestGPT)*")
+        lines.append(f"⏱ *Completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}*")
 
         return "\n".join(lines)
 
@@ -349,11 +349,11 @@ class PRTestOrchestrator:
 
         # Header
         if pr_test_result["status"] == "failed":
-            lines.append("❌ **PR Testing Failed**")
+            lines.append(" **PR Testing Failed**")
         elif pr_test_result["status"] == "ready_for_execution":
-            lines.append("✅ **PR Testing Preparation Complete**")
+            lines.append(" **PR Testing Preparation Complete**")
         else:
-            lines.append("ℹ️  **PR Testing Status Update**")
+            lines.append("ℹ  **PR Testing Status Update**")
 
         lines.append("")
 
@@ -399,18 +399,18 @@ class PRTestOrchestrator:
             total = test_execution_result.get("total_count", 0)
             overall_status = test_execution_result.get("overall_status", "UNKNOWN")
 
-            status_emoji = "✅" if overall_status == "PASS" else "❌"
+            status_emoji = "" if overall_status == "PASS" else ""
             lines.append(f"{status_emoji} **Test Results:** {passed}/{total} scenarios passed")
 
             # Add coverage information if available
             if test_execution_result.get("coverage_enabled"):
                 coverage_pct = test_execution_result.get("coverage_percentage", 0)
-                lines.append(f"📊 **Code Coverage:** {coverage_pct:.1f}% of changed lines")
+                lines.append(f" **Code Coverage:** {coverage_pct:.1f}% of changed lines")
 
                 # Link to HTML report if available
                 if test_execution_result.get("coverage_html_path"):
                     html_path = test_execution_result["coverage_html_path"]
-                    lines.append(f"📄 **Detailed Report:** `{html_path}`")
+                    lines.append(f" **Detailed Report:** `{html_path}`")
 
             # Show brief test summary from agent
             if test_execution_result.get("agent_response"):
@@ -434,7 +434,7 @@ class PRTestOrchestrator:
                 lines.append("")
                 lines.append("**Failures:**")
                 for failure in test_execution_result["failures"][:3]:
-                    lines.append(f"  ❌ {failure['scenario']}: {failure['error'][:100]}")
+                    lines.append(f"   {failure['scenario']}: {failure['error'][:100]}")
 
             lines.append("")
 
@@ -446,7 +446,7 @@ class PRTestOrchestrator:
 
         # Footer
         lines.append("---")
-        lines.append(f"🤖 *TestGPT PR Testing*")
-        lines.append(f"🆔 *Test Run:* `{pr_test_result['test_run_id']}`")
+        lines.append(f" *TestGPT PR Testing*")
+        lines.append(f" *Test Run:* `{pr_test_result['test_run_id']}`")
 
         return "\n".join(lines)

@@ -121,7 +121,7 @@ class TestRunnerService:
             )
 
             # Execute the test
-            print(f"🧪 Executing test: {test_suite_dict.get('name')}")
+            print(f" Executing test: {test_suite_dict.get('name')}")
             print(f"   Browser: {final_browser}")
             print(f"   Viewport: {final_viewport_width}x{final_viewport_height}")
             print(f"   Network: {final_network_mode}")
@@ -162,7 +162,7 @@ class TestRunnerService:
                     error_details=cell_result.failure_summary,
                 )
 
-                print(f"✅ Test completed: {final_status.upper()}")
+                print(f" Test completed: {final_status.upper()}")
 
                 return {
                     "execution_id": execution_id,
@@ -181,7 +181,7 @@ class TestRunnerService:
                     error_details="Test execution returned no results",
                 )
 
-                print(f"❌ Test failed: No results returned")
+                print(f" Test failed: No results returned")
 
                 return {
                     "execution_id": execution_id,
@@ -199,7 +199,7 @@ class TestRunnerService:
                 error_details=str(e),
             )
 
-            print(f"❌ Test execution error: {str(e)}")
+            print(f" Test execution error: {str(e)}")
 
             return {
                 "execution_id": execution_id,
@@ -269,7 +269,7 @@ class TestRunnerService:
                 )
                 test_steps.append(step)
             except Exception as e:
-                print(f"⚠️  Warning: Could not convert step {step_data}: {e}")
+                print(f"  Warning: Could not convert step {step_data}: {e}")
                 continue
 
         return test_steps
@@ -295,12 +295,12 @@ async def run_pending_executions():
         print(f"Found {len(pending)} pending executions")
 
         for execution in pending:
-            print(f"\n🔄 Processing execution: {execution.id}")
+            print(f"\n Processing execution: {execution.id}")
 
             # Get test suite
             test_suite = crud.get_test_suite(db, execution.test_suite_id)
             if not test_suite:
-                print(f"  ⚠️  Test suite not found: {execution.test_suite_id}")
+                print(f"    Test suite not found: {execution.test_suite_id}")
                 continue
 
             # Get config if specified

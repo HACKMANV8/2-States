@@ -85,7 +85,7 @@ class CoverageOrchestrator:
         self._stop_engine = None
         self._reporter = None
 
-        print(f"✅ Coverage orchestrator initialized")
+        print(f" Coverage orchestrator initialized")
         print(f"   Run ID: {self.run_id}")
         print(f"   Config: {self.config.changed_lines_threshold}% changed lines, "
               f"MCDC={self.config.mcdc_required}")
@@ -101,10 +101,10 @@ class CoverageOrchestrator:
         4. Initialize collectors
         """
         if self.is_started:
-            print("⚠️  Coverage already started")
+            print("  Coverage already started")
             return self.coverage_run
 
-        print(f"\n🚀 Starting coverage collection...")
+        print(f"\n Starting coverage collection...")
 
         # Create coverage run
         self.coverage_run = CoverageRun(
@@ -118,19 +118,19 @@ class CoverageOrchestrator:
 
         # Step 1: Analyze PR if URL provided
         if self.pr_url:
-            print(f"   📋 Analyzing PR: {self.pr_url}")
+            print(f"    Analyzing PR: {self.pr_url}")
             await self._analyze_pr()
 
         # Step 2: Instrument changed files
-        print(f"   🔧 Instrumenting code...")
+        print(f"    Instrumenting code...")
         await self._instrument_files()
 
         # Step 3: Initialize runtime collector
-        print(f"   📊 Initializing coverage collector...")
+        print(f"    Initializing coverage collector...")
         await self._init_collector()
 
         self.is_started = True
-        print(f"✅ Coverage collection started (Run ID: {self.run_id})\n")
+        print(f" Coverage collection started (Run ID: {self.run_id})\n")
 
         return self.coverage_run
 
@@ -154,7 +154,7 @@ class CoverageOrchestrator:
         if not self.is_started:
             raise RuntimeError("Coverage not started. Call start_coverage() first.")
 
-        print(f"📝 Recording test: {test_name}")
+        print(f" Recording test: {test_name}")
 
         # Get current coverage snapshot
         current_coverage = self._calculate_current_coverage()
@@ -200,7 +200,7 @@ class CoverageOrchestrator:
         if not self.is_started:
             raise RuntimeError("Coverage not started. Call start_coverage() first.")
 
-        print(f"\n🤔 Evaluating stop condition...")
+        print(f"\n Evaluating stop condition...")
 
         # Calculate current metrics
         current_coverage = self._calculate_current_coverage()
@@ -232,9 +232,9 @@ class CoverageOrchestrator:
         self.stop_decisions.append(decision)
 
         if should_stop:
-            print(f"   🛑 STOP recommended: {reason} (confidence: {confidence:.0%})")
+            print(f"    STOP recommended: {reason} (confidence: {confidence:.0%})")
         else:
-            print(f"   ▶️  CONTINUE testing: {reason} (confidence: {confidence:.0%})")
+            print(f"     CONTINUE testing: {reason} (confidence: {confidence:.0%})")
 
         return decision
 
@@ -245,7 +245,7 @@ class CoverageOrchestrator:
         Returns:
             List of CoverageGap objects with suggestions
         """
-        print(f"\n🔍 Identifying coverage gaps...")
+        print(f"\n Identifying coverage gaps...")
 
         # Analyze uncovered code
         gaps = await self._analyze_coverage_gaps()
@@ -272,7 +272,7 @@ class CoverageOrchestrator:
         Returns:
             CoverageReport object
         """
-        print(f"\n📊 Generating {report_type} coverage report...")
+        print(f"\n Generating {report_type} coverage report...")
 
         # Finalize coverage run
         self.coverage_run.completed_at = datetime.now()
@@ -299,10 +299,10 @@ class CoverageOrchestrator:
             metrics=self._get_summary_metrics()
         )
 
-        print(f"✅ Report generated: {report_id}")
+        print(f" Report generated: {report_id}")
         print(f"   Overall coverage: {self.coverage_run.overall_coverage_percent:.1f}%")
         print(f"   Tests executed: {self.test_count}")
-        print(f"   MCDC satisfied: {'✅' if self.coverage_run.mcdc_satisfied else '❌'}")
+        print(f"   MCDC satisfied: {'' if self.coverage_run.mcdc_satisfied else ''}")
 
         return report
 
@@ -313,7 +313,7 @@ class CoverageOrchestrator:
         Args:
             reason: Reason for stopping
         """
-        print(f"\n🛑 Stopping coverage collection: {reason.value}")
+        print(f"\n Stopping coverage collection: {reason.value}")
 
         if self.coverage_run:
             self.coverage_run.status = CoverageStatus.STOPPED
@@ -324,7 +324,7 @@ class CoverageOrchestrator:
         await self._cleanup()
 
         self.is_started = False
-        print(f"✅ Coverage collection stopped")
+        print(f" Coverage collection stopped")
 
     # ========================================================================
     # INTERNAL METHODS
@@ -333,14 +333,14 @@ class CoverageOrchestrator:
     async def _analyze_pr(self):
         """Analyze PR to identify changed files."""
         if not self.pr_url:
-            print(f"   ⚠️  No PR URL provided, skipping PR analysis")
+            print(f"     No PR URL provided, skipping PR analysis")
             return
 
         try:
             # Import PR diff analyzer
             from coverage.instrumentation.pr_diff_analyzer import PRDiffAnalyzer
 
-            print(f"   📋 Analyzing PR: {self.pr_url}")
+            print(f"    Analyzing PR: {self.pr_url}")
             analyzer = PRDiffAnalyzer()
 
             # Get GitHub token from environment
@@ -358,7 +358,7 @@ class CoverageOrchestrator:
             # Update run with PR info
             self.coverage_run.pr_id = str(pr_summary.pr_number)
 
-            print(f"   ✅ PR analysis complete:")
+            print(f"    PR analysis complete:")
             print(f"      Changed files: {len(pr_summary.changed_files)}")
             print(f"      Changed functions: {len(pr_summary.changed_functions)}")
             print(f"      Total lines to cover: {self.coverage_run.changed_lines_total}")
@@ -368,7 +368,7 @@ class CoverageOrchestrator:
             self._changed_functions = pr_summary.changed_functions
 
         except Exception as e:
-            print(f"   ⚠️  PR analysis failed: {str(e)}")
+            print(f"     PR analysis failed: {str(e)}")
             print(f"   Continuing without PR context...")
             self._changed_files = []
             self._changed_functions = []
@@ -376,14 +376,14 @@ class CoverageOrchestrator:
     async def _instrument_files(self):
         """Instrument code files for coverage tracking."""
         if not hasattr(self, '_changed_files') or not self._changed_files:
-            print(f"   ⚠️  No changed files to instrument")
+            print(f"     No changed files to instrument")
             return
 
         try:
             from coverage.instrumentation.instrumenter import CodeInstrumenter
             from pathlib import Path
 
-            print(f"   🔧 Instrumenting {len(self._changed_files)} files...")
+            print(f"    Instrumenting {len(self._changed_files)} files...")
 
             instrumenter = CodeInstrumenter()
 
@@ -394,17 +394,17 @@ class CoverageOrchestrator:
             ]
 
             if not code_files:
-                print(f"   ⚠️  No code files found to instrument")
+                print(f"     No code files found to instrument")
                 return
 
             # Instrument files (without base path for now - would need repo clone)
             # For demonstration, we'll track which files should be instrumented
             self._instrumented_file_count = len(code_files)
 
-            print(f"   ✅ Marked {self._instrumented_file_count} files for instrumentation")
+            print(f"    Marked {self._instrumented_file_count} files for instrumentation")
 
         except Exception as e:
-            print(f"   ⚠️  Instrumentation setup failed: {str(e)}")
+            print(f"     Instrumentation setup failed: {str(e)}")
             self._instrumented_file_count = 0
 
     async def _init_collector(self):
@@ -413,7 +413,7 @@ class CoverageOrchestrator:
         self._line_hits = {}  # file_path -> {line_num -> hit_count}
         self._branch_hits = {}  # file_path -> {branch_id -> taken}
 
-        print(f"   ✅ Coverage collector initialized")
+        print(f"    Coverage collector initialized")
         print(f"      Tracking mode: Simulated (real collection requires test integration)")
 
     def _calculate_current_coverage(self) -> float:
@@ -701,4 +701,4 @@ MCDC: {'Satisfied' if self._check_mcdc_satisfied() else 'Not Satisfied'}
     async def _cleanup(self):
         """Cleanup instrumentation and temporary files."""
         # TODO: Implement cleanup
-        print(f"   ℹ️  Cleanup not yet implemented")
+        print(f"   ℹ  Cleanup not yet implemented")

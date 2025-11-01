@@ -26,7 +26,7 @@ async def quick_test():
     response = await simple_agent.arun("Say 'Hello from Claude!' and nothing else.")
     print(f"Response: {response.content if hasattr(response, 'content') else response}")
 
-    print("\n✅ Basic agent works!")
+    print("\n Basic agent works!")
     print("\nNow you can run the full examples:")
     print("  python 01_basic_context7_agent.py")
     print("  python 02_filesystem_agent.py")

@@ -21,7 +21,7 @@ load_dotenv()
 # Page configuration
 st.set_page_config(
     page_title="Agno MCP Agent Assistant",
-    page_icon="🤖",
+    page_icon="",
     layout="wide"
 )
 
@@ -86,7 +86,7 @@ def main():
     """Main Streamlit application."""
 
     # Title and description
-    st.title("🤖 Agno MCP Agent Assistant")
+    st.title(" Agno MCP Agent Assistant")
     st.markdown("""
     Chat with an AI assistant powered by **Agno** framework and **Model Context Protocol (MCP)**.
     The assistant has access to live documentation via Context7 MCP server.
@@ -94,19 +94,19 @@ def main():
 
     # Sidebar
     with st.sidebar:
-        st.header("⚙️ Configuration")
+        st.header(" Configuration")
 
         # Check for API key
         api_key = os.getenv("ANTHROPIC_API_KEY")
         if not api_key:
-            st.error("❌ ANTHROPIC_API_KEY not found!")
+            st.error(" ANTHROPIC_API_KEY not found!")
             st.info("Please create a `.env` file with your Anthropic API key.")
             st.stop()
         else:
-            st.success("✅ API Key loaded")
+            st.success(" API Key loaded")
 
         st.markdown("---")
-        st.header("ℹ️ About")
+        st.header("ℹ About")
         st.markdown("""
         This app demonstrates:
         - **Agno Framework**: Multi-agent orchestration
@@ -115,7 +115,7 @@ def main():
         """)
 
         st.markdown("---")
-        st.header("💡 Example Queries")
+        st.header(" Example Queries")
         st.markdown("""
         - "How do I use Agno MCP tools?"
         - "Show me FastAPI examples"
@@ -135,15 +135,15 @@ def main():
 
     # Initialize agent on first run
     if st.session_state.agent is None:
-        with st.spinner("🔄 Initializing MCP Agent..."):
+        with st.spinner(" Initializing MCP Agent..."):
             try:
                 # Run async initialization
                 agent, mcp_tools = asyncio.run(initialize_agents())
                 st.session_state.agent = agent
                 st.session_state.mcp_tools = mcp_tools
-                st.success("✅ Agent initialized successfully!")
+                st.success(" Agent initialized successfully!")
             except Exception as e:
-                st.error(f"❌ Error initializing agent: {str(e)}")
+                st.error(f" Error initializing agent: {str(e)}")
                 st.stop()
 
     # Display chat messages
@@ -162,7 +162,7 @@ def main():
 
         # Get agent response
         with st.chat_message("assistant"):
-            with st.spinner("🤔 Thinking..."):
+            with st.spinner(" Thinking..."):
                 try:
                     # Get response from agent
                     response = asyncio.run(
@@ -179,7 +179,7 @@ def main():
                     })
 
                 except Exception as e:
-                    error_msg = f"❌ Error: {str(e)}"
+                    error_msg = f" Error: {str(e)}"
                     st.error(error_msg)
                     st.session_state.messages.append({
                         "role": "assistant",

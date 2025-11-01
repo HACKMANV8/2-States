@@ -273,7 +273,7 @@ class PRContextBuilder:
         Returns:
             Formatted context document string
         """
-        print("\n📝 Building test context document...")
+        print("\n Building test context document...")
 
         pr_metadata = pr_context.get("metadata", {})
         pr_files = pr_context.get("files", [])
@@ -357,7 +357,7 @@ class PRContextBuilder:
 
         if deployment_info.get("validation"):
             validation = deployment_info["validation"]
-            lines.append(f"**Status:** {'✅ Accessible' if validation.get('accessible') else '❌ Not Accessible'}")
+            lines.append(f"**Status:** {' Accessible' if validation.get('accessible') else ' Not Accessible'}")
             if validation.get("status_code"):
                 lines.append(f"**HTTP Status:** {validation['status_code']}")
             if validation.get("response_time_ms"):
@@ -401,9 +401,9 @@ class PRContextBuilder:
 
         context_doc = "\n".join(lines)
 
-        print(f"   ✅ Context document built ({len(context_doc)} characters)")
-        print(f"   📋 Scenarios generated: {len(test_scenarios)}")
-        print(f"   ✓  Acceptance criteria: {len(acceptance_criteria)}")
+        print(f"    Context document built ({len(context_doc)} characters)")
+        print(f"    Scenarios generated: {len(test_scenarios)}")
+        print(f"     Acceptance criteria: {len(acceptance_criteria)}")
 
         return context_doc
 

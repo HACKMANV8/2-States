@@ -255,13 +255,13 @@ class DeploymentDetector:
         Returns:
             Dict with deployment information and validation results
         """
-        print("\n🔍 Searching for deployment URLs...")
+        print("\n Searching for deployment URLs...")
 
         # Extract all deployment URLs
         deployment_urls = self.extract_from_pr_context(pr_context)
 
         if not deployment_urls["all_unique"]:
-            print("   ⚠️  No deployment URLs found in PR")
+            print("     No deployment URLs found in PR")
             return {
                 "found": False,
                 "deployment_url": None,
@@ -269,30 +269,30 @@ class DeploymentDetector:
                 "validation": None
             }
 
-        print(f"   ✅ Found {len(deployment_urls['all_unique'])} deployment URL(s)")
+        print(f"    Found {len(deployment_urls['all_unique'])} deployment URL(s)")
 
         # Get best URL
         best_url = self.get_best_deployment_url(pr_context)
 
-        print(f"   🎯 Selected deployment URL: {best_url}")
-        print(f"   🔍 Validating deployment accessibility...")
+        print(f"    Selected deployment URL: {best_url}")
+        print(f"    Validating deployment accessibility...")
 
         # Validate the best URL
         validation = await self.validate_url(best_url)
 
         if validation["accessible"]:
-            print(f"   ✅ Deployment is accessible (HTTP {validation['status_code']})")
+            print(f"    Deployment is accessible (HTTP {validation['status_code']})")
             print(f"      Response time: {validation['response_time_ms']}ms")
         else:
-            print(f"   ❌ Deployment validation failed: {validation['error']}")
+            print(f"    Deployment validation failed: {validation['error']}")
 
             # Try other URLs if best one failed
             for url in deployment_urls["all_unique"]:
                 if url != best_url:
-                    print(f"   🔄 Trying alternative URL: {url}")
+                    print(f"    Trying alternative URL: {url}")
                     alt_validation = await self.validate_url(url)
                     if alt_validation["accessible"]:
-                        print(f"   ✅ Alternative deployment is accessible")
+                        print(f"    Alternative deployment is accessible")
                         best_url = url
                         validation = alt_validation
                         break

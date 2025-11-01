@@ -11,7 +11,7 @@
 set -e  # Exit on error
 
 echo "=========================================================================="
-echo "🔧 TestGPT Browser Installation & Verification"
+echo " TestGPT Browser Installation & Verification"
 echo "=========================================================================="
 echo ""
 
@@ -27,21 +27,21 @@ NC='\033[0m' # No Color
 # Step 1: Install all Playwright browsers
 # ==============================================================================
 
-echo "📦 Step 1: Installing all Playwright browsers..."
+echo " Step 1: Installing all Playwright browsers..."
 echo "   This may take a few minutes if browsers need to be downloaded."
 echo ""
 
 npx playwright install chromium webkit firefox 2>&1 | grep -v "^$" || true
 
 echo ""
-echo -e "${GREEN}✅ Browser installation complete${NC}"
+echo -e "${GREEN} Browser installation complete${NC}"
 echo ""
 
 # ==============================================================================
 # Step 2: Find latest browser versions
 # ==============================================================================
 
-echo "🔍 Step 2: Detecting installed browser versions..."
+echo " Step 2: Detecting installed browser versions..."
 echo ""
 
 # Find latest chromium
@@ -58,30 +58,30 @@ echo ""
 # Step 3: Verify browser binaries exist
 # ==============================================================================
 
-echo "✓  Step 3: Verifying browser binaries..."
+echo "  Step 3: Verifying browser binaries..."
 echo ""
 
 # Check Chromium
 if [ -d "$PLAYWRIGHT_CACHE/$CHROMIUM_LATEST/chrome-mac/Chromium.app" ]; then
-    echo -e "   ${GREEN}✅ Chromium binary found${NC}"
+    echo -e "   ${GREEN} Chromium binary found${NC}"
 else
-    echo -e "   ${RED}❌ Chromium binary NOT found${NC}"
+    echo -e "   ${RED} Chromium binary NOT found${NC}"
     exit 1
 fi
 
 # Check WebKit
 if [ -d "$PLAYWRIGHT_CACHE/$WEBKIT_LATEST/Playwright.app" ]; then
-    echo -e "   ${GREEN}✅ WebKit binary found${NC}"
+    echo -e "   ${GREEN} WebKit binary found${NC}"
 else
-    echo -e "   ${RED}❌ WebKit binary NOT found${NC}"
+    echo -e "   ${RED} WebKit binary NOT found${NC}"
     exit 1
 fi
 
 # Check Firefox
 if [ -d "$PLAYWRIGHT_CACHE/$FIREFOX_LATEST/firefox" ]; then
-    echo -e "   ${GREEN}✅ Firefox binary found${NC}"
+    echo -e "   ${GREEN} Firefox binary found${NC}"
 else
-    echo -e "   ${RED}❌ Firefox binary NOT found${NC}"
+    echo -e "   ${RED} Firefox binary NOT found${NC}"
     exit 1
 fi
 
@@ -91,7 +91,7 @@ echo ""
 # Step 4: Fix MCP browser symlinks
 # ==============================================================================
 
-echo "🔗 Step 4: Setting up MCP browser symlinks..."
+echo " Step 4: Setting up MCP browser symlinks..."
 echo ""
 
 cd "$PLAYWRIGHT_CACHE"
@@ -107,7 +107,7 @@ if [ -L "mcp-webkit" ]; then
     echo "   mcp-webkit symlink already exists"
 else
     ln -s "$WEBKIT_LATEST" mcp-webkit
-    echo -e "   ${GREEN}✅ Created mcp-webkit → $WEBKIT_LATEST${NC}"
+    echo -e "   ${GREEN} Created mcp-webkit → $WEBKIT_LATEST${NC}"
 fi
 
 # Note: mcp-chromium and mcp-chrome are user data directories, not browser binaries
@@ -119,7 +119,7 @@ echo ""
 # Step 5: Create .links directory for Playwright
 # ==============================================================================
 
-echo "📂 Step 5: Setting up Playwright browser links..."
+echo " Step 5: Setting up Playwright browser links..."
 echo ""
 
 cd "$PLAYWRIGHT_CACHE"
@@ -138,35 +138,35 @@ if [ ! -e ".links/firefox-$(cd $FIREFOX_LATEST && pwd)" ]; then
     ln -sf "../$FIREFOX_LATEST" .links/firefox 2>/dev/null || true
 fi
 
-echo -e "   ${GREEN}✅ Browser links configured${NC}"
+echo -e "   ${GREEN} Browser links configured${NC}"
 echo ""
 
 # ==============================================================================
 # Step 6: Verify everything works
 # ==============================================================================
 
-echo "🧪 Step 6: Verifying browser installations..."
+echo " Step 6: Verifying browser installations..."
 echo ""
 
 # Test Chromium
 if [ -x "$PLAYWRIGHT_CACHE/$CHROMIUM_LATEST/chrome-mac/Chromium.app/Contents/MacOS/Chromium" ]; then
-    echo -e "   ${GREEN}✅ Chromium executable is valid${NC}"
+    echo -e "   ${GREEN} Chromium executable is valid${NC}"
 else
-    echo -e "   ${YELLOW}⚠️  Chromium executable not found at expected location${NC}"
+    echo -e "   ${YELLOW}  Chromium executable not found at expected location${NC}"
 fi
 
 # Test WebKit
 if [ -x "$PLAYWRIGHT_CACHE/$WEBKIT_LATEST/Playwright.app/Contents/MacOS/Playwright" ]; then
-    echo -e "   ${GREEN}✅ WebKit executable is valid${NC}"
+    echo -e "   ${GREEN} WebKit executable is valid${NC}"
 else
-    echo -e "   ${YELLOW}⚠️  WebKit executable not found at expected location${NC}"
+    echo -e "   ${YELLOW}  WebKit executable not found at expected location${NC}"
 fi
 
 # Test Firefox
 if [ -d "$PLAYWRIGHT_CACHE/$FIREFOX_LATEST/firefox/Firefox.app" ] || [ -d "$PLAYWRIGHT_CACHE/$FIREFOX_LATEST/firefox/firefox" ]; then
-    echo -e "   ${GREEN}✅ Firefox installation is valid${NC}"
+    echo -e "   ${GREEN} Firefox installation is valid${NC}"
 else
-    echo -e "   ${YELLOW}⚠️  Firefox installation not found at expected location${NC}"
+    echo -e "   ${YELLOW}  Firefox installation not found at expected location${NC}"
 fi
 
 echo ""
@@ -176,7 +176,7 @@ echo ""
 # ==============================================================================
 
 echo "=========================================================================="
-echo "✅ BROWSER SETUP COMPLETE"
+echo " BROWSER SETUP COMPLETE"
 echo "=========================================================================="
 echo ""
 echo "Installed browsers:"

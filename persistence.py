@@ -64,11 +64,11 @@ class PersistenceLayer:
             with open(file_path, 'w') as f:
                 json.dump(scenario_dict, f, indent=2, default=str)
 
-            print(f"💾 Saved scenario: {scenario.scenario_id}")
+            print(f" Saved scenario: {scenario.scenario_id}")
             return True
 
         except Exception as e:
-            print(f"❌ Error saving scenario: {str(e)}")
+            print(f" Error saving scenario: {str(e)}")
             return False
 
     def load_scenario(self, scenario_id: str) -> Optional[ScenarioDefinition]:
@@ -95,7 +95,7 @@ class PersistenceLayer:
             return scenario_dict
 
         except Exception as e:
-            print(f"❌ Error loading scenario: {str(e)}")
+            print(f" Error loading scenario: {str(e)}")
             return None
 
     def find_scenarios_by_name(self, name_pattern: str) -> List[str]:
@@ -122,7 +122,7 @@ class PersistenceLayer:
                     matching_ids.append(scenario_dict.get("scenario_id"))
 
         except Exception as e:
-            print(f"❌ Error searching scenarios: {str(e)}")
+            print(f" Error searching scenarios: {str(e)}")
 
         return matching_ids
 
@@ -150,7 +150,7 @@ class PersistenceLayer:
                     matching_ids.append(scenario_dict.get("scenario_id"))
 
         except Exception as e:
-            print(f"❌ Error searching scenarios: {str(e)}")
+            print(f" Error searching scenarios: {str(e)}")
 
         return matching_ids
 
@@ -177,7 +177,7 @@ class PersistenceLayer:
                 })
 
         except Exception as e:
-            print(f"❌ Error listing scenarios: {str(e)}")
+            print(f" Error listing scenarios: {str(e)}")
 
         return scenarios
 
@@ -204,11 +204,11 @@ class PersistenceLayer:
             with open(file_path, 'w') as f:
                 json.dump(artifact_dict, f, indent=2, default=str)
 
-            print(f"💾 Saved run artifact: {run_artifact.run_id}")
+            print(f" Saved run artifact: {run_artifact.run_id}")
             return True
 
         except Exception as e:
-            print(f"❌ Error saving run artifact: {str(e)}")
+            print(f" Error saving run artifact: {str(e)}")
             return False
 
     def load_run_artifact(self, run_id: str) -> Optional[dict]:
@@ -233,7 +233,7 @@ class PersistenceLayer:
             return artifact_dict
 
         except Exception as e:
-            print(f"❌ Error loading run artifact: {str(e)}")
+            print(f" Error loading run artifact: {str(e)}")
             return None
 
     def get_latest_run_for_scenario(self, scenario_id: str) -> Optional[dict]:
@@ -268,7 +268,7 @@ class PersistenceLayer:
             return matching_runs[0]
 
         except Exception as e:
-            print(f"❌ Error finding latest run: {str(e)}")
+            print(f" Error finding latest run: {str(e)}")
             return None
 
     # ========================================================================
@@ -331,5 +331,5 @@ class PersistenceLayer:
             return True
 
         except Exception as e:
-            print(f"❌ Error updating scenario: {str(e)}")
+            print(f" Error updating scenario: {str(e)}")
             return False

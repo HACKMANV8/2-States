@@ -465,20 +465,20 @@ class DatabaseHealthChecker:
         print("OVERALL STATUS: " + summary["overall_status"])
         print("=" * 80)
         print(f"Total Checks: {summary['total_checks']}")
-        print(f"✅ Passed: {summary['passed']}")
-        print(f"⚠️  Warnings: {summary['warnings']}")
-        print(f"❌ Failed: {summary['failed']}")
-        print(f"🔥 Errors: {summary['errors']}")
+        print(f" Passed: {summary['passed']}")
+        print(f"  Warnings: {summary['warnings']}")
+        print(f" Failed: {summary['failed']}")
+        print(f" Errors: {summary['errors']}")
         print()
 
         # Print individual check results
         for check in self.results["checks"]:
             status_icon = {
-                "PASS": "✅",
-                "WARN": "⚠️",
-                "FAIL": "❌",
-                "ERROR": "🔥",
-                "INFO": "ℹ️"
+                "PASS": "",
+                "WARN": "",
+                "FAIL": "",
+                "ERROR": "",
+                "INFO": "ℹ"
             }.get(check["status"], "?")
 
             print(f"{status_icon} {check['name']}: {check['status']}")
@@ -509,7 +509,7 @@ class DatabaseHealthChecker:
         with open(filepath, 'w') as f:
             json.dump(self.results, f, indent=2)
 
-        print(f"📄 Full results saved to: {filepath}")
+        print(f" Full results saved to: {filepath}")
         return filepath
 
 

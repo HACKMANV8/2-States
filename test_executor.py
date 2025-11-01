@@ -66,7 +66,7 @@ class TestExecutor:
         self.log_file.write(f"{'='*80}\n\n")
         self.log_file.flush()
 
-        print(f"📝 Logging to: {self.log_file_path}")
+        print(f" Logging to: {self.log_file_path}")
         print(f"   (Also available at: logs/latest.log)\n")
 
         # Create symlink
@@ -159,7 +159,7 @@ class TestExecutor:
         Returns:
             List of CellResult objects (one per matrix cell)
         """
-        print(f"\n🎯 Executing test plan: {test_plan.scenario_name}")
+        print(f"\n Executing test plan: {test_plan.scenario_name}")
         print(f"   Total cells to execute: {test_plan.total_cells_to_execute}")
         print(f"   Estimated duration: {test_plan.estimated_duration_minutes} minutes\n")
 
@@ -167,17 +167,17 @@ class TestExecutor:
 
         # Execute cells (for now sequentially, can be parallelized later)
         for i, cell in enumerate(test_plan.matrix_cells, 1):
-            print(f"▶️  Executing cell {i}/{len(test_plan.matrix_cells)}: {cell.cell_id}")
+            print(f"  Executing cell {i}/{len(test_plan.matrix_cells)}: {cell.cell_id}")
 
             try:
                 result = await self.execute_cell(cell, test_plan.target_url, test_plan.user_request)
                 cell_results.append(result)
 
-                status_emoji = "✅" if result.status == TestStatus.PASS else "❌"
+                status_emoji = "" if result.status == TestStatus.PASS else ""
                 print(f"{status_emoji} Cell completed: {result.status.value}\n")
 
             except Exception as e:
-                print(f"❌ Cell execution failed with error: {str(e)}\n")
+                print(f" Cell execution failed with error: {str(e)}\n")
                 # Create error result
                 error_result = self._create_error_result(cell, str(e))
                 cell_results.append(error_result)
@@ -205,7 +205,7 @@ class TestExecutor:
         """
         from pathlib import Path
 
-        print(f"\n🧪 Executing backend API test")
+        print(f"\n Executing backend API test")
         if repo_url:
             print(f"   Repository: {repo_url}")
         elif api_path:
@@ -217,7 +217,7 @@ class TestExecutor:
 
         try:
             # Get backend testing MCP tools
-            print("🔌 Connecting to backend testing MCP server...")
+            print(" Connecting to backend testing MCP server...")
             backend_mcp_tools = await self.mcp_manager.get_backend_mcp_tools(
                 repo_url=repo_url,
                 api_path=Path(api_path) if api_path else None,
@@ -225,7 +225,7 @@ class TestExecutor:
             )
 
             # Create agent with backend testing tools
-            print("🤖 Initializing backend testing agent...")
+            print(" Initializing backend testing agent...")
             backend_agent = Agent(
                 name="BackendAPITestAgent",
                 model=Claude(id="claude-sonnet-4-20250514"),
@@ -249,7 +249,7 @@ Be thorough and report clear results.""",
             )
 
             # Run the test with the agent
-            print(f"🧪 Running backend API tests...")
+            print(f" Running backend API tests...")
             print(f"   Instructions: {test_instructions}\n")
 
             # Capture ALL agent output (thinking, tool calls, debug info) to log file
@@ -260,7 +260,7 @@ Be thorough and report clear results.""",
             completed_at = datetime.now()
             duration_ms = int((completed_at - started_at).total_seconds() * 1000)
 
-            print(f"\n✅ Backend API testing completed")
+            print(f"\n Backend API testing completed")
             print(f"   Duration: {duration_ms}ms\n")
 
             return {
@@ -281,7 +281,7 @@ Be thorough and report clear results.""",
             completed_at = datetime.now()
             duration_ms = int((completed_at - started_at).total_seconds() * 1000)
 
-            print(f"\n❌ Backend API testing failed")
+            print(f"\n Backend API testing failed")
             print(f"   Error: {str(e)}\n")
 
             return {
@@ -307,7 +307,7 @@ Be thorough and report clear results.""",
             self.agent = None
             return
 
-        self._log("   🔧 Initializing AI agent with viewport-specific MCP connection...")
+        self._log("    Initializing AI agent with viewport-specific MCP connection...")
         self._log("      Debug mode: ENABLED")
         self._log("      Tool calls: Will be logged\n")
 
@@ -376,13 +376,13 @@ Be thorough but efficient. Report clear outcomes.""",
         # Initialize agent with this cell's specific MCP tools
         await self._initialize_agent(mcp_tools)
 
-        self._log(f"   🌐 Browser: {cell.browser.display_name}")
-        self._log(f"   📱 Viewport: {cell.viewport.name} ({cell.viewport.width}×{cell.viewport.height})")
-        self._log(f"   📡 Network: {cell.network.display_name}")
+        self._log(f"    Browser: {cell.browser.display_name}")
+        self._log(f"    Viewport: {cell.viewport.name} ({cell.viewport.width}×{cell.viewport.height})")
+        self._log(f"    Network: {cell.network.display_name}")
 
         # NEW APPROACH: Give agent the full flow goal, let it decide the steps
         if self.agent is not None:
-            self._log(f"   🤖 Letting AI agent execute flow autonomously...")
+            self._log(f"    Letting AI agent execute flow autonomously...")
             flow_result = await self._execute_flow_autonomously(cell, user_request)
             step_results = flow_result["step_results"]
             overall_passed = flow_result["passed"]
@@ -410,7 +410,7 @@ Be thorough but efficient. Report clear outcomes.""",
         try:
             await self.mcp_manager.cleanup_instance(cell.viewport, cell.browser)
         except Exception as e:
-            self._log(f"   ⚠️  Warning: Failed to cleanup MCP instance: {e}")
+            self._log(f"     Warning: Failed to cleanup MCP instance: {e}")
 
         return CellResult(
             cell_id=cell.cell_id,
@@ -449,7 +449,7 @@ Be thorough but efficient. Report clear outcomes.""",
         flow_start = datetime.now()
 
         self._log(f"\n{'='*70}")
-        self._log(f"🔍 DEBUG: Starting autonomous execution for cell {cell.cell_id}")
+        self._log(f" DEBUG: Starting autonomous execution for cell {cell.cell_id}")
         self._log(f"{'='*70}")
 
         # Build the high-level goal for the agent
@@ -485,10 +485,10 @@ ENVIRONMENT SETUP:
 - Network: {cell.network.display_name}
 
 VIEWPORT IS ALREADY CONFIGURED CORRECTLY:
-✅ This browser was launched with proper device emulation for {cell.viewport.display_name}
-✅ Viewport: {cell.viewport.width}×{cell.viewport.height} ({cell.viewport.device_class})
-✅ Device scale factor: {cell.viewport.device_scale_factor}x
-✅ {"Mobile mode with touch events" if cell.viewport.is_mobile else "Desktop mode"}
+ This browser was launched with proper device emulation for {cell.viewport.display_name}
+ Viewport: {cell.viewport.width}×{cell.viewport.height} ({cell.viewport.device_class})
+ Device scale factor: {cell.viewport.device_scale_factor}x
+ {"Mobile mode with touch events" if cell.viewport.is_mobile else "Desktop mode"}
 
 YOUR WORKFLOW:
 1. Navigate directly to target URL: browser_navigate(url="TARGET_URL")
@@ -526,7 +526,7 @@ For each major step you take, report:
 Begin execution now. Take full control."""
 
         # Log the full instruction being sent to agent
-        self._log(f"\n📤 INSTRUCTION SENT TO AGENT:")
+        self._log(f"\n INSTRUCTION SENT TO AGENT:")
         self._log(f"{'-'*70}")
         self._log(autonomous_instruction)
         self._log(f"{'-'*70}\n")
@@ -534,7 +534,7 @@ Begin execution now. Take full control."""
         try:
             # Execute autonomously with agent
             self._log(f"⏳ Executing with AI agent (this may take 30-60 seconds)...")
-            self._log(f"🤖 Agent is thinking and using Playwright MCP tools...\n")
+            self._log(f" Agent is thinking and using Playwright MCP tools...\n")
 
             # Capture ALL agent output (thinking, tool calls, debug info) to log file
             with self._capture_agent_output():
@@ -544,7 +544,7 @@ Begin execution now. Take full control."""
             agent_output = response.content if hasattr(response, 'content') else str(response)
 
             # Log the agent's full response
-            self._log(f"\n📥 AGENT RESPONSE:")
+            self._log(f"\n AGENT RESPONSE:")
             self._log(f"{'-'*70}")
             self._log(agent_output)
             self._log(f"{'-'*70}\n")
@@ -555,7 +555,7 @@ Begin execution now. Take full control."""
             # Determine overall pass/fail
             overall_passed = all(sr.passed for sr in step_results)
 
-            self._log(f"✅ Autonomous execution completed: {'PASSED' if overall_passed else 'FAILED'}")
+            self._log(f" Autonomous execution completed: {'PASSED' if overall_passed else 'FAILED'}")
             self._log(f"{'='*70}\n")
 
             return {
@@ -568,7 +568,7 @@ Begin execution now. Take full control."""
             import traceback
             error_traceback = traceback.format_exc()
 
-            self._log(f"\n❌ AGENT EXECUTION ERROR:")
+            self._log(f"\n AGENT EXECUTION ERROR:")
             self._log(f"{'-'*70}")
             self._log(f"Error Type: {type(e).__name__}")
             self._log(f"Error Message: {str(e)}")
@@ -600,9 +600,9 @@ Begin execution now. Take full control."""
         return f"""
 WORKFLOW for {cell.viewport.display_name}:
 
-✅ Browser already launched with correct device emulation
-✅ Viewport: {cell.viewport.width}×{cell.viewport.height}
-✅ {"Mobile device with touch events" if cell.viewport.is_mobile else "Desktop device"}
+ Browser already launched with correct device emulation
+ Viewport: {cell.viewport.width}×{cell.viewport.height}
+ {"Mobile device with touch events" if cell.viewport.is_mobile else "Desktop device"}
 
 Step 1: Navigate directly to target URL
 {{
@@ -703,14 +703,14 @@ Expected outcomes:
                 status_section = output_lower.split(indicator)[-1][:200]  # Look at next 200 chars after indicator
 
                 # Success indicators
-                success_keywords = ["passed", "pass", "✅", "excellent", "success", "completed successfully", "all tests passed"]
+                success_keywords = ["passed", "pass", "", "excellent", "success", "completed successfully", "all tests passed"]
                 if any(keyword in status_section for keyword in success_keywords):
                     overall_passed = True
                     explicit_status_found = True
                     break
 
                 # Failure indicators (removed "fail" to avoid false positives with "functionality")
-                failure_keywords = ["failed", "❌", "error", "did not pass", "test failed"]
+                failure_keywords = ["failed", "", "error", "did not pass", "test failed"]
                 if any(keyword in status_section for keyword in failure_keywords):
                     overall_passed = False
                     explicit_status_found = True

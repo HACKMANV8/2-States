@@ -328,7 +328,7 @@ class SlackFailureDetail:
 class SlackEnvironmentBreakdown:
     """Per-dimension pass/fail breakdown for Slack."""
     dimension: str  # "Viewports" or "Browsers" or "Network"
-    items: Dict[str, str]  # e.g. {"iPhone 13 Pro": "2/4 runs passed ⚠️"}
+    items: Dict[str, str]  # e.g. {"iPhone 13 Pro": "2/4 runs passed "}
 
 
 @dataclass

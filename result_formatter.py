@@ -115,22 +115,22 @@ class ResultFormatter:
         """
         # Build status emoji and summary
         if run_artifact.overall_status == TestStatus.PASS:
-            status_emoji = "✅"
+            status_emoji = ""
             status_text = "PASS"
         elif run_artifact.overall_status == TestStatus.FAIL:
-            status_emoji = "❌"
+            status_emoji = ""
             status_text = "FAIL"
         else:
-            status_emoji = "⚠️"
+            status_emoji = ""
             status_text = "PARTIAL"
 
         pass_rate = f"{run_artifact.passed_cells}/{run_artifact.total_cells}"
 
         # Build message
         lines = [
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-            "🤖 TestGPT QA Run Complete",
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            "",
+            " TestGPT QA Run Complete",
+            "",
             "",
             f"Scenario: {run_artifact.scenario_name}",
             f"Target: {run_artifact.target_url}",
@@ -157,7 +157,7 @@ class ResultFormatter:
         dashboard_link = f"{dashboard_base_url}/runs/{run_artifact.run_id}"
         lines.extend([
             "",
-            f"📊 Full report: {dashboard_link}"
+            f" Full report: {dashboard_link}"
         ])
 
         return "\n".join(lines)
@@ -197,7 +197,7 @@ class ResultFormatter:
     def _format_failures_section(self, run_artifact: RunArtifact) -> List[str]:
         """Format the critical failures section."""
         lines = [
-            "━━━ CRITICAL FAILURES ━━━",
+            " CRITICAL FAILURES ",
             ""
         ]
 
@@ -210,7 +210,7 @@ class ResultFormatter:
 
         # Show top 5 failures
         for result in failed_cells[:5]:
-            priority_emoji = "🔴" if result.failure_priority == FailurePriority.P0 else "🟡"
+            priority_emoji = "" if result.failure_priority == FailurePriority.P0 else "🟡"
 
             # Get browser display name
             try:
@@ -234,7 +234,7 @@ class ResultFormatter:
     def _format_passes_section(self, run_artifact: RunArtifact) -> List[str]:
         """Format the passes summary section."""
         lines = [
-            "━━━ PASSES ━━━",
+            " PASSES ",
             ""
         ]
 
@@ -250,7 +250,7 @@ class ResultFormatter:
             except:
                 browser_display = browser
 
-            lines.append(f"✅ {browser_display}: {count} run(s) passed")
+            lines.append(f" {browser_display}: {count} run(s) passed")
 
         lines.append("")
         return lines
@@ -258,7 +258,7 @@ class ResultFormatter:
     def _format_environment_breakdown(self, run_artifact: RunArtifact) -> List[str]:
         """Format the per-dimension environment breakdown."""
         lines = [
-            "━━━ ENVIRONMENT BREAKDOWN ━━━",
+            " ENVIRONMENT BREAKDOWN ",
             ""
         ]
 
@@ -266,7 +266,7 @@ class ResultFormatter:
         viewport_stats = self._calculate_dimension_stats(run_artifact.cell_results, "viewport")
         lines.append("Viewports:")
         for name, (passed, total) in viewport_stats.items():
-            status_emoji = "✅" if passed == total else "⚠️" if passed > 0 else "❌"
+            status_emoji = "" if passed == total else "" if passed > 0 else ""
             lines.append(f"  • {name}: {passed}/{total} runs passed {status_emoji}")
 
         lines.append("")
@@ -275,7 +275,7 @@ class ResultFormatter:
         browser_stats = self._calculate_dimension_stats(run_artifact.cell_results, "browser")
         lines.append("Browsers:")
         for name, (passed, total) in browser_stats.items():
-            status_emoji = "✅" if passed == total else "⚠️" if passed > 0 else "❌"
+            status_emoji = "" if passed == total else "" if passed > 0 else ""
             try:
                 display_name = get_browser(name).display_name
             except:
@@ -288,7 +288,7 @@ class ResultFormatter:
         network_stats = self._calculate_dimension_stats(run_artifact.cell_results, "network")
         lines.append("Network:")
         for name, (passed, total) in network_stats.items():
-            status_emoji = "✅" if passed == total else "⚠️" if passed > 0 else "❌"
+            status_emoji = "" if passed == total else "" if passed > 0 else ""
             lines.append(f"  • {name}: {passed}/{total} runs passed {status_emoji}")
 
         lines.append("")
@@ -330,7 +330,7 @@ class ResultFormatter:
     def _format_next_steps(self, run_artifact: RunArtifact) -> List[str]:
         """Format the next steps / actionable guidance section."""
         lines = [
-            "━━━ NEXT STEPS ━━━",
+            " NEXT STEPS ",
             ""
         ]
 
@@ -364,7 +364,7 @@ class ResultFormatter:
                 lines.append("→ Optimize for slow network conditions (image compression, lazy loading)")
 
         else:
-            lines.append("→ All tests passed! ✅")
+            lines.append("→ All tests passed! ")
 
         # Add re-run command
         scenario_slug = run_artifact.scenario_name.split(" - ")[0].lower()

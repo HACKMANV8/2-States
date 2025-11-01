@@ -65,7 +65,7 @@ async def initialize_backend_server():
     if backend_manager is not None:
         return backend_manager
 
-    print("🚀 Starting backend API server for testing...")
+    print(" Starting backend API server for testing...")
 
     backend_manager = BackendServerManager(
         api_host="127.0.0.1",
@@ -75,10 +75,10 @@ async def initialize_backend_server():
 
     # Start the backend server
     if backend_manager.start_backend_server():
-        print("✅ Backend API server started successfully")
+        print(" Backend API server started successfully")
         return backend_manager
     else:
-        print("❌ Failed to start backend API server")
+        print(" Failed to start backend API server")
         return None
 
 
@@ -93,7 +93,7 @@ async def initialize_agent():
     if agent is not None:
         return agent
 
-    print("🔧 Initializing Multi-Capability Agno Agent...")
+    print(" Initializing Multi-Capability Agno Agent...")
     print("=" * 70)
 
     # Step 1: Initialize backend server
@@ -106,7 +106,7 @@ async def initialize_agent():
     print("\n[2/4] Connecting to Playwright MCP...")
     playwright_mcp_tools = MCPTools(command="npx -y @playwright/mcp@latest")
     await playwright_mcp_tools.connect()
-    print("✅ Playwright MCP connected")
+    print(" Playwright MCP connected")
 
     # Step 3: Connect to Backend Testing MCP (FastMCP)
     print("\n[3/4] Connecting to Backend API Testing MCP (FastMCP)...")
@@ -115,7 +115,7 @@ async def initialize_agent():
 
     backend_mcp_tools = MCPTools(command=backend_mcp_command)
     await backend_mcp_tools.connect()
-    print("✅ Backend API Testing MCP connected")
+    print(" Backend API Testing MCP connected")
 
     # Step 4: Create agent with BOTH tool sets
     print("\n[4/4] Creating agent with dual capabilities...")
@@ -162,7 +162,7 @@ If the task is unclear, ask for clarification.
         markdown=True
     )
 
-    print("✅ Agent initialized with web automation AND API testing capabilities!")
+    print(" Agent initialized with web automation AND API testing capabilities!")
     print("=" * 70)
     return agent
 
@@ -182,11 +182,11 @@ async def run_agent_task(user_message: str) -> str:
     agent = await initialize_agent()
 
     try:
-        print(f"\n📝 Processing: {user_message}")
+        print(f"\n Processing: {user_message}")
         response = await agent.arun(user_message)
         return response.content if hasattr(response, 'content') else str(response)
     except Exception as e:
-        error_msg = f"❌ Error: {str(e)}"
+        error_msg = f" Error: {str(e)}"
         print(error_msg)
         return f"{error_msg}\n\nPlease try again or rephrase your request."
 
@@ -211,7 +211,7 @@ def handle_mention(event, say):
     if not user_message:
         say(
             text=(
-                "👋 Hi! I can help with:\n"
+                " Hi! I can help with:\n"
                 "• Web automation (search, navigate, screenshot)\n"
                 "• Backend API testing (test endpoints, run test suites)\n"
                 "\nExample commands:\n"
@@ -223,21 +223,21 @@ def handle_mention(event, say):
         )
         return
 
-    print(f"📝 Received message: {user_message}")
+    print(f" Received message: {user_message}")
 
     # Send initial acknowledgment
-    say(text=f"🤖 Got it! Working on: '{user_message}'...", channel=channel)
+    say(text=f" Got it! Working on: '{user_message}'...", channel=channel)
 
     # Run the agent task
     try:
         result = asyncio.run(run_agent_task(user_message))
 
         # Post result back to Slack
-        print(f"✅ Agent completed. Posting results...")
-        say(text=f"✅ Done!\n\n{result}", channel=channel)
+        print(f" Agent completed. Posting results...")
+        say(text=f" Done!\n\n{result}", channel=channel)
 
     except Exception as e:
-        error_msg = f"❌ Error running task: {str(e)}"
+        error_msg = f" Error running task: {str(e)}"
         print(error_msg)
         say(text=error_msg, channel=channel)
 
@@ -246,7 +246,7 @@ async def cleanup():
     """Clean up MCP connections and backend server on shutdown."""
     global playwright_mcp_tools, backend_mcp_tools, backend_manager
 
-    print("\n🔌 Closing connections and stopping servers...")
+    print("\n Closing connections and stopping servers...")
 
     if playwright_mcp_tools:
         print("   Closing Playwright MCP...")
@@ -260,18 +260,18 @@ async def cleanup():
         print("   Stopping backend API server...")
         backend_manager.stop_backend_server()
 
-    print("✅ All connections closed and servers stopped")
+    print(" All connections closed and servers stopped")
 
 
 if __name__ == "__main__":
     print("""
-╔══════════════════════════════════════════════════════════════════════╗
-║                                                                      ║
-║  Enhanced Slack Bot with Agno Integration                           ║
-║  • Playwright MCP (Web Automation)                                   ║
-║  • FastMCP (Backend API Testing)                                     ║
-║                                                                      ║
-╚══════════════════════════════════════════════════════════════════════╝
+
+                                                                      
+  Enhanced Slack Bot with Agno Integration                           
+  • Playwright MCP (Web Automation)                                   
+  • FastMCP (Backend API Testing)                                     
+                                                                      
+
     """)
 
     # Verify environment variables
@@ -284,7 +284,7 @@ if __name__ == "__main__":
     missing_vars = []
     for var_name, description in required_env_vars.items():
         if not os.environ.get(var_name):
-            print(f"❌ Error: {var_name} not found in environment!")
+            print(f" Error: {var_name} not found in environment!")
             missing_vars.append(var_name)
 
     if missing_vars:
@@ -292,22 +292,22 @@ if __name__ == "__main__":
         print("Please create a .env file with the required variables.")
         exit(1)
 
-    print("✅ All environment variables found")
+    print(" All environment variables found")
 
-    print("\n⚡️ Starting enhanced Slack bot...")
-    print("💡 Capabilities:")
+    print("\n Starting enhanced Slack bot...")
+    print(" Capabilities:")
     print("   • Web automation via Playwright")
     print("   • Backend API testing via FastMCP")
-    print("\n💬 Mention the bot in any channel to use it")
+    print("\n Mention the bot in any channel to use it")
     print("=" * 70)
 
     try:
         handler = SocketModeHandler(app, os.environ["SLACK_APP_TOKEN"])
         handler.start()
     except KeyboardInterrupt:
-        print("\n\n⚠️  Shutting down...")
+        print("\n\n  Shutting down...")
         asyncio.run(cleanup())
-        print("👋 Goodbye!")
+        print(" Goodbye!")
     except Exception as e:
-        print(f"\n❌ Error: {e}")
+        print(f"\n Error: {e}")
         asyncio.run(cleanup())

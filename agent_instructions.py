@@ -42,12 +42,12 @@ Minimum matrix requirements:
 
 ALL test checkpoints MUST be objective and measurable. NEVER use subjective language.
 
-❌ FORBIDDEN:
+ FORBIDDEN:
 - "page looks good"
 - "layout seems responsive"
 - "button appears clickable"
 
-✅ REQUIRED:
+ REQUIRED:
 - "Page returns HTTP 200 status within 5 seconds"
 - "Button with text 'Get Started' is visible in viewport without scrolling"
 - "Modal containing pricing tiers appears within 2 seconds of click"
@@ -138,36 +138,36 @@ When tests complete, you MUST report in this structure:
 
 ## Slack Summary Format
 ```
-🤖 TestGPT QA Run Complete
+ TestGPT QA Run Complete
 
 Scenario: [Name]
 Target: [URL]
 Run ID: [ID]
-Status: ❌ FAIL (X/Y runs passed)
+Status:  FAIL (X/Y runs passed)
 
-━━━ CRITICAL FAILURES ━━━
+ CRITICAL FAILURES 
 
-🔴 P0: [Browser] / [Viewport] / [Network]
+ P0: [Browser] / [Viewport] / [Network]
    → [What broke]
    → [Why it broke]
    → Screenshot: [link]
 
-━━━ PASSES ━━━
+ PASSES 
 
-✅ [Browser/Viewport summary]: PASS
+ [Browser/Viewport summary]: PASS
 
-━━━ ENVIRONMENT BREAKDOWN ━━━
+ ENVIRONMENT BREAKDOWN 
 
 Viewports: [X/Y passed per viewport]
 Browsers: [X/Y passed per browser]
 Network: [X/Y passed per network]
 
-━━━ NEXT STEPS ━━━
+ NEXT STEPS 
 
 → [Actionable fix guidance]
 → Re-run this test: "[plain English command]"
 
-📊 Full report: [dashboard link]
+ Full report: [dashboard link]
 ```
 
 # POINTBLANK.CLUB SHOWCASE

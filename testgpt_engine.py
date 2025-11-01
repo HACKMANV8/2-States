@@ -84,13 +84,13 @@ class TestGPTEngine:
             Formatted Slack summary message
         """
         print("\n" + "=" * 70)
-        print("🚀 TestGPT Processing Request")
+        print(" TestGPT Processing Request")
         print("=" * 70)
         print(f"Message: {slack_message}")
         print(f"User: {user_id}\n")
 
         # Step 1: Parse request
-        print("📋 Step 1: Parsing Slack request...")
+        print(" Step 1: Parsing Slack request...")
         parsed_request = self.parser.parse(slack_message, user_id)
 
         print(f"   Target URL: {parsed_request.target_urls[0]}")
@@ -105,7 +105,7 @@ class TestGPTEngine:
             return await self._handle_rerun(parsed_request, user_id)
 
         # Step 3: Build test plan
-        print("🏗️  Step 2: Building test plan with matrix expansion...")
+        print("  Step 2: Building test plan with matrix expansion...")
 
         scenario_id = self.parser.get_scenario_id(parsed_request)
         scenario_name = self.parser.get_scenario_name(parsed_request)
@@ -122,7 +122,7 @@ class TestGPTEngine:
         print(f"   Estimated duration: {test_plan.estimated_duration_minutes} minutes\n")
 
         # Step 4: Save scenario definition
-        print("💾 Step 3: Saving scenario definition for re-run capability...")
+        print(" Step 3: Saving scenario definition for re-run capability...")
         scenario_def = self.plan_builder.build_scenario_definition(test_plan, user_id)
         self.persistence.save_scenario(scenario_def)
         print()
@@ -131,13 +131,13 @@ class TestGPTEngine:
         try:
             # Check if this is a PR test
             if parsed_request.is_pr_test:
-                print("🧪 Step 4: Executing PR-based tests...")
+                print(" Step 4: Executing PR-based tests...")
                 pr_result = await self._handle_pr_test(parsed_request, user_id)
                 return pr_result
 
             # Check if this is a backend API test
             if parsed_request.is_backend_api_test:
-                print("🧪 Step 4: Executing backend API tests...")
+                print(" Step 4: Executing backend API tests...")
 
                 # Build test instructions from parsed request
                 test_instructions = self._build_backend_test_instructions(parsed_request)
@@ -155,16 +155,16 @@ class TestGPTEngine:
 
             # Regular Playwright testing
             if self.executor:
-                print("▶️  Step 4: Executing test matrix...")
+                print("  Step 4: Executing test matrix...")
                 cell_results = await self.executor.execute_test_plan(test_plan)
                 print(f"   Completed {len(cell_results)} cells\n")
             else:
-                print("⚠️  Step 4: Skipping execution (no MCP tools connected)")
+                print("  Step 4: Skipping execution (no MCP tools connected)")
                 print("   Generating mock results for demonstration...\n")
                 cell_results = self._generate_mock_results(test_plan)
 
             # Step 6: Aggregate results
-            print("📊 Step 5: Aggregating results...")
+            print(" Step 5: Aggregating results...")
             run_id = f"run-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:6]}"
 
             run_artifact = self.formatter.aggregate_results(
@@ -183,7 +183,7 @@ class TestGPTEngine:
             print(f"   Pass rate: {run_artifact.passed_cells}/{run_artifact.total_cells}\n")
 
             # Step 7: Save run artifact
-            print("💾 Step 6: Saving run artifact...")
+            print(" Step 6: Saving run artifact...")
             self.persistence.save_run_artifact(run_artifact)
             self.persistence.update_scenario_last_run(scenario_id, datetime.now())
 
@@ -192,12 +192,12 @@ class TestGPTEngine:
             print()
 
             # Step 8: Format Slack summary
-            print("✍️  Step 7: Formatting Slack summary...")
+            print("  Step 7: Formatting Slack summary...")
             slack_summary = self.formatter.format_slack_summary(run_artifact)
             print()
 
             print("=" * 70)
-            print("✅ TestGPT Processing Complete")
+            print(" TestGPT Processing Complete")
             print("=" * 70 + "\n")
 
             return slack_summary
@@ -216,7 +216,7 @@ class TestGPTEngine:
                     raise
             except Exception as e:
                 # Log other errors but don't fail the request
-                print(f"⚠️  Warning during MCP cleanup: {e}")
+                print(f"  Warning during MCP cleanup: {e}")
 
     async def _handle_rerun(self, parsed_request, user_id: str) -> str:
         """
@@ -224,7 +224,7 @@ class TestGPTEngine:
 
         Finds the matching scenario and re-executes it.
         """
-        print("🔄 Handling re-run request...")
+        print(" Handling re-run request...")
 
         reference = parsed_request.rerun_scenario_reference
 
@@ -248,7 +248,7 @@ class TestGPTEngine:
                 )
                 if sorted_scenarios:
                     reference = sorted_scenarios[0]['scenario_id']
-                    print(f"   🔍 'last test' resolved to: {sorted_scenarios[0]['scenario_name']}")
+                    print(f"    'last test' resolved to: {sorted_scenarios[0]['scenario_name']}")
 
         # Try to find matching scenario
         # First by exact ID
@@ -267,7 +267,7 @@ class TestGPTEngine:
 
         if not scenario_dict:
             return (
-                f"❌ Could not find scenario matching '{reference}'\n\n"
+                f" Could not find scenario matching '{reference}'\n\n"
                 f"Available scenarios:\n" +
                 "\n".join(
                     f"  • {s['scenario_name']}"
@@ -320,7 +320,7 @@ class TestGPTEngine:
         )
 
         # Execute the test as if it's a new request
-        print(f"   🚀 Executing re-run...\n")
+        print(f"    Executing re-run...\n")
 
         # Build test plan from reconstructed request
         scenario_id = self.parser.get_scenario_id(reconstructed_request)
@@ -338,12 +338,12 @@ class TestGPTEngine:
         print(f"   Estimated duration: {test_plan.estimated_duration_minutes} minutes\n")
 
         # Execute tests
-        print("▶️  Executing test matrix...")
+        print("  Executing test matrix...")
         cell_results = await self.executor.execute_test_plan(test_plan)
         print(f"   Completed {len(cell_results)} cells\n")
 
         # Aggregate results
-        print("📊 Aggregating results...")
+        print(" Aggregating results...")
         run_id = f"run-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:6]}"
 
         run_artifact = self.formatter.aggregate_results(
@@ -362,7 +362,7 @@ class TestGPTEngine:
         print(f"   Pass rate: {run_artifact.passed_cells}/{run_artifact.total_cells}\n")
 
         # Save run artifact
-        print("💾 Saving run artifact...")
+        print(" Saving run artifact...")
         self.persistence.save_run_artifact(run_artifact)
 
         # Save to database for frontend display
@@ -379,11 +379,11 @@ class TestGPTEngine:
             json.dump(scenario_dict, f, indent=2, default=str)
 
         # Format Slack summary
-        print("✍️  Formatting Slack summary...\n")
+        print("  Formatting Slack summary...\n")
         slack_summary = self.formatter.format_slack_summary(run_artifact)
 
         print("=" * 70)
-        print("✅ Re-run Complete")
+        print(" Re-run Complete")
         print("=" * 70 + "\n")
 
         return slack_summary
@@ -473,7 +473,7 @@ class TestGPTEngine:
         if not scenarios:
             return "No saved scenarios yet. Run a test to create one!"
 
-        lines = ["📚 Saved Test Scenarios\n"]
+        lines = [" Saved Test Scenarios\n"]
 
         for scenario in scenarios[:10]:  # Limit to 10
             lines.append(f"• {scenario['scenario_name']}")
@@ -546,7 +546,7 @@ class TestGPTEngine:
             pr_url = parsed_request.pr_url
             if not pr_url:
                 return (
-                    "❌ **PR Testing Failed**\n\n"
+                    " **PR Testing Failed**\n\n"
                     "Could not find a valid GitHub PR URL in your message.\n\n"
                     "Please provide a PR URL like:\n"
                     "- `test this PR https://github.com/owner/repo/pull/123`\n"
@@ -572,7 +572,7 @@ class TestGPTEngine:
             if pr_test_result["status"] == "failed":
                 error_msg = pr_test_result.get("error", "Unknown error")
                 return (
-                    f"❌ **PR Testing Preparation Failed**\n\n"
+                    f" **PR Testing Preparation Failed**\n\n"
                     f"**Error:** {error_msg}\n\n"
                     f"**PR URL:** {pr_url}\n\n"
                     f"Please check that:\n"
@@ -586,7 +586,7 @@ class TestGPTEngine:
                 deployment_url = pr_test_result["test_context"]["deployment_url"]
                 agent_instructions = pr_test_result["test_context"]["agent_instructions"]
 
-                print("\n🎭 Executing tests with Playwright agent...")
+                print("\n Executing tests with Playwright agent...")
 
                 # Execute using existing TestExecutor
                 # Create a simple test with the deployment URL and instructions
@@ -613,10 +613,10 @@ class TestGPTEngine:
         except Exception as e:
             import traceback
             error_trace = traceback.format_exc()
-            print(f"❌ Error in PR testing: {e}\n{error_trace}")
+            print(f" Error in PR testing: {e}\n{error_trace}")
 
             return (
-                f"❌ **PR Testing Failed**\n\n"
+                f" **PR Testing Failed**\n\n"
                 f"**Error:** {str(e)}\n\n"
                 f"**PR URL:** {parsed_request.pr_url}\n\n"
                 f"Please check the logs for more details."
@@ -645,7 +645,7 @@ class TestGPTEngine:
 
         try:
             # Get MCP manager and create instance for this test
-            print(f"   🔧 Starting Playwright MCP instance...")
+            print(f"    Starting Playwright MCP instance...")
 
             # Use desktop-standard viewport and chromium-desktop browser
             # This matches the normal testing flow configuration
@@ -655,12 +655,12 @@ class TestGPTEngine:
             viewport = VIEWPORT_PROFILES["desktop-standard"]
             browser_profile = BROWSER_PROFILES["chromium-desktop"]
 
-            print(f"   🌐 Testing with {browser_profile.name} browser")
+            print(f"    Testing with {browser_profile.name} browser")
 
             # Connect to MCP using the proper manager (same as normal tests)
             mcp_tools = await self.mcp_manager.get_mcp_tools_for_cell(viewport, browser_profile)
 
-            print(f"   ✅ Playwright MCP connected")
+            print(f"    Playwright MCP connected")
 
             # Create agent with Claude model
             from agno.models.anthropic import Claude
@@ -673,7 +673,7 @@ class TestGPTEngine:
                 debug_mode=True
             )
 
-            print(f"   🤖 Executing test scenarios...")
+            print(f"    Executing test scenarios...")
 
             start_time = datetime.now()
 
@@ -683,7 +683,7 @@ class TestGPTEngine:
             end_time = datetime.now()
             duration_ms = int((end_time - start_time).total_seconds() * 1000)
 
-            print(f"   ✅ Test execution completed ({duration_ms}ms)")
+            print(f"    Test execution completed ({duration_ms}ms)")
 
             # Parse results from agent response
             response_text = str(response)
@@ -692,14 +692,14 @@ class TestGPTEngine:
             test_passed = any(indicator in response_text.lower() for indicator in [
                 "all tests passed",
                 "all scenarios passed",
-                "✅",
+                "",
                 "success"
             ])
 
             test_failed = any(indicator in response_text.lower() for indicator in [
                 "failed",
                 "error",
-                "❌",
+                "",
                 "failure"
             ])
 
@@ -714,9 +714,9 @@ class TestGPTEngine:
                     # Known cosmetic issue with stdio cleanup - safe to ignore
                     pass
                 else:
-                    print(f"   ⚠️  MCP cleanup warning: {e}")
+                    print(f"     MCP cleanup warning: {e}")
             except Exception as e:
-                print(f"   ⚠️  MCP cleanup error: {e}")
+                print(f"     MCP cleanup error: {e}")
 
             return {
                 "success": True,
@@ -737,7 +737,7 @@ class TestGPTEngine:
         except Exception as e:
             import traceback
             error_trace = traceback.format_exc()
-            print(f"   ❌ Test execution failed: {e}")
+            print(f"    Test execution failed: {e}")
 
             return {
                 "success": False,
@@ -764,8 +764,8 @@ class TestGPTEngine:
 
             # Check multiple pass indicators
             pass_indicators = [
-                f"✅ {scenario_lower}",
-                f"{scenario_lower} ✅",
+                f" {scenario_lower}",
+                f"{scenario_lower} ",
                 f"{scenario_lower}: passed",
                 f"{scenario_lower} passed",
                 f"{scenario_lower}: success",
@@ -775,8 +775,8 @@ class TestGPTEngine:
 
             # Check multiple fail indicators
             fail_indicators = [
-                f"❌ {scenario_lower}",
-                f"{scenario_lower} ❌",
+                f" {scenario_lower}",
+                f"{scenario_lower} ",
                 f"{scenario_lower}: failed",
                 f"{scenario_lower} failed",
                 f"{scenario_lower}: error",
@@ -820,7 +820,7 @@ class TestGPTEngine:
         current_failure = None
 
         for line in lines:
-            if "❌" in line or "failed" in line.lower() or "error" in line.lower():
+            if "" in line or "failed" in line.lower() or "error" in line.lower():
                 if current_failure:
                     failures.append(current_failure)
 
@@ -852,9 +852,9 @@ class TestGPTEngine:
 
         # Header
         if backend_result["status"] == "completed":
-            lines.append("✅ **Backend API Testing Completed**\n")
+            lines.append(" **Backend API Testing Completed**\n")
         else:
-            lines.append("❌ **Backend API Testing Failed**\n")
+            lines.append(" **Backend API Testing Failed**\n")
 
         # Test details
         if backend_result.get("repo_url"):
@@ -885,8 +885,8 @@ class TestGPTEngine:
 
         # Footer
         lines.append("---")
-        lines.append(f"🤖 *TestGPT Backend API Testing*")
-        lines.append(f"⏱️  *Completed at:* {backend_result['completed_at'].strftime('%Y-%m-%d %H:%M:%S')}")
+        lines.append(f" *TestGPT Backend API Testing*")
+        lines.append(f"⏱  *Completed at:* {backend_result['completed_at'].strftime('%Y-%m-%d %H:%M:%S')}")
 
         return "\n".join(lines)
 
@@ -934,10 +934,10 @@ class TestGPTEngine:
 
                 new_suite = crud.create_test_suite(db, suite_create)
                 test_suite_id = new_suite.id
-                print(f"   📝 Created test suite: {test_suite_id}")
+                print(f"    Created test suite: {test_suite_id}")
             else:
                 test_suite_id = existing_suite.id
-                print(f"   📝 Using existing test suite: {test_suite_id}")
+                print(f"    Using existing test suite: {test_suite_id}")
 
             # Determine status based on run_artifact.overall_status
             status_map = {
@@ -1011,11 +1011,11 @@ class TestGPTEngine:
             db.commit()
             db.refresh(execution)
 
-            print(f"   💾 Saved execution to database: {execution.id}")
-            print(f"   📊 Status: {status}, Suite ID: {test_suite_id}")
+            print(f"    Saved execution to database: {execution.id}")
+            print(f"    Status: {status}, Suite ID: {test_suite_id}")
 
         except Exception as e:
-            print(f"   ⚠️  Warning: Failed to save execution to database: {e}")
+            print(f"     Warning: Failed to save execution to database: {e}")
             import traceback
             traceback.print_exc()
         finally:

@@ -188,7 +188,7 @@ class DynamicServerManager:
             # Wait for server to be ready
             logger.info("Waiting for API server to be ready...")
             if await self._wait_for_api_ready(timeout=30):
-                logger.info(f"✅ API server started successfully at {self.api_url}")
+                logger.info(f" API server started successfully at {self.api_url}")
                 return self.api_process
             else:
                 # Server failed to start
@@ -293,7 +293,7 @@ class DynamicServerManager:
             # Wait for MCP server to be ready
             logger.info("Waiting for FastMCP server to be ready...")
             if await self._wait_for_mcp_ready(timeout=10):
-                logger.info("✅ FastMCP server started successfully")
+                logger.info(" FastMCP server started successfully")
                 return self.mcp_wrapper_path, self.mcp_process
             else:
                 # Server failed to start

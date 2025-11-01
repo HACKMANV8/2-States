@@ -92,12 +92,12 @@ class PRTestPersistence:
 
             pr_test = create_pr_test_run(db, db_data)
 
-            print(f"   💾 Saved PR test run to database: {pr_test.id}")
+            print(f"    Saved PR test run to database: {pr_test.id}")
 
             return pr_test.id
 
         except Exception as e:
-            print(f"   ⚠️  Failed to save PR test start: {e}")
+            print(f"     Failed to save PR test start: {e}")
             return None
         finally:
             self._close_db()
@@ -142,14 +142,14 @@ class PRTestPersistence:
             updated = update_pr_test_run(db, test_run_id, updates)
 
             if updated:
-                print(f"   💾 Updated PR test results: {test_run_id}")
+                print(f"    Updated PR test results: {test_run_id}")
                 return True
             else:
-                print(f"   ⚠️  Failed to update PR test (not found): {test_run_id}")
+                print(f"     Failed to update PR test (not found): {test_run_id}")
                 return False
 
         except Exception as e:
-            print(f"   ⚠️  Failed to update PR test results: {e}")
+            print(f"     Failed to update PR test results: {e}")
             return False
         finally:
             self._close_db()
@@ -179,7 +179,7 @@ class PRTestPersistence:
             return updated is not None
 
         except Exception as e:
-            print(f"   ⚠️  Failed to update GitHub comment info: {e}")
+            print(f"     Failed to update GitHub comment info: {e}")
             return False
         finally:
             self._close_db()
@@ -199,7 +199,7 @@ class PRTestPersistence:
             return get_pr_test_run(db, test_run_id)
 
         except Exception as e:
-            print(f"   ⚠️  Failed to get PR test: {e}")
+            print(f"     Failed to get PR test: {e}")
             return None
         finally:
             self._close_db()

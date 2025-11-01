@@ -24,13 +24,13 @@ from backend.pr_test_crud import (
 
 def test_crud_operations():
     """Test CRUD operations."""
-    print("🧪 Testing PR Test CRUD operations...\n")
+    print(" Testing PR Test CRUD operations...\n")
 
     db = SessionLocal()
 
     try:
         # 1. CREATE
-        print("1️⃣ Testing CREATE...")
+        print("1⃣ Testing CREATE...")
         test_run_id = f"test-run-{uuid.uuid4().hex[:8]}"
         test_data = {
             "test_run_id": test_run_id,
@@ -68,22 +68,22 @@ def test_crud_operations():
         }
 
         pr_test = create_pr_test_run(db, test_data)
-        print(f"   ✅ Created PR test run: {pr_test.id}")
-        print(f"   📋 PR: {pr_test.repo_owner}/{pr_test.repo_name}#{pr_test.pr_number}")
-        print(f"   🔍 Status: {pr_test.status}")
+        print(f"    Created PR test run: {pr_test.id}")
+        print(f"    PR: {pr_test.repo_owner}/{pr_test.repo_name}#{pr_test.pr_number}")
+        print(f"    Status: {pr_test.status}")
 
         # 2. READ (by ID)
-        print("\n2️⃣ Testing READ (by ID)...")
+        print("\n2⃣ Testing READ (by ID)...")
         retrieved = get_pr_test_run(db, pr_test.id)
         if retrieved:
-            print(f"   ✅ Retrieved PR test run: {retrieved.pr_title}")
-            print(f"   📊 Scenarios: {retrieved.scenarios_total}")
-            print(f"   🌐 Deployment: {retrieved.deployment_platform}")
+            print(f"    Retrieved PR test run: {retrieved.pr_title}")
+            print(f"    Scenarios: {retrieved.scenarios_total}")
+            print(f"    Deployment: {retrieved.deployment_platform}")
         else:
-            print("   ❌ Failed to retrieve PR test run")
+            print("    Failed to retrieve PR test run")
 
         # 3. UPDATE
-        print("\n3️⃣ Testing UPDATE...")
+        print("\n3⃣ Testing UPDATE...")
         updates = {
             "status": "passed",
             "overall_pass": True,
@@ -99,38 +99,38 @@ def test_crud_operations():
         }
         updated = update_pr_test_run(db, pr_test.id, updates)
         if updated:
-            print(f"   ✅ Updated PR test run")
-            print(f"   🔍 New status: {updated.status}")
-            print(f"   ✅ Pass: {updated.overall_pass}")
-            print(f"   📊 Results: {updated.scenarios_passed}/{updated.scenarios_total} passed")
+            print(f"    Updated PR test run")
+            print(f"    New status: {updated.status}")
+            print(f"    Pass: {updated.overall_pass}")
+            print(f"    Results: {updated.scenarios_passed}/{updated.scenarios_total} passed")
         else:
-            print("   ❌ Failed to update PR test run")
+            print("    Failed to update PR test run")
 
         # 4. LIST
-        print("\n4️⃣ Testing LIST...")
+        print("\n4⃣ Testing LIST...")
         all_tests = get_pr_test_runs(db, limit=10)
-        print(f"   ✅ Retrieved {len(all_tests)} PR test runs")
+        print(f"    Retrieved {len(all_tests)} PR test runs")
         for test in all_tests:
             print(f"      - {test.repo_owner}/{test.repo_name}#{test.pr_number}: {test.status}")
 
         # 5. FILTER
-        print("\n5️⃣ Testing FILTER (by repo)...")
+        print("\n5⃣ Testing FILTER (by repo)...")
         filtered = get_pr_test_runs(db, repo_owner="test", repo_name="repo")
-        print(f"   ✅ Retrieved {len(filtered)} tests for test/repo")
+        print(f"    Retrieved {len(filtered)} tests for test/repo")
 
         # 6. STATS
-        print("\n6️⃣ Testing STATS...")
+        print("\n6⃣ Testing STATS...")
         stats = get_pr_test_stats(db, days=7)
-        print(f"   ✅ Statistics for last 7 days:")
+        print(f"    Statistics for last 7 days:")
         print(f"      - Total tests: {stats['total_tests']}")
         print(f"      - Passed: {stats['passed']}")
         print(f"      - Failed: {stats['failed']}")
         print(f"      - Success rate: {stats['success_rate']:.1f}%")
 
-        print("\n✅ All CRUD operations successful!\n")
+        print("\n All CRUD operations successful!\n")
 
     except Exception as e:
-        print(f"\n❌ Error during CRUD test: {e}")
+        print(f"\n Error during CRUD test: {e}")
         import traceback
         traceback.print_exc()
 

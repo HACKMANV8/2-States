@@ -61,10 +61,10 @@ def test_edge_cases():
             result = analyzer.analyze_decision(expression, file_path, line)
 
             if result.is_achievable:
-                status = "✅ PASS"
+                status = " PASS"
                 passed += 1
             else:
-                status = "⚠️  WARN"
+                status = "  WARN"
                 passed += 1  # Still counts as pass, just not achievable
 
             print(f"{status} {name}")
@@ -79,7 +79,7 @@ def test_edge_cases():
             print()
 
         except Exception as e:
-            status = "❌ FAIL"
+            status = " FAIL"
             failed += 1
             print(f"{status} {name}")
             print(f"    Expression: {expression}")
@@ -115,12 +115,12 @@ def test_error_handling():
         try:
             result = analyzer.analyze_decision(expression, file_path, line)
             # If we get here, the analyzer handled it gracefully
-            print(f"✅ PASS {name}")
+            print(f" PASS {name}")
             print(f"    Expression: '{expression}'")
             print(f"    Handled gracefully")
             passed += 1
         except Exception as e:
-            print(f"✅ PASS {name}")
+            print(f" PASS {name}")
             print(f"    Expression: '{expression}'")
             print(f"    Expected error: {type(e).__name__}")
             passed += 1
@@ -149,11 +149,11 @@ def test_max_complexity():
 
     try:
         result = analyzer.analyze_decision(max_expr, "test.py", 1)
-        print(f"✅ Handled max complexity")
+        print(f" Handled max complexity")
         print(f"   Truth table rows: {len(result.truth_table)}")
         print(f"   MCDC achievable: {result.is_achievable}")
     except Exception as e:
-        print(f"❌ Failed at max complexity: {e}")
+        print(f" Failed at max complexity: {e}")
         return False
 
     print()
@@ -166,12 +166,12 @@ def test_max_complexity():
     try:
         result = analyzer.analyze_decision(over_max_expr, "test.py", 2)
         if not result.is_achievable and "complexity" in result.reason.lower():
-            print(f"✅ Correctly rejected over-complex condition")
+            print(f" Correctly rejected over-complex condition")
             print(f"   Reason: {result.reason}")
         else:
-            print(f"⚠️  Accepted over-complex condition (may need review)")
+            print(f"  Accepted over-complex condition (may need review)")
     except Exception as e:
-        print(f"✅ Correctly raised error for over-complex condition")
+        print(f" Correctly raised error for over-complex condition")
         print(f"   Error: {e}")
 
     print()
@@ -182,9 +182,9 @@ def test_max_complexity():
 
 if __name__ == "__main__":
     print("\n")
-    print("╔" + "═" * 68 + "╗")
-    print("║" + " " * 15 + "MCDC ANALYZER EDGE CASE TEST SUITE" + " " * 19 + "║")
-    print("╚" + "═" * 68 + "╝")
+    print("" + "" * 68 + "")
+    print("" + " " * 15 + "MCDC ANALYZER EDGE CASE TEST SUITE" + " " * 19 + "")
+    print("" + "" * 68 + "")
     print()
 
     all_passed = True
@@ -196,12 +196,12 @@ if __name__ == "__main__":
 
     print("\n" + "=" * 70)
     if all_passed:
-        print("✅ ALL EDGE CASE TESTS PASSED")
+        print(" ALL EDGE CASE TESTS PASSED")
         print("=" * 70)
         print("\nMCDC analyzer is robust and handles edge cases correctly!")
         sys.exit(0)
     else:
-        print("❌ SOME TESTS FAILED")
+        print(" SOME TESTS FAILED")
         print("=" * 70)
         print("\nPlease review failures above.")
         sys.exit(1)

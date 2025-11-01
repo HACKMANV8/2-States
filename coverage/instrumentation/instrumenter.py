@@ -54,7 +54,7 @@ class CodeInstrumenter:
         Returns:
             InstrumentationResult with instrumented files
         """
-        print(f"🔧 Instrumenting {len(file_paths)} files...")
+        print(f" Instrumenting {len(file_paths)} files...")
 
         instrumented_files = []
         failed_files = []
@@ -64,15 +64,15 @@ class CodeInstrumenter:
                 result = await self._instrument_file(file_path, base_path)
                 if result:
                     instrumented_files.append(result)
-                    print(f"   ✅ {file_path}")
+                    print(f"    {file_path}")
                 else:
                     failed_files.append((file_path, "Unsupported file type"))
-                    print(f"   ⏭️  {file_path} (skipped)")
+                    print(f"   ⏭  {file_path} (skipped)")
             except Exception as e:
                 failed_files.append((file_path, str(e)))
-                print(f"   ❌ {file_path}: {str(e)}")
+                print(f"    {file_path}: {str(e)}")
 
-        print(f"✅ Instrumentation complete:")
+        print(f" Instrumentation complete:")
         print(f"   Success: {len(instrumented_files)}")
         print(f"   Failed: {len(failed_files)}")
 

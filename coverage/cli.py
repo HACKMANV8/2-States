@@ -35,14 +35,14 @@ class CoverageCLI:
 
     def cmd_init(self):
         """Initialize database."""
-        print("🚀 Initializing TestGPT Coverage Database...")
+        print(" Initializing TestGPT Coverage Database...")
         self.db.create_tables()
-        print("✅ Database initialized successfully")
+        print(" Database initialized successfully")
 
     async def cmd_analyze_pr(self, pr_url: str):
         """Analyze PR diff."""
         print(f"\n{'='*70}")
-        print(f"📋 Analyzing PR: {pr_url}")
+        print(f" Analyzing PR: {pr_url}")
         print(f"{'='*70}\n")
 
         analyzer = PRDiffAnalyzer()
@@ -61,14 +61,14 @@ class CoverageCLI:
         print(f"Critical Changes: {len(summary.critical_changes)}")
 
         if summary.critical_changes:
-            print(f"\n🚨 Critical Changes:")
+            print(f"\n Critical Changes:")
             for change in summary.critical_changes[:5]:
                 print(f"   • {change.file_path}:{change.line_start}-{change.line_end}")
                 if change.function_name:
                     print(f"     Function: {change.function_name}")
 
         if summary.changed_functions:
-            print(f"\n🔧 Changed Functions:")
+            print(f"\n Changed Functions:")
             for func in summary.changed_functions[:10]:
                 print(f"   • {func.function_name} in {func.file_path}")
                 print(f"     Lines: {func.line_start}-{func.line_end}, "
@@ -77,7 +77,7 @@ class CoverageCLI:
     async def cmd_analyze_mcdc(self, file_path: str):
         """Analyze MCDC in a file."""
         print(f"\n{'='*70}")
-        print(f"🔍 Analyzing MCDC in: {file_path}")
+        print(f" Analyzing MCDC in: {file_path}")
         print(f"{'='*70}\n")
 
         # Read file
@@ -102,7 +102,7 @@ class CoverageCLI:
             print(f"  Line: {result.decision.line_number}")
             print(f"  Conditions: {len(result.decision.conditions)}")
             print(f"  Complexity: {result.decision.complexity}")
-            print(f"  MCDC Achievable: {'✅' if result.is_achievable else '❌'}")
+            print(f"  MCDC Achievable: {'' if result.is_achievable else ''}")
 
             if result.is_achievable:
                 print(f"  Required Tests: {result.minimum_test_count}")
@@ -123,7 +123,7 @@ class CoverageCLI:
     async def cmd_run(self, pr_url: str, config_name: str = "default"):
         """Run full coverage collection."""
         print(f"\n{'='*70}")
-        print(f"🚀 Starting Coverage Run")
+        print(f" Starting Coverage Run")
         print(f"{'='*70}\n")
 
         # Load configuration
@@ -180,7 +180,7 @@ class CoverageCLI:
 
         report = await orchestrator.generate_report(report_type="json")
 
-        print(f"✅ Coverage run complete!")
+        print(f" Coverage run complete!")
         print(f"   Run ID: {run.run_id}")
         print(f"   Report ID: {report.report_id}")
         print(f"   Coverage: {orchestrator.coverage_run.overall_coverage_percent:.1f}%")
@@ -188,18 +188,18 @@ class CoverageCLI:
 
         # Save to database
         self.db.save_coverage_run(orchestrator.coverage_run)
-        print(f"\n💾 Saved to database")
+        print(f"\n Saved to database")
 
     def cmd_report(self, run_id: str):
         """Generate report for a run."""
         print(f"\n{'='*70}")
-        print(f"📊 Coverage Report: {run_id}")
+        print(f" Coverage Report: {run_id}")
         print(f"{'='*70}\n")
 
         run = self.db.get_coverage_run(run_id)
 
         if not run:
-            print(f"❌ Run not found: {run_id}")
+            print(f" Run not found: {run_id}")
             return
 
         print(f"Run ID: {run.run_id}")
@@ -211,7 +211,7 @@ class CoverageCLI:
         print(f"  Overall: {run.overall_coverage_percent:.1f}%")
         print(f"  Changed Lines: {run.changed_lines_covered}/{run.changed_lines_total}")
         print(f"  Branches: {run.branches_covered}/{run.branches_total}")
-        print(f"  MCDC Satisfied: {'✅' if run.mcdc_satisfied else '❌'}")
+        print(f"  MCDC Satisfied: {'' if run.mcdc_satisfied else ''}")
         print(f"  Tests Run: {run.test_count}")
 
         if run.stop_reason:
@@ -220,7 +220,7 @@ class CoverageCLI:
     def cmd_list(self, limit: int = 10):
         """List recent coverage runs."""
         print(f"\n{'='*70}")
-        print(f"📋 Recent Coverage Runs")
+        print(f" Recent Coverage Runs")
         print(f"{'='*70}\n")
 
         runs = self.db.get_recent_runs(limit=limit)
@@ -231,11 +231,11 @@ class CoverageCLI:
 
         for run in runs:
             status_emoji = {
-                'running': '🔄',
-                'completed': '✅',
-                'failed': '❌',
-                'stopped': '🛑'
-            }.get(run.status, '❓')
+                'running': '',
+                'completed': '',
+                'failed': '',
+                'stopped': ''
+            }.get(run.status, '')
 
             print(f"{status_emoji} {run.run_id}")
             print(f"   Status: {run.status}")
@@ -287,21 +287,21 @@ async def main():
 
         elif command == "analyze-pr":
             if len(sys.argv) < 3:
-                print("❌ Error: PR URL required")
+                print(" Error: PR URL required")
                 print("Usage: python coverage/cli.py analyze-pr <pr_url>")
                 return
             await cli.cmd_analyze_pr(sys.argv[2])
 
         elif command == "analyze-mcdc":
             if len(sys.argv) < 3:
-                print("❌ Error: File path required")
+                print(" Error: File path required")
                 print("Usage: python coverage/cli.py analyze-mcdc <file_path>")
                 return
             await cli.cmd_analyze_mcdc(sys.argv[2])
 
         elif command == "run":
             if len(sys.argv) < 3:
-                print("❌ Error: PR URL required")
+                print(" Error: PR URL required")
                 print("Usage: python coverage/cli.py run <pr_url> [config]")
                 return
             pr_url = sys.argv[2]
@@ -310,7 +310,7 @@ async def main():
 
         elif command == "report":
             if len(sys.argv) < 3:
-                print("❌ Error: Run ID required")
+                print(" Error: Run ID required")
                 print("Usage: python coverage/cli.py report <run_id>")
                 return
             cli.cmd_report(sys.argv[2])
@@ -320,13 +320,13 @@ async def main():
             cli.cmd_list(limit)
 
         else:
-            print(f"❌ Unknown command: {command}")
+            print(f" Unknown command: {command}")
             cli.print_usage()
 
     except KeyboardInterrupt:
-        print("\n\n⚠️  Interrupted by user")
+        print("\n\n  Interrupted by user")
     except Exception as e:
-        print(f"\n❌ Error: {str(e)}")
+        print(f"\n Error: {str(e)}")
         import traceback
         traceback.print_exc()
 

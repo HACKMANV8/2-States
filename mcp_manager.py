@@ -56,7 +56,7 @@ class MCPServerInstance:
         quoted_args = ' '.join(shlex.quote(arg) for arg in mcp_args)
         full_command = f"npx -y @playwright/mcp@latest {quoted_args}"
 
-        print(f"   🔌 Connecting to MCP server for {self.viewport.name} on {self.browser.name}")
+        print(f"    Connecting to MCP server for {self.viewport.name} on {self.browser.name}")
         print(f"      Command: {full_command}")
 
         self.mcp_tools = MCPTools(
@@ -67,7 +67,7 @@ class MCPServerInstance:
         await self.mcp_tools.connect()
         self.connected = True
 
-        print(f"      ✅ Connected to MCP server (port {self.port})")
+        print(f"       Connected to MCP server (port {self.port})")
 
         return self.mcp_tools
 
@@ -110,13 +110,13 @@ class MCPServerInstance:
     async def disconnect(self):
         """Disconnect and cleanup this MCP server instance."""
         if self.mcp_tools:
-            print(f"   🔌 Disconnecting MCP server for {self.viewport.name}")
+            print(f"    Disconnecting MCP server for {self.viewport.name}")
             # Note: We don't call close() because it causes RuntimeError when called across task boundaries
             # The MCP connection will be cleaned up automatically when the program exits
             # This is a known limitation with asyncio cancel scopes and stdio connections
             self.connected = False
             self.mcp_tools = None
-            print(f"      ✅ MCP connection released (will cleanup on exit)")
+            print(f"       MCP connection released (will cleanup on exit)")
 
         if self.process:
             try:
@@ -150,7 +150,7 @@ class BackendTestingMCPInstance:
         if self.mcp_tools and self.connected:
             return self.mcp_tools
 
-        print(f"\n🚀 Launching dynamic backend testing MCP server")
+        print(f"\n Launching dynamic backend testing MCP server")
         if self.repo_url:
             print(f"   Repository: {self.repo_url}")
         elif self.api_path:
@@ -232,14 +232,14 @@ class BackendTestingMCPInstance:
         else:
             raise ValueError("Either repo_url or api_path must be provided")
 
-        print(f"   🔌 Connecting to backend testing MCP server")
+        print(f"    Connecting to backend testing MCP server")
         print(f"      Command: {mcp_command}")
 
         self.mcp_tools = MCPTools(command=mcp_command)
         await self.mcp_tools.connect()
         self.connected = True
 
-        print(f"      ✅ Backend testing MCP connected")
+        print(f"       Backend testing MCP connected")
 
         return self.mcp_tools
 
@@ -247,11 +247,11 @@ class BackendTestingMCPInstance:
         """Disconnect and cleanup backend testing MCP server."""
         if self.mcp_tools:
             try:
-                print(f"   🔌 Disconnecting backend testing MCP server")
+                print(f"    Disconnecting backend testing MCP server")
                 await self.mcp_tools.close()
-                print(f"      ✅ Backend MCP connection closed")
+                print(f"       Backend MCP connection closed")
             except Exception as e:
-                print(f"   ⚠️  Error disconnecting backend MCP: {e}")
+                print(f"     Error disconnecting backend MCP: {e}")
             finally:
                 self.connected = False
                 self.mcp_tools = None
@@ -260,7 +260,7 @@ class BackendTestingMCPInstance:
             try:
                 await self.server_manager.stop_all()
             except Exception as e:
-                print(f"   ⚠️  Error stopping backend servers: {e}")
+                print(f"     Error stopping backend servers: {e}")
 
 
 class DynamicMCPManager:
@@ -299,11 +299,11 @@ class DynamicMCPManager:
         if instance_id in self.playwright_instances:
             instance = self.playwright_instances[instance_id]
             if instance.connected:
-                print(f"   ♻️  Reusing existing MCP connection for {viewport.name} / {browser.name}")
+                print(f"     Reusing existing MCP connection for {viewport.name} / {browser.name}")
                 return instance.mcp_tools
 
         # Create new instance
-        print(f"\n🚀 Launching dedicated MCP server for {viewport.display_name} / {browser.display_name}")
+        print(f"\n Launching dedicated MCP server for {viewport.display_name} / {browser.display_name}")
 
         port = self.next_port
         self.next_port += 1
@@ -352,11 +352,11 @@ class DynamicMCPManager:
         if instance_id in self.backend_instances:
             instance = self.backend_instances[instance_id]
             if instance.connected:
-                print(f"   ♻️  Reusing existing backend MCP connection for {instance_id}")
+                print(f"     Reusing existing backend MCP connection for {instance_id}")
                 return instance.mcp_tools
 
         # Create new instance
-        print(f"\n🚀 Launching backend testing MCP server for {instance_id}")
+        print(f"\n Launching backend testing MCP server for {instance_id}")
 
         instance = BackendTestingMCPInstance(
             instance_id=instance_id,
@@ -388,35 +388,35 @@ class DynamicMCPManager:
         if instance_id in self.playwright_instances:
             instance = self.playwright_instances[instance_id]
             try:
-                print(f"   🧹 Cleaning up MCP instance: {instance_id}")
+                print(f"    Cleaning up MCP instance: {instance_id}")
                 await instance.disconnect()
                 del self.playwright_instances[instance_id]
-                print(f"      ✅ MCP instance cleaned up")
+                print(f"       MCP instance cleaned up")
             except Exception as e:
-                print(f"      ⚠️  Error cleaning up {instance_id}: {e}")
+                print(f"        Error cleaning up {instance_id}: {e}")
 
     async def cleanup_all(self):
         """Cleanup all MCP server instances (Playwright and Backend)."""
         total_instances = len(self.playwright_instances) + len(self.backend_instances)
-        print(f"\n🧹 Cleaning up {total_instances} MCP server instances...")
+        print(f"\n Cleaning up {total_instances} MCP server instances...")
 
         # Cleanup Playwright instances
         for instance_id, instance in self.playwright_instances.items():
             try:
                 await instance.disconnect()
             except Exception as e:
-                print(f"   ⚠️  Error cleaning up Playwright instance {instance_id}: {e}")
+                print(f"     Error cleaning up Playwright instance {instance_id}: {e}")
 
         # Cleanup backend instances
         for instance_id, instance in self.backend_instances.items():
             try:
                 await instance.disconnect()
             except Exception as e:
-                print(f"   ⚠️  Error cleaning up backend instance {instance_id}: {e}")
+                print(f"     Error cleaning up backend instance {instance_id}: {e}")
 
         self.playwright_instances.clear()
         self.backend_instances.clear()
-        print("   ✅ All MCP servers cleaned up")
+        print("    All MCP servers cleaned up")
 
     def get_active_instances(self) -> dict:
         """Get list of currently active MCP server instances."""

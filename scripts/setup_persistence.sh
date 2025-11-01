@@ -18,7 +18,7 @@ NC='\033[0m' # No Color
 
 # Check if virtual environment exists
 if [ ! -d "venv" ]; then
-    echo -e "${RED}❌ Virtual environment not found${NC}"
+    echo -e "${RED} Virtual environment not found${NC}"
     echo "Please create it first:"
     echo "  python -m venv venv"
     echo "  source venv/bin/activate"
@@ -26,25 +26,25 @@ if [ ! -d "venv" ]; then
 fi
 
 # Activate virtual environment
-echo -e "${YELLOW}📦 Activating virtual environment...${NC}"
+echo -e "${YELLOW} Activating virtual environment...${NC}"
 source venv/bin/activate
 
 # Install Python dependencies
-echo -e "${YELLOW}📦 Installing Python dependencies...${NC}"
+echo -e "${YELLOW} Installing Python dependencies...${NC}"
 pip install -q --upgrade pip
 pip install -q sqlalchemy alembic requests
 
-echo -e "${GREEN}✅ Python dependencies installed${NC}"
+echo -e "${GREEN} Python dependencies installed${NC}"
 echo ""
 
 # Initialize database and seed default configs
-echo -e "${YELLOW}🗄️  Initializing database and seeding default configurations...${NC}"
+echo -e "${YELLOW}  Initializing database and seeding default configurations...${NC}"
 python backend/seed_data.py
 
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✅ Database initialized successfully${NC}"
+    echo -e "${GREEN} Database initialized successfully${NC}"
 else
-    echo -e "${RED}❌ Database initialization failed${NC}"
+    echo -e "${RED} Database initialization failed${NC}"
     exit 1
 fi
 
@@ -52,7 +52,7 @@ echo ""
 
 # Check if frontend directory exists
 if [ -d "frontend" ]; then
-    echo -e "${YELLOW}📦 Setting up frontend...${NC}"
+    echo -e "${YELLOW} Setting up frontend...${NC}"
     cd frontend
 
     # Check if node_modules exists
@@ -63,15 +63,15 @@ if [ -d "frontend" ]; then
         echo "Frontend dependencies already installed"
     fi
 
-    echo -e "${GREEN}✅ Frontend ready${NC}"
+    echo -e "${GREEN} Frontend ready${NC}"
     cd ..
 else
-    echo -e "${YELLOW}⚠️  Frontend directory not found, skipping frontend setup${NC}"
+    echo -e "${YELLOW}  Frontend directory not found, skipping frontend setup${NC}"
 fi
 
 echo ""
 echo "=========================================="
-echo -e "${GREEN}✅ Setup Complete!${NC}"
+echo -e "${GREEN} Setup Complete!${NC}"
 echo "=========================================="
 echo ""
 echo "Next steps:"

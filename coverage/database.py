@@ -212,7 +212,7 @@ class CoverageDatabase:
     def create_tables(self):
         """Create all tables."""
         Base.metadata.create_all(bind=self.engine)
-        print("✅ Coverage database tables created")
+        print(" Coverage database tables created")
 
     def get_session(self):
         """Get database session."""

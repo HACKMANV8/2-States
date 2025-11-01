@@ -34,7 +34,7 @@ def test_database_crud():
 
     db = CoverageDatabase("sqlite:///./test_db_crud.db")
     db.create_tables()
-    print("✅ Database created")
+    print(" Database created")
 
     # CREATE
     run = CoverageRun(
@@ -46,14 +46,14 @@ def test_database_crud():
         test_count=5
     )
     db.save_coverage_run(run)
-    print(f"✅ Created coverage run: {run.run_id}")
+    print(f" Created coverage run: {run.run_id}")
 
     # READ
     retrieved = db.get_coverage_run(run.run_id)
     assert retrieved is not None, "Failed to retrieve coverage run"
     assert retrieved.run_id == run.run_id, "Run ID mismatch"
     assert retrieved.overall_coverage_percent == 75.5, "Coverage mismatch"
-    print(f"✅ Retrieved coverage run: {retrieved.run_id}")
+    print(f" Retrieved coverage run: {retrieved.run_id}")
 
     # UPDATE
     run.status = CoverageStatus.COMPLETED
@@ -62,12 +62,12 @@ def test_database_crud():
     updated = db.get_coverage_run(run.run_id)
     assert updated.status == CoverageStatus.COMPLETED, "Status not updated"
     assert updated.overall_coverage_percent == 85.0, "Coverage not updated"
-    print(f"✅ Updated coverage run: {updated.run_id}")
+    print(f" Updated coverage run: {updated.run_id}")
 
     # LIST
     recent = db.get_recent_runs(limit=10)
     assert len(recent) > 0, "No recent runs found"
-    print(f"✅ Listed {len(recent)} recent runs")
+    print(f" Listed {len(recent)} recent runs")
 
     print()
     return True
@@ -86,7 +86,7 @@ def test_database_relationships():
 
     db = CoverageDatabase("sqlite:///./test_db_relationships.db")
     db.create_tables()
-    print("✅ Database created")
+    print(" Database created")
 
     # Create coverage run
     run_id = f"test-{uuid.uuid4().hex[:8]}"
@@ -98,7 +98,7 @@ def test_database_relationships():
         test_count=3
     )
     db.save_coverage_run(run)
-    print(f"✅ Created coverage run: {run_id}")
+    print(f" Created coverage run: {run_id}")
 
     # Save test effectiveness
     effectiveness1 = TestEffectiveness(
@@ -111,7 +111,7 @@ def test_database_relationships():
         effectiveness_score=50.0
     )
     db.save_test_effectiveness(effectiveness1)
-    print(f"✅ Saved test effectiveness: {effectiveness1.test_id}")
+    print(f" Saved test effectiveness: {effectiveness1.test_id}")
 
     effectiveness2 = TestEffectiveness(
         test_id="test-2",
@@ -123,18 +123,18 @@ def test_database_relationships():
         effectiveness_score=37.5
     )
     db.save_test_effectiveness(effectiveness2)
-    print(f"✅ Saved test effectiveness: {effectiveness2.test_id}")
+    print(f" Saved test effectiveness: {effectiveness2.test_id}")
 
     # Note: Database currently doesn't implement retrieval methods for
     # test effectiveness and gaps. These are stored but not queried.
     # For production, consider adding:
     # - get_test_effectiveness_for_run()
     # - get_coverage_gaps_for_run()
-    print(f"✅ Test effectiveness saved (retrieval not yet implemented)")
+    print(f" Test effectiveness saved (retrieval not yet implemented)")
 
     # Note: save_coverage_gap() not implemented in database yet
     # This would be needed for production use
-    print(f"✅ Coverage gap creation works (save method not yet in database)")
+    print(f" Coverage gap creation works (save method not yet in database)")
 
     print()
     return True
@@ -153,7 +153,7 @@ def test_database_concurrency():
 
     db = CoverageDatabase("sqlite:///./test_db_concurrency.db")
     db.create_tables()
-    print("✅ Database created")
+    print(" Database created")
 
     # Simulate multiple runs being saved
     runs = []
@@ -168,12 +168,12 @@ def test_database_concurrency():
         )
         db.save_coverage_run(run)
         runs.append(run)
-        print(f"✅ Saved concurrent run {i + 1}: {run.run_id}")
+        print(f" Saved concurrent run {i + 1}: {run.run_id}")
 
     # Verify all runs were saved
     all_runs = db.get_recent_runs(limit=10)
     assert len(all_runs) >= 5, f"Expected at least 5 runs, got {len(all_runs)}"
-    print(f"✅ All {len(all_runs)} runs saved successfully")
+    print(f" All {len(all_runs)} runs saved successfully")
 
     print()
     return True
@@ -192,12 +192,12 @@ def test_database_error_handling():
 
     db = CoverageDatabase("sqlite:///./test_db_errors.db")
     db.create_tables()
-    print("✅ Database created")
+    print(" Database created")
 
     # Test 1: Retrieve non-existent run
     result = db.get_coverage_run("non-existent-run-id")
     assert result is None, "Should return None for non-existent run"
-    print("✅ Correctly handled non-existent run retrieval")
+    print(" Correctly handled non-existent run retrieval")
 
     # Test 2: Duplicate primary key (should update)
     run_id = f"duplicate-test-{uuid.uuid4().hex[:8]}"
@@ -209,7 +209,7 @@ def test_database_error_handling():
         overall_coverage_percent=50.0
     )
     db.save_coverage_run(run1)
-    print(f"✅ Saved initial run: {run_id}")
+    print(f" Saved initial run: {run_id}")
 
     # Save again with same ID (should update)
     run2 = CoverageRun(
@@ -220,18 +220,18 @@ def test_database_error_handling():
         overall_coverage_percent=80.0
     )
     db.save_coverage_run(run2)
-    print(f"✅ Updated duplicate run: {run_id}")
+    print(f" Updated duplicate run: {run_id}")
 
     # Verify update
     retrieved = db.get_coverage_run(run_id)
     assert retrieved.status == CoverageStatus.COMPLETED, "Status should be updated"
     assert retrieved.overall_coverage_percent == 80.0, "Coverage should be updated"
-    print("✅ Duplicate key handled correctly (updated)")
+    print(" Duplicate key handled correctly (updated)")
 
     # Test 3: Empty queries
     empty_runs = db.get_recent_runs(limit=1000)
     # Just ensure it doesn't crash on large limit
-    print(f"✅ Empty/large query handled correctly (got {len(empty_runs)} runs)")
+    print(f" Empty/large query handled correctly (got {len(empty_runs)} runs)")
 
     print()
     return True
@@ -250,7 +250,7 @@ def test_database_large_dataset():
 
     db = CoverageDatabase("sqlite:///./test_db_large.db")
     db.create_tables()
-    print("✅ Database created")
+    print(" Database created")
 
     # Create 50 coverage runs
     run_ids = []
@@ -267,21 +267,21 @@ def test_database_large_dataset():
         db.save_coverage_run(run)
         run_ids.append(run_id)
 
-    print(f"✅ Saved 50 coverage runs")
+    print(f" Saved 50 coverage runs")
 
     # Test retrieval limits
     recent_10 = db.get_recent_runs(limit=10)
     assert len(recent_10) == 10, f"Expected 10 runs, got {len(recent_10)}"
-    print(f"✅ Retrieved recent 10 runs")
+    print(f" Retrieved recent 10 runs")
 
     recent_25 = db.get_recent_runs(limit=25)
     assert len(recent_25) == 25, f"Expected 25 runs, got {len(recent_25)}"
-    print(f"✅ Retrieved recent 25 runs")
+    print(f" Retrieved recent 25 runs")
 
     # Test individual retrieval
     sample_run = db.get_coverage_run(run_ids[25])
     assert sample_run is not None, "Should retrieve sample run"
-    print(f"✅ Retrieved individual run from large dataset")
+    print(f" Retrieved individual run from large dataset")
 
     print()
     return True
@@ -289,9 +289,9 @@ def test_database_large_dataset():
 
 if __name__ == "__main__":
     print("\n")
-    print("╔" + "═" * 68 + "╗")
-    print("║" + " " * 15 + "DATABASE ROBUSTNESS TEST SUITE" + " " * 23 + "║")
-    print("╚" + "═" * 68 + "╝")
+    print("" + "" * 68 + "")
+    print("" + " " * 15 + "DATABASE ROBUSTNESS TEST SUITE" + " " * 23 + "")
+    print("" + "" * 68 + "")
     print()
 
     all_passed = True
@@ -309,22 +309,22 @@ if __name__ == "__main__":
                         "test_db_concurrency.db", "test_db_errors.db", "test_db_large.db"]:
             if os.path.exists(f"./{db_file}"):
                 os.remove(f"./{db_file}")
-        print("✅ Cleaned up test databases")
+        print(" Cleaned up test databases")
         print()
 
         print("=" * 70)
         if all_passed:
-            print("✅ ALL DATABASE TESTS PASSED")
+            print(" ALL DATABASE TESTS PASSED")
             print("=" * 70)
             print("\nDatabase operations are robust and production-ready!")
             sys.exit(0)
         else:
-            print("❌ SOME TESTS FAILED")
+            print(" SOME TESTS FAILED")
             print("=" * 70)
             sys.exit(1)
 
     except Exception as e:
-        print(f"\n❌ TEST SUITE FAILED: {str(e)}")
+        print(f"\n TEST SUITE FAILED: {str(e)}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

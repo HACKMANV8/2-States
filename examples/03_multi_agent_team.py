@@ -31,14 +31,14 @@ async def create_research_team():
         print("ERROR: ANTHROPIC_API_KEY not found in environment variables.")
         return None
 
-    print("🚀 Creating Multi-Agent Research Team...")
+    print(" Creating Multi-Agent Research Team...")
     print("=" * 60)
 
     # 1. Documentation Agent with Context7 MCP
-    print("\n📚 Setting up Documentation Agent with Context7...")
+    print("\n Setting up Documentation Agent with Context7...")
     context7_tools = MCPTools(command="npx -y @upstash/context7-mcp@latest")
     await context7_tools.connect()
-    print("✅ Context7 MCP connected")
+    print(" Context7 MCP connected")
 
     doc_agent = Agent(
         name="DocExpert",
@@ -60,13 +60,13 @@ Always cite your sources and provide clear, concise explanations.
     )
 
     # 2. Filesystem Agent for local code analysis
-    print("📁 Setting up Filesystem Agent...")
+    print(" Setting up Filesystem Agent...")
     current_dir = os.path.dirname(os.path.abspath(__file__))
     filesystem_tools = MCPTools(
         command=f"npx -y @modelcontextprotocol/server-filesystem {current_dir}"
     )
     await filesystem_tools.connect()
-    print("✅ Filesystem MCP connected")
+    print(" Filesystem MCP connected")
 
     code_agent = Agent(
         name="CodeAnalyzer",
@@ -88,7 +88,7 @@ Be thorough and provide actionable insights.
     )
 
     # 3. Coordinator Agent (Team Leader)
-    print("🎯 Setting up Coordinator Agent...")
+    print(" Setting up Coordinator Agent...")
     coordinator = Agent(
         name="ResearchCoordinator",
         role="Research team coordinator and synthesizer",
@@ -118,11 +118,11 @@ Present your findings in a well-structured format with clear sections.
         markdown=True
     )
 
-    print("✅ Team setup complete!")
+    print(" Team setup complete!")
     print("\nTeam Members:")
-    print("  1. 📚 DocExpert (Context7 MCP)")
-    print("  2. 📁 CodeAnalyzer (Filesystem MCP)")
-    print("  3. 🎯 ResearchCoordinator (Team Lead)")
+    print("  1.  DocExpert (Context7 MCP)")
+    print("  2.  CodeAnalyzer (Filesystem MCP)")
+    print("  3.  ResearchCoordinator (Team Lead)")
 
     return coordinator, [context7_tools, filesystem_tools]
 
@@ -131,10 +131,10 @@ async def main():
     """Main function to run the multi-agent team."""
 
     print("""
-    ╔══════════════════════════════════════════════════════════╗
-    ║  Multi-Agent Research Team with MCP Integration          ║
-    ║  Combines documentation and code analysis capabilities   ║
-    ╚══════════════════════════════════════════════════════════╝
+    
+      Multi-Agent Research Team with MCP Integration          
+      Combines documentation and code analysis capabilities   
+    
     """)
 
     # Create the research team
@@ -146,7 +146,7 @@ async def main():
 
     try:
         print("\n" + "=" * 60)
-        print("🤖 Research Team Ready!")
+        print(" Research Team Ready!")
         print("=" * 60)
 
         # Example research questions
@@ -174,26 +174,26 @@ async def main():
             print("No question provided. Exiting.")
             return
 
-        print(f"\n📝 Research Question:")
+        print(f"\n Research Question:")
         print(f"   {question}")
         print("=" * 60)
-        print("\n💭 Team is collaborating...\n")
+        print("\n Team is collaborating...\n")
 
         # Run the coordinator agent
         response = await coordinator.arun(question)
 
         print("\n" + "=" * 60)
-        print("✨ Team Research Results:")
+        print(" Team Research Results:")
         print("=" * 60)
         print(response.content if hasattr(response, 'content') else str(response))
         print("\n" + "=" * 60)
 
     finally:
         # Close all MCP connections
-        print("\n🔌 Closing all MCP connections...")
+        print("\n Closing all MCP connections...")
         for mcp_tool in mcp_tools_list:
             await mcp_tool.close()
-        print("✅ All connections closed")
+        print(" All connections closed")
 
 
 if __name__ == "__main__":

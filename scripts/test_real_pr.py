@@ -24,9 +24,9 @@ async def test_real_pr():
     test_pr_url = "https://github.com/vercel/next.js/pull/71519"
 
     print("="*70)
-    print("🧪 TESTING PR TESTING WITH REAL GITHUB PR")
+    print(" TESTING PR TESTING WITH REAL GITHUB PR")
     print("="*70)
-    print(f"\n📋 PR URL: {test_pr_url}")
+    print(f"\n PR URL: {test_pr_url}")
     print("\nThis will:")
     print("  1. Fetch PR metadata from GitHub")
     print("  2. Detect deployment URL (if available)")
@@ -52,7 +52,7 @@ async def test_real_pr():
         result = await engine.process_request(user_message, user_id)
 
         print("\n" + "="*70)
-        print("✅ TEST COMPLETED!")
+        print(" TEST COMPLETED!")
         print("="*70)
         print(f"\n{result}\n")
 
@@ -64,7 +64,7 @@ async def test_real_pr():
 
     except Exception as e:
         print("\n" + "="*70)
-        print("❌ TEST FAILED")
+        print(" TEST FAILED")
         print("="*70)
         print(f"\nError: {e}\n")
         import traceback

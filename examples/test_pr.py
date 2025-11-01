@@ -41,11 +41,11 @@ async def test_pull_request(
         Test results dictionary
     """
     print(f"""
-╔══════════════════════════════════════════════════════════════════════╗
-║                                                                      ║
-║          Testing Pull Request #{pr_number:04d}                              ║
-║                                                                      ║
-╚══════════════════════════════════════════════════════════════════════╝
+
+                                                                      
+          Testing Pull Request #{pr_number:04d}                              
+                                                                      
+
 
 Repository: {repo_url}
 PR Number: {pr_number}
@@ -55,7 +55,7 @@ App Module: {app_module}
     # Initialize orchestrator
     orchestrator = DynamicBackendOrchestrator()
 
-    print("🔄 Testing PR changes...")
+    print(" Testing PR changes...")
     print("=" * 70)
 
     # Test the PR
@@ -98,18 +98,18 @@ App Module: {app_module}
         print(f"  Success Rate: {success_rate:.1f}%")
 
         if result['overall_success']:
-            print("\n✅ PR TESTS PASSED - Safe to merge!")
+            print("\n PR TESTS PASSED - Safe to merge!")
         else:
-            print("\n❌ PR TESTS FAILED - DO NOT MERGE")
+            print("\n PR TESTS FAILED - DO NOT MERGE")
             print("\nFailed Tests:")
             for test in result['test_results']:
                 if not test.get('success'):
-                    print(f"  ❌ {test.get('endpoint')}")
+                    print(f"   {test.get('endpoint')}")
                     if test.get('error'):
                         print(f"     Error: {test['error']}")
 
     if result.get('error'):
-        print(f"\n❌ Error: {result['error']}")
+        print(f"\n Error: {result['error']}")
 
     print("\n" + "=" * 70)
 
@@ -142,7 +142,7 @@ async def main():
 
     # Check if using defaults
     if "YOUR_USERNAME" in args.repo:
-        print("\n⚠️  Using default placeholder URL.")
+        print("\n  Using default placeholder URL.")
         print("Please provide --repo and --pr arguments:")
         print(f"  python {sys.argv[0]} --repo https://github.com/user/repo --pr 123")
         print("\nFor this demo, we'll show the expected output format:\n")
@@ -169,10 +169,10 @@ Test Results:
   Failed: 1
   Success Rate: 93.3%
 
-❌ PR TESTS FAILED - DO NOT MERGE
+ PR TESTS FAILED - DO NOT MERGE
 
 Failed Tests:
-  ❌ POST /users
+   POST /users
      Error: Validation error in request body schema
         """)
         return {"overall_success": False}

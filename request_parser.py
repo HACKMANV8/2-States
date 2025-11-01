@@ -52,16 +52,16 @@ class SlackRequestParser:
         if self.use_claude_parser:
             try:
                 self.claude_parser = ClaudeViewportParser()
-                print("✅ Claude API parser initialized for smart viewport detection")
+                print(" Claude API parser initialized for smart viewport detection")
             except Exception as e:
-                print(f"⚠️  Claude parser initialization failed: {e}")
+                print(f"  Claude parser initialization failed: {e}")
                 print("   Falling back to keyword-based parsing")
                 self.use_claude_parser = False
                 self.claude_parser = None
         else:
             self.claude_parser = None
             if use_claude_parser and not CLAUDE_PARSER_AVAILABLE:
-                print("⚠️  Claude parser not available (import failed)")
+                print("  Claude parser not available (import failed)")
                 print("   Using keyword-based parsing")
 
     def parse(self, message: str, user_id: str = "unknown") -> ParsedSlackRequest:
@@ -88,7 +88,7 @@ class SlackRequestParser:
             # Only use pointblank.club if user explicitly said "pointblank" without a subdomain
             if "pointblank.club" in message_lower and "." not in message_lower.split("pointblank")[0][-10:]:
                 urls = ["https://pointblank.club"]
-                print(f"   ℹ️  Using default demo site: pointblank.club")
+                print(f"   ℹ  Using default demo site: pointblank.club")
 
         # Extract flows/scenarios mentioned
         flows = self._extract_flows(message_lower)
@@ -100,16 +100,16 @@ class SlackRequestParser:
         if self.use_claude_parser and self.claude_parser:
             # Use Claude API for intelligent parsing
             try:
-                print(f"🤖 Using Claude API to parse environment requirements...")
+                print(f" Using Claude API to parse environment requirements...")
                 env_requirements = self.claude_parser.parse_environments(message, target_url)
                 required_viewports = env_requirements.get("viewports", ["desktop-standard"])
                 required_browsers = env_requirements.get("browsers", ["chromium-desktop"])
                 required_networks = env_requirements.get("networks", ["normal"])
-                print(f"   📱 Viewports: {', '.join(required_viewports)}")
-                print(f"   🌐 Browsers: {', '.join(required_browsers)}")
-                print(f"   📡 Networks: {', '.join(required_networks)}")
+                print(f"    Viewports: {', '.join(required_viewports)}")
+                print(f"    Browsers: {', '.join(required_browsers)}")
+                print(f"    Networks: {', '.join(required_networks)}")
             except Exception as e:
-                print(f"⚠️  Claude parsing failed: {e}")
+                print(f"  Claude parsing failed: {e}")
                 print("   Falling back to keyword-based parsing")
                 # Fallback to keyword-based parsing
                 keywords = self._extract_keywords(message_lower)
@@ -135,7 +135,7 @@ class SlackRequestParser:
         backend_app_module = "main:app"
 
         if is_pr_test:
-            print(f"   🔍 Detected PR testing request")
+            print(f"    Detected PR testing request")
             print(f"      PR URL: {pr_url}")
         elif is_backend_test:
             # Extract GitHub URL if present
@@ -143,7 +143,7 @@ class SlackRequestParser:
             # Extract app module if specified
             backend_app_module = self._extract_app_module(message)
 
-            print(f"   🔍 Detected backend API testing request")
+            print(f"    Detected backend API testing request")
             if backend_repo_url:
                 print(f"      Repository: {backend_repo_url}")
             print(f"      App module: {backend_app_module}")
@@ -188,13 +188,13 @@ class SlackRequestParser:
         slack_urls = slack_url_pattern.findall(message)
 
         if slack_urls:
-            print(f"   📎 Extracted Slack-formatted URL: {slack_urls}")
+            print(f"    Extracted Slack-formatted URL: {slack_urls}")
             return slack_urls
 
         # Standard URL extraction
         urls = self.url_pattern.findall(message)
         if urls:
-            print(f"   📎 Extracted URL with protocol: {urls}")
+            print(f"    Extracted URL with protocol: {urls}")
             return urls
 
         # Check for domain mentions without protocol (supports subdomains)
@@ -205,11 +205,11 @@ class SlackRequestParser:
 
         if domain_match:
             domain = domain_match.group(1)
-            print(f"   📎 Extracted domain without protocol: {domain}")
+            print(f"    Extracted domain without protocol: {domain}")
             urls = [f"https://{domain}"]
             return urls
 
-        print(f"   ⚠️  No URL found in message: {message[:100]}")
+        print(f"     No URL found in message: {message[:100]}")
         return []
 
     def _extract_flows(self, message: str) -> List[str]:

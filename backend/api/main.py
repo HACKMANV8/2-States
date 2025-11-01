@@ -55,8 +55,8 @@ app.include_router(pr_tests.router)
 async def startup_event():
     """Initialize database on startup"""
     init_db()
-    print("🚀 TestGPT API Server started")
-    print("📚 API Docs: http://localhost:8000/docs")
+    print(" TestGPT API Server started")
+    print(" API Docs: http://localhost:8000/docs")
 
 
 # ============================================================================
@@ -303,20 +303,20 @@ def execute_test_in_background(
         # Add browser and viewport info
         slack_message += f" browser:{browser} viewport:{viewport_width}x{viewport_height}"
 
-        print(f"🚀 Starting API test execution for suite: {suite.name}")
-        print(f"📝 Test message: {slack_message[:200]}...")
+        print(f" Starting API test execution for suite: {suite.name}")
+        print(f" Test message: {slack_message[:200]}...")
 
         # Initialize TestGPT engine and run the test
         engine = TestGPTEngine()
 
         try:
             # Execute the test
-            print("🤖 Calling TestGPT engine.process_test_request()...")
+            print(" Calling TestGPT engine.process_test_request()...")
             slack_summary = asyncio.run(engine.process_test_request(
                 slack_message=slack_message,
                 user_id="api-user"
             ))
-            print(f"✅ Test execution completed: {slack_summary[:100]}...")
+            print(f" Test execution completed: {slack_summary[:100]}...")
 
             # Update execution with success
             crud.update_test_execution_status(

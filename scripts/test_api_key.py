@@ -15,8 +15,8 @@ try:
         max_tokens=100,
         messages=[{"role": "user", "content": "Say 'API key works!'"}]
     )
-    print(f"✅ SUCCESS: {message.content[0].text}")
+    print(f" SUCCESS: {message.content[0].text}")
 except anthropic.AuthenticationError as e:
-    print(f"❌ Authentication Error: {e}")
+    print(f" Authentication Error: {e}")
 except Exception as e:
-    print(f"❌ Error: {e}")
+    print(f" Error: {e}")

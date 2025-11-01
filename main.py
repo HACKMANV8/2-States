@@ -22,13 +22,13 @@ load_dotenv()
 def print_banner():
     """Print TestGPT banner."""
     print("""
-╔══════════════════════════════════════════════════════════════════════╗
-║                                                                      ║
-║  TestGPT - Multi-Environment QA Testing Platform                    ║
-║                                                                      ║
-║  Powered by: Agno + Playwright MCP + Claude Sonnet 4                ║
-║                                                                      ║
-╚══════════════════════════════════════════════════════════════════════╝
+
+                                                                      
+  TestGPT - Multi-Environment QA Testing Platform                    
+                                                                      
+  Powered by: Agno + Playwright MCP + Claude Sonnet 4                
+                                                                      
+
     """)
 
 
@@ -43,15 +43,15 @@ def verify_environment():
     missing = []
     for var, description in required_vars.items():
         if not os.environ.get(var):
-            missing.append(f"  ❌ {var} - {description}")
+            missing.append(f"   {var} - {description}")
 
     if missing:
-        print("❌ Missing required environment variables:\n")
+        print(" Missing required environment variables:\n")
         print("\n".join(missing))
-        print("\n💡 Please configure these in your .env file")
+        print("\n Please configure these in your .env file")
         return False
 
-    print("✅ All environment variables found")
+    print(" All environment variables found")
     return True
 
 
@@ -86,8 +86,8 @@ async def start_slack_bot():
     loop = asyncio.get_event_loop()
     loop.set_exception_handler(asyncio_exception_handler)
 
-    print("\n⚡️ Starting TestGPT Slack bot...")
-    print("💡 Mention the bot in any channel to trigger QA testing")
+    print("\n Starting TestGPT Slack bot...")
+    print(" Mention the bot in any channel to trigger QA testing")
     print("=" * 70)
 
     # Initialize Slack app
@@ -105,22 +105,22 @@ async def start_slack_bot():
             return testgpt_engine
 
         print("\n" + "=" * 70)
-        print("🔧 Initializing TestGPT Engine")
+        print(" Initializing TestGPT Engine")
         print("=" * 70)
 
         # Connect to Playwright MCP
-        print("📡 Connecting to Playwright MCP...")
+        print(" Connecting to Playwright MCP...")
         mcp_tools = MCPTools(command="npx -y @playwright/mcp@latest")
         await mcp_tools.connect()
-        print("✅ Playwright MCP connected\n")
+        print(" Playwright MCP connected\n")
 
         # Create TestGPT engine
-        print("🤖 Initializing TestGPT orchestration engine...")
+        print(" Initializing TestGPT orchestration engine...")
         testgpt_engine = TestGPTEngine(mcp_tools=mcp_tools, storage_dir="./testgpt_data")
-        print("✅ TestGPT engine initialized\n")
+        print(" TestGPT engine initialized\n")
 
         print("=" * 70)
-        print("✅ TestGPT Ready for Multi-Environment Testing")
+        print(" TestGPT Ready for Multi-Environment Testing")
         print("=" * 70 + "\n")
 
         return testgpt_engine
@@ -144,8 +144,8 @@ async def start_slack_bot():
         except Exception as e:
             import traceback
             error_details = traceback.format_exc()
-            print(f"❌ Error in run_testgpt_task: {error_details}")
-            return f"❌ Error: {str(e)}\n\nPlease try again or rephrase your request."
+            print(f" Error in run_testgpt_task: {error_details}")
+            return f" Error: {str(e)}\n\nPlease try again or rephrase your request."
 
     # Track processed events to prevent duplicates
     processed_events = set()
@@ -164,12 +164,12 @@ async def start_slack_bot():
         # This prevents processing old messages if bot restarts or Slack retries
         age_seconds = current_time - event_ts
         if age_seconds > 300:
-            print(f"⚠️  Skipping old event (age: {age_seconds:.1f}s): {event_id}")
+            print(f"  Skipping old event (age: {age_seconds:.1f}s): {event_id}")
             return
 
         # Deduplicate events (Slack may retry)
         if event_id in processed_events:
-            print(f"⚠️  Skipping duplicate event: {event_id}")
+            print(f"  Skipping duplicate event: {event_id}")
             return
 
         processed_events.add(event_id)
@@ -181,7 +181,7 @@ async def start_slack_bot():
         user_id = event.get("user", "unknown")
         user_text = event.get("text", "")
 
-        print(f"\n📨 Event ID: {event_id}, Age: {age_seconds:.1f}s")
+        print(f"\n Event ID: {event_id}, Age: {age_seconds:.1f}s")
 
         # Extract the actual message (remove the bot mention)
         parts = user_text.split(">", 1)
@@ -194,29 +194,29 @@ async def start_slack_bot():
             say(text=get_welcome_message(), channel=channel)
             return
 
-        print(f"\n📝 Received message from user {user_id}: {user_message}")
+        print(f"\n Received message from user {user_id}: {user_message}")
 
         # Send initial acknowledgment
-        say(text=f"🤖 TestGPT received your request!\n\nAnalyzing: '{user_message}'\n\nProcessing...", channel=channel)
+        say(text=f" TestGPT received your request!\n\nAnalyzing: '{user_message}'\n\nProcessing...", channel=channel)
 
         # Run TestGPT task
         try:
             result = asyncio.run(run_testgpt_task(user_message, user_id))
 
             # Post result back to Slack
-            print(f"✅ TestGPT completed. Posting results to Slack...")
+            print(f" TestGPT completed. Posting results to Slack...")
             say(text=result, channel=channel)
 
         except Exception as e:
             import traceback
             error_details = traceback.format_exc()
-            print(f"❌ Error in handle_mention: {error_details}")
-            error_msg = f"❌ Error running TestGPT: {str(e)}"
+            print(f" Error in handle_mention: {error_details}")
+            error_msg = f" Error running TestGPT: {str(e)}"
             say(text=error_msg, channel=channel)
 
     def get_welcome_message() -> str:
         """Get welcome message for bot."""
-        return """👋 **Welcome to TestGPT!**
+        return """ **Welcome to TestGPT!**
 
 I'm your AI-powered QA testing assistant. I can run comprehensive cross-browser,
 cross-device, and cross-network tests on your websites.
@@ -229,16 +229,16 @@ cross-device, and cross-network tests on your websites.
 • `list scenarios` - See all saved test scenarios
 
 **What I test:**
-✓ Multiple viewports (iPhone, iPad, desktop, etc.)
-✓ Multiple browsers (Chrome, Safari, Firefox)
-✓ Network conditions (normal, slow 3G, flaky)
+ Multiple viewports (iPhone, iPad, desktop, etc.)
+ Multiple browsers (Chrome, Safari, Firefox)
+ Network conditions (normal, slow 3G, flaky)
 
 Try mentioning me with a test request!
 """
 
     def get_help_message() -> str:
         """Get help message."""
-        return """📖 **TestGPT Help**
+        return """ **TestGPT Help**
 
 **How to use:**
 Mention me with a natural language test request.
@@ -260,24 +260,24 @@ Mention me with a natural language test request.
         handler = SocketModeHandler(app, os.environ["SLACK_APP_TOKEN"])
         handler.start()
     except KeyboardInterrupt:
-        print("\n\n⚠️  Shutting down...")
+        print("\n\n  Shutting down...")
         # Cleanup will happen automatically
-        print("👋 Goodbye!")
+        print(" Goodbye!")
     except Exception as e:
-        print(f"\n❌ Error: {e}")
+        print(f"\n Error: {e}")
         import traceback
         traceback.print_exc()
 
 
 async def start_github_webhooks():
     """Start GitHub webhook listener (future)."""
-    print("\n🔧 GitHub webhooks not yet implemented")
+    print("\n GitHub webhooks not yet implemented")
     print("   Will be available in future version")
 
 
 async def start_web_ui():
     """Start web UI server (future)."""
-    print("\n🔧 Web UI not yet implemented")
+    print("\n Web UI not yet implemented")
     print("   Will be available in future version")
 
 
@@ -295,7 +295,7 @@ def main():
     if len(sys.argv) > 1:
         mode = sys.argv[1]
 
-    print(f"\n🚀 Starting in mode: {mode}")
+    print(f"\n Starting in mode: {mode}")
 
     # Start appropriate service
     if mode == "slack":
@@ -305,7 +305,7 @@ def main():
     elif mode == "web":
         asyncio.run(start_web_ui())
     else:
-        print(f"❌ Unknown mode: {mode}")
+        print(f" Unknown mode: {mode}")
         print("\nAvailable modes:")
         print("  - slack (default)")
         print("  - github (coming soon)")

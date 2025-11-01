@@ -81,7 +81,7 @@ class ClaudeViewportParser:
                 "networks": result.get("networks", ["normal"])
             }
         except json.JSONDecodeError as e:
-            print(f"⚠️  Failed to parse Claude response as JSON: {e}")
+            print(f"  Failed to parse Claude response as JSON: {e}")
             print(f"Response was: {response_text}")
             # Fallback to defaults
             return {

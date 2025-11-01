@@ -32,7 +32,7 @@ async def main():
         print("Please create a .env file with your Anthropic API key.")
         return
 
-    print("🚀 Initializing Context7 MCP Agent...")
+    print(" Initializing Context7 MCP Agent...")
     print("=" * 60)
 
     # MCP server command for Context7 (public library docs)
@@ -40,9 +40,9 @@ async def main():
     command = "npx -y @upstash/context7-mcp@latest"
 
     # Initialize and connect to the MCP server
-    print("\n📡 Connecting to Context7 MCP server...")
+    print("\n Connecting to Context7 MCP server...")
     async with MCPTools(command=command) as mcp_tools:
-        print("✅ Successfully connected to Context7 MCP server")
+        print(" Successfully connected to Context7 MCP server")
 
         # Create an Agno agent with the MCP tools
         agent = Agent(
@@ -68,7 +68,7 @@ If the user asks a general question, answer it directly without using tools.
         )
 
         print("\n" + "=" * 60)
-        print("🤖 Agent ready! You can now ask questions about libraries.")
+        print(" Agent ready! You can now ask questions about libraries.")
         print("=" * 60)
 
         # Example queries to demonstrate the agent
@@ -95,15 +95,15 @@ If the user asks a general question, answer it directly without using tools.
             print("No question provided. Exiting.")
             return
 
-        print(f"\n📝 Question: {question}")
+        print(f"\n Question: {question}")
         print("=" * 60)
-        print("\n💭 Agent is thinking...\n")
+        print("\n Agent is thinking...\n")
 
         # Run the agent with the question
         response = await agent.arun(question)
 
         print("\n" + "=" * 60)
-        print("✨ Agent Response:")
+        print(" Agent Response:")
         print("=" * 60)
         print(response.content if hasattr(response, 'content') else str(response))
         print("\n" + "=" * 60)
@@ -111,10 +111,10 @@ If the user asks a general question, answer it directly without using tools.
 
 if __name__ == "__main__":
     print("""
-    ╔══════════════════════════════════════════════════════════╗
-    ║  Agno Agent with Context7 MCP Integration                ║
-    ║  Fetches live documentation for programming libraries    ║
-    ╚══════════════════════════════════════════════════════════╝
+    
+      Agno Agent with Context7 MCP Integration                
+      Fetches live documentation for programming libraries    
+    
     """)
 
     asyncio.run(main())

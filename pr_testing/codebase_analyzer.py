@@ -72,7 +72,7 @@ class CodebaseAnalyzer:
                 return None
 
         except Exception as e:
-            print(f"   ℹ️  Could not fetch {file_path}: {e}")
+            print(f"   ℹ  Could not fetch {file_path}: {e}")
             return None
 
     def analyze_readme(self, readme_content: str) -> Dict[str, Any]:
@@ -317,7 +317,7 @@ class CodebaseAnalyzer:
         Returns:
             Complete codebase analysis
         """
-        print(f"\n📚 Analyzing codebase structure...")
+        print(f"\n Analyzing codebase structure...")
 
         analysis = {
             "repository": f"{owner}/{repo}",
@@ -333,14 +333,14 @@ class CodebaseAnalyzer:
         # Fetch and analyze README
         readme_content = await self.fetch_file_from_github(owner, repo, branch, "README.md", github_token)
         if readme_content:
-            print(f"   ✅ Found README.md")
+            print(f"    Found README.md")
             analysis["readme"] = self.analyze_readme(readme_content)
             analysis["tech_stack"].extend(analysis["readme"].get("tech_stack", []))
 
         # Fetch and analyze package.json
         package_json_content = await self.fetch_file_from_github(owner, repo, branch, "package.json", github_token)
         if package_json_content:
-            print(f"   ✅ Found package.json")
+            print(f"    Found package.json")
             analysis["package_json"] = self.analyze_package_json(package_json_content)
             analysis["project_type"] = "frontend" if "next" in analysis["package_json"].get("dependencies", []) else "fullstack"
 
@@ -350,7 +350,7 @@ class CodebaseAnalyzer:
         # Fetch and analyze requirements.txt
         requirements_content = await self.fetch_file_from_github(owner, repo, branch, "requirements.txt", github_token)
         if requirements_content:
-            print(f"   ✅ Found requirements.txt")
+            print(f"    Found requirements.txt")
             analysis["requirements_txt"] = self.analyze_requirements_txt(requirements_content)
 
             if analysis["project_type"] == "unknown":
@@ -382,8 +382,8 @@ class CodebaseAnalyzer:
         # Remove duplicates from tech stack
         analysis["tech_stack"] = list(set(analysis["tech_stack"]))
 
-        print(f"   📋 Project Type: {analysis['project_type']}")
-        print(f"   🛠️  Tech Stack: {', '.join(analysis['tech_stack']) if analysis['tech_stack'] else 'Unknown'}")
+        print(f"    Project Type: {analysis['project_type']}")
+        print(f"     Tech Stack: {', '.join(analysis['tech_stack']) if analysis['tech_stack'] else 'Unknown'}")
 
         return analysis
 

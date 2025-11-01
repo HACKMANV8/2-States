@@ -81,7 +81,7 @@ def retry_with_backoff(
                             current_time = int(time.time())
                             wait_seconds = max(reset_time - current_time, 0)
 
-                            print(f"⚠️  GitHub API rate limit exceeded")
+                            print(f"  GitHub API rate limit exceeded")
                             print(f"   Will retry after {wait_seconds} seconds")
 
                             if wait_seconds > 0 and wait_seconds < 3600:  # Don't wait more than 1 hour
@@ -92,11 +92,11 @@ def retry_with_backoff(
 
                     if attempt < max_retries:
                         delay = exponential_backoff(attempt, base_delay, max_delay)
-                        print(f"   ⚠️  Attempt {attempt + 1} failed: {str(e)[:100]}")
-                        print(f"   🔄 Retrying in {delay:.1f} seconds...")
+                        print(f"     Attempt {attempt + 1} failed: {str(e)[:100]}")
+                        print(f"    Retrying in {delay:.1f} seconds...")
                         await asyncio.sleep(delay)
                     else:
-                        print(f"   ❌ All {max_retries + 1} attempts failed")
+                        print(f"    All {max_retries + 1} attempts failed")
 
                 except Exception as e:
                     # For non-retryable exceptions, raise immediately
@@ -148,7 +148,7 @@ class GitHubRateLimiter:
                 wait_time = oldest_call + 3600 - now
 
                 if wait_time > 0:
-                    print(f"⚠️  Rate limit approaching. Waiting {wait_time:.1f}s")
+                    print(f"  Rate limit approaching. Waiting {wait_time:.1f}s")
                     await asyncio.sleep(wait_time)
 
                     # Refresh history after wait

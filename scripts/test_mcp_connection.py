@@ -30,9 +30,9 @@ async def test_mcp_connection():
 
     try:
         await mcp_tools.connect()
-        print("✅ MCP Server Connected Successfully!")
+        print(" MCP Server Connected Successfully!")
     except Exception as e:
-        print(f"❌ Connection Failed: {e}")
+        print(f" Connection Failed: {e}")
         return
 
     # Test 2: List available tools from MCP server
@@ -51,7 +51,7 @@ async def test_mcp_connection():
                 print(f"   Parameters: {list(params.get('properties', {}).keys()) if isinstance(params, dict) else 'N/A'}")
             print()
     else:
-        print("⚠️  No tools found or tools not accessible in this format")
+        print("  No tools found or tools not accessible in this format")
 
     # Test 3: Create agent and test WITHOUT MCP (baseline)
     print("\n[TEST 3] Agent WITHOUT MCP (Baseline Test):")
@@ -123,7 +123,7 @@ Be explicit about which tools you're using.""",
 
             # Check for tool calls
             if hasattr(msg, 'tool_calls') and msg.tool_calls:
-                print(f"  📞 TOOL CALLS DETECTED: {len(msg.tool_calls)} calls")
+                print(f"   TOOL CALLS DETECTED: {len(msg.tool_calls)} calls")
                 for j, tool_call in enumerate(msg.tool_calls, 1):
                     tool_name = tool_call.function.name if hasattr(tool_call, 'function') else str(tool_call)
                     print(f"     {j}. Tool: {tool_name}")
@@ -132,7 +132,7 @@ Be explicit about which tools you're using.""",
 
             # Check for tool responses
             if hasattr(msg, 'tool_call_id'):
-                print(f"  📥 TOOL RESPONSE")
+                print(f"   TOOL RESPONSE")
                 if hasattr(msg, 'content'):
                     print(f"     Content: {str(msg.content)[:100]}...")
 
@@ -142,17 +142,17 @@ Be explicit about which tools you're using.""",
     print("\n[CLEANUP] Closing MCP Connection...")
     print("-" * 70)
     await mcp_tools.close()
-    print("✅ Connection closed successfully")
+    print(" Connection closed successfully")
 
     # Summary
     print("\n" + "=" * 70)
     print("DIAGNOSTIC SUMMARY")
     print("=" * 70)
-    print("✅ MCP Server Connection: SUCCESS")
-    print("✅ Tools Available: YES")
-    print("✅ Agent Integration: SUCCESS")
-    print("✅ Tool Execution: CHECK MESSAGES ABOVE")
-    print("\n🎯 PROOF: The MCP server is connecting and providing tools to the agent!")
+    print(" MCP Server Connection: SUCCESS")
+    print(" Tools Available: YES")
+    print(" Agent Integration: SUCCESS")
+    print(" Tool Execution: CHECK MESSAGES ABOVE")
+    print("\n PROOF: The MCP server is connecting and providing tools to the agent!")
     print("=" * 70)
 
 

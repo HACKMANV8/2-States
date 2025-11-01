@@ -25,13 +25,13 @@ class PersistentBrowserDemo:
         print("=" * 70)
 
         api_key = os.getenv('ANTHROPIC_API_KEY')
-        print(f"✓ API Key: {api_key[:20]}...{api_key[-10:]}\n")
+        print(f" API Key: {api_key[:20]}...{api_key[-10:]}\n")
 
         # Connect to Playwright MCP (connection persists)
         print("Connecting to Playwright MCP...")
         self.mcp_tools = MCPTools(command="npx -y @playwright/mcp@latest")
         await self.mcp_tools.connect()
-        print("✅ Playwright MCP connected\n")
+        print(" Playwright MCP connected\n")
 
         # Create agent with persistent tools
         self.agent = Agent(
@@ -48,15 +48,15 @@ When performing tasks:
 - Be specific about what you see""",
             markdown=True
         )
-        print("✅ Agent created with persistent session!\n")
+        print(" Agent created with persistent session!\n")
 
     async def run_task(self, step_number: int, task: str):
         """Run a task - browser state persists between calls"""
         print("=" * 70)
         print(f"STEP {step_number}")
         print("=" * 70)
-        print(f"📝 Task: {task}\n")
-        print("🤖 Agent working...\n")
+        print(f" Task: {task}\n")
+        print(" Agent working...\n")
         print("-" * 70)
 
         response = await self.agent.arun(task)
@@ -73,17 +73,17 @@ When performing tasks:
             print("Closing Playwright MCP Connection")
             print("=" * 70)
             await self.mcp_tools.close()
-            print("✅ Connection closed\n")
+            print(" Connection closed\n")
 
 
 async def main():
     print("""
-╔══════════════════════════════════════════════════════════════════════╗
-║                                                                      ║
-║  ADVANCED DEMO: Persistent Browser Session                           ║
-║  Multiple tasks, same browser - state maintained!                    ║
-║                                                                      ║
-╚══════════════════════════════════════════════════════════════════════╝
+
+                                                                      
+  ADVANCED DEMO: Persistent Browser Session                           
+  Multiple tasks, same browser - state maintained!                    
+                                                                      
+
     """)
 
     demo = PersistentBrowserDemo()
@@ -109,13 +109,13 @@ async def main():
         )
 
         print("=" * 70)
-        print("🎯 DEMO SUMMARY")
+        print(" DEMO SUMMARY")
         print("=" * 70)
         print("\nWhat just happened:")
-        print("  ✓ Step 1: Opened Wikipedia (new browser)")
-        print("  ✓ Step 2: Searched (SAME browser session)")
-        print("  ✓ Step 3: Read article (SAME browser session)")
-        print("\n💡 The browser state persisted across all 3 calls!")
+        print("   Step 1: Opened Wikipedia (new browser)")
+        print("   Step 2: Searched (SAME browser session)")
+        print("   Step 3: Read article (SAME browser session)")
+        print("\n The browser state persisted across all 3 calls!")
         print("   This solves GitHub Issue #2732 - no state loss!")
         print("=" * 70)
 
@@ -123,7 +123,7 @@ async def main():
         await demo.cleanup()
 
     print("=" * 70)
-    print("🎉 PERSISTENT SESSION DEMO COMPLETE!")
+    print(" PERSISTENT SESSION DEMO COMPLETE!")
     print("=" * 70)
     print("\nThis demonstrates the solution to GitHub #2732:")
     print("  • Class-based approach maintains MCP connection")

@@ -25,7 +25,7 @@ async def test_playwright_mcp_connection():
         )
 
         await mcp_tools.connect()
-        print("✅ Playwright MCP server connected successfully!")
+        print(" Playwright MCP server connected successfully!")
 
         # Check available tools
         print("\n[TEST 2] Available Playwright tools:")
@@ -48,7 +48,7 @@ async def test_playwright_mcp_connection():
         print("\n[TEST 3] Closing connection...")
         print("-" * 70)
         await mcp_tools.close()
-        print("✅ Connection closed successfully")
+        print(" Connection closed successfully")
 
         print("\n" + "=" * 70)
         print("SUCCESS: Playwright MCP is ready to use!")
@@ -59,7 +59,7 @@ async def test_playwright_mcp_connection():
         print("=" * 70)
 
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f" Error: {e}")
         print("\nTroubleshooting:")
         print("- Ensure Node.js and npm are installed")
         print("- Check internet connection")

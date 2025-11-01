@@ -596,7 +596,7 @@ class APITester:
         for test_name, test_func in tests:
             print(f"Running: {test_name}...", end=" ")
             result = test_func()
-            status_icon = "✅" if result else "❌"
+            status_icon = "" if result else ""
             print(f"{status_icon}")
             time.sleep(0.5)  # Small delay between tests
 
@@ -615,10 +615,10 @@ class APITester:
         print("TEST SUMMARY")
         print("=" * 80)
         print(f"Total Tests: {total}")
-        print(f"✅ Passed: {passed}")
-        print(f"❌ Failed: {failed}")
-        print(f"🔥 Errors: {errors}")
-        print(f"⏭️  Skipped: {skipped}")
+        print(f" Passed: {passed}")
+        print(f" Failed: {failed}")
+        print(f" Errors: {errors}")
+        print(f"⏭  Skipped: {skipped}")
         print()
 
         # Print failed/error tests
@@ -648,7 +648,7 @@ class APITester:
         with open(filepath, 'w') as f:
             json.dump(self.results, f, indent=2)
 
-        print(f"📄 Full results saved to: {filepath}")
+        print(f" Full results saved to: {filepath}")
         return filepath
 
 
@@ -676,10 +676,10 @@ def main():
         sys.exit(0 if failed == 0 else 1)
 
     except KeyboardInterrupt:
-        print("\n⚠️  Tests interrupted by user")
+        print("\n  Tests interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"\n🔥 Fatal error: {e}")
+        print(f"\n Fatal error: {e}")
         sys.exit(1)
 
 

@@ -12,15 +12,15 @@ app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
 def handle_mention(event, say):
     channel = event["channel"]
     
-    print("🚀 Starting testing...")
-    say(text="🚀 Starting testing...", channel=channel)
+    print(" Starting testing...")
+    say(text=" Starting testing...", channel=channel)
     
     time.sleep(10)
     
-    print("✅ Testing complete!")
-    say(text="✅ Testing complete!", channel=channel)
+    print(" Testing complete!")
+    say(text=" Testing complete!", channel=channel)
 
 if __name__ == "__main__":
     handler = SocketModeHandler(app, os.environ["SLACK_APP_TOKEN"])
-    print("⚡️ Bot is running!")
+    print(" Bot is running!")
     handler.start()

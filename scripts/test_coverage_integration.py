@@ -21,10 +21,10 @@ async def test_coverage_integration():
     from testgpt_engine import TestGPTEngine
     from coverage import CoverageOrchestrator, CoverageConfig
 
-    print("\n✅ Step 1: Imports successful")
+    print("\n Step 1: Imports successful")
 
     # Test 1: Verify coverage module integration
-    print("\n📋 TEST 1: Coverage Module Integration")
+    print("\n TEST 1: Coverage Module Integration")
     print("-"*70)
 
     try:
@@ -33,32 +33,32 @@ async def test_coverage_integration():
             pr_url="https://github.com/test/repo/pull/1",
             config=config.to_dict()
         )
-        print("   ✅ CoverageOrchestrator initialized")
+        print("    CoverageOrchestrator initialized")
     except Exception as e:
-        print(f"   ❌ Failed to initialize coverage: {e}")
+        print(f"    Failed to initialize coverage: {e}")
         return False
 
     # Test 2: Verify TestGPT Engine has coverage support
-    print("\n📋 TEST 2: TestGPT Engine Coverage Support")
+    print("\n TEST 2: TestGPT Engine Coverage Support")
     print("-"*70)
 
     try:
         engine = TestGPTEngine()
-        print("   ✅ TestGPT Engine initialized")
+        print("    TestGPT Engine initialized")
 
         # Check if original_message attribute exists
         if hasattr(engine, 'original_message'):
-            print("   ✅ Engine has original_message storage")
+            print("    Engine has original_message storage")
         else:
-            print("   ❌ Engine missing original_message attribute")
+            print("    Engine missing original_message attribute")
             return False
 
     except Exception as e:
-        print(f"   ❌ Failed to initialize engine: {e}")
+        print(f"    Failed to initialize engine: {e}")
         return False
 
     # Test 3: Verify coverage keyword detection
-    print("\n📋 TEST 3: Coverage Keyword Detection")
+    print("\n TEST 3: Coverage Keyword Detection")
     print("-"*70)
 
     test_messages = [
@@ -70,13 +70,13 @@ async def test_coverage_integration():
     for message, should_detect in test_messages:
         has_coverage = "with coverage" in message.lower() or "coverage" in message.lower()
         if has_coverage == should_detect:
-            print(f"   ✅ '{message[:50]}...' → {has_coverage}")
+            print(f"    '{message[:50]}...' → {has_coverage}")
         else:
-            print(f"   ❌ '{message[:50]}...' → {has_coverage} (expected {should_detect})")
+            print(f"    '{message[:50]}...' → {has_coverage} (expected {should_detect})")
             return False
 
     # Test 4: Verify test_executor has coverage support
-    print("\n📋 TEST 4: Test Executor Coverage Support")
+    print("\n TEST 4: Test Executor Coverage Support")
     print("-"*70)
 
     try:
@@ -85,25 +85,25 @@ async def test_coverage_integration():
         # Test without coverage
         executor1 = TestExecutor()
         if hasattr(executor1, 'coverage_enabled'):
-            print("   ✅ TestExecutor has coverage_enabled attribute")
+            print("    TestExecutor has coverage_enabled attribute")
         else:
-            print("   ❌ TestExecutor missing coverage_enabled attribute")
+            print("    TestExecutor missing coverage_enabled attribute")
             return False
 
         # Test with coverage
         executor2 = TestExecutor(coverage_enabled=True, coverage_orchestrator=orchestrator)
         if executor2.coverage_enabled:
-            print("   ✅ TestExecutor accepts coverage parameters")
+            print("    TestExecutor accepts coverage parameters")
         else:
-            print("   ❌ TestExecutor not accepting coverage parameters")
+            print("    TestExecutor not accepting coverage parameters")
             return False
 
     except Exception as e:
-        print(f"   ❌ Failed to create TestExecutor: {e}")
+        print(f"    Failed to create TestExecutor: {e}")
         return False
 
     # Test 5: Simulated integration test
-    print("\n📋 TEST 5: Simulated Integration Flow")
+    print("\n TEST 5: Simulated Integration Flow")
     print("-"*70)
 
     try:
@@ -119,9 +119,9 @@ async def test_coverage_integration():
                           "coverage" in engine.original_message.lower())
 
         if coverage_enabled:
-            print("   ✅ Coverage detection working")
+            print("    Coverage detection working")
         else:
-            print("   ❌ Coverage detection failed")
+            print("    Coverage detection failed")
             return False
 
         print("   4. Coverage orchestrator would initialize")
@@ -133,7 +133,7 @@ async def test_coverage_integration():
 
         print("   5. Coverage tracking would start")
         await test_orchestrator.start_coverage()
-        print("   ✅ Coverage orchestrator started")
+        print("    Coverage orchestrator started")
 
         print("   6. Tests would execute with coverage recording")
         await test_orchestrator.record_test_execution(
@@ -141,42 +141,42 @@ async def test_coverage_integration():
             test_name="Sample Test",
             execution_time_ms=1000
         )
-        print("   ✅ Test execution recorded")
+        print("    Test execution recorded")
 
         print("   7. Stop condition would be evaluated")
         decision = await test_orchestrator.should_stop_testing()
-        print(f"   ✅ Stop decision: {decision.reason}")
+        print(f"    Stop decision: {decision.reason}")
 
         print("   8. Coverage report would be generated")
         report = await test_orchestrator.generate_report("summary")
-        print(f"   ✅ Report generated: {len(report.report_data)} bytes")
+        print(f"    Report generated: {len(report.report_data)} bytes")
 
         print("   9. Slack message would include coverage")
         if "Coverage" in report.report_data:
-            print("   ✅ Coverage data present in report")
+            print("    Coverage data present in report")
         else:
-            print("   ⚠️  Coverage data missing from report")
+            print("     Coverage data missing from report")
 
     except Exception as e:
-        print(f"   ❌ Integration flow failed: {e}")
+        print(f"    Integration flow failed: {e}")
         import traceback
         traceback.print_exc()
         return False
 
     # All tests passed
     print("\n" + "="*70)
-    print("✅ ALL INTEGRATION TESTS PASSED")
+    print(" ALL INTEGRATION TESTS PASSED")
     print("="*70)
 
-    print("\n📊 Integration Summary:")
-    print("   ✅ Coverage module imports correctly")
-    print("   ✅ TestGPT Engine has coverage support")
-    print("   ✅ Coverage keyword detection working")
-    print("   ✅ Test Executor accepts coverage parameters")
-    print("   ✅ Full integration flow validated")
+    print("\n Integration Summary:")
+    print("    Coverage module imports correctly")
+    print("    TestGPT Engine has coverage support")
+    print("    Coverage keyword detection working")
+    print("    Test Executor accepts coverage parameters")
+    print("    Full integration flow validated")
 
-    print("\n🎉 Coverage integration is COMPLETE and WORKING!")
-    print("\n💡 Next steps:")
+    print("\n Coverage integration is COMPLETE and WORKING!")
+    print("\n Next steps:")
     print("   1. Test with real PR: @TestGPT test PR <url> with coverage")
     print("   2. Verify Slack message includes coverage %")
     print("   3. Check that tests stop early when threshold met")
@@ -190,14 +190,14 @@ async def main():
         success = await test_coverage_integration()
 
         if success:
-            print("\n✅ Integration test PASSED\n")
+            print("\n Integration test PASSED\n")
             sys.exit(0)
         else:
-            print("\n❌ Integration test FAILED\n")
+            print("\n Integration test FAILED\n")
             sys.exit(1)
 
     except Exception as e:
-        print(f"\n❌ Integration test ERROR: {e}\n")
+        print(f"\n Integration test ERROR: {e}\n")
         import traceback
         traceback.print_exc()
         sys.exit(1)

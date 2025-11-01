@@ -32,7 +32,7 @@ async def test_coverage_basic():
 
     # Start coverage
     run = await orchestrator.start_coverage()
-    print(f"\n✅ Coverage started: {run.run_id}")
+    print(f"\n Coverage started: {run.run_id}")
 
     # Simulate some test executions
     print("\n" + "="*70)
@@ -41,7 +41,7 @@ async def test_coverage_basic():
 
     for i in range(6):
         test_name = f"test_feature_{i+1}"
-        print(f"\n📝 Running {test_name}...")
+        print(f"\n Running {test_name}...")
 
         effectiveness = await orchestrator.record_test_execution(
             test_id=f"test-{i+1}",
@@ -55,7 +55,7 @@ async def test_coverage_basic():
         if i >= 2:
             decision = await orchestrator.should_stop_testing()
             if decision.should_stop:
-                print(f"\n🛑 Stopping: {decision.reason}")
+                print(f"\n Stopping: {decision.reason}")
                 break
 
     # Identify gaps
@@ -72,15 +72,15 @@ async def test_coverage_basic():
 
     # JSON report
     json_report = await orchestrator.generate_report(report_type="json")
-    print(f"✅ JSON report generated ({len(json_report.report_data)} bytes)")
+    print(f" JSON report generated ({len(json_report.report_data)} bytes)")
 
     # HTML report
     html_report = await orchestrator.generate_report(report_type="html")
-    print(f"✅ HTML report generated ({len(html_report.report_data)} bytes)")
+    print(f" HTML report generated ({len(html_report.report_data)} bytes)")
 
     # Summary
     summary = await orchestrator.generate_report(report_type="summary")
-    print(f"✅ Summary generated\n")
+    print(f" Summary generated\n")
     print(summary.report_data)
 
     return orchestrator
@@ -104,16 +104,16 @@ async def test_mcdc_analysis():
     ]
 
     for name, expression, file_path, line in test_conditions:
-        print(f"\n📊 {name}: {expression}")
+        print(f"\n {name}: {expression}")
         result = analyzer.analyze_decision(expression, file_path, line)
 
         if result.is_achievable:
-            print(f"   ✅ MCDC Achievable")
+            print(f"    MCDC Achievable")
             print(f"   Required Tests: {result.minimum_test_count}")
             print(f"   Conditions: {len(result.decision.conditions)}")
             print(f"   Truth Table Rows: {len(result.truth_table)}")
         else:
-            print(f"   ❌ MCDC Not Achievable: {result.reason}")
+            print(f"    MCDC Not Achievable: {result.reason}")
 
 
 async def test_database_operations():
@@ -130,7 +130,7 @@ async def test_database_operations():
 
     db = CoverageDatabase(f"sqlite:///{test_db_path}")
     db.create_tables()
-    print("✅ Database initialized")
+    print(" Database initialized")
 
     # Create a test run
     from coverage.models import CoverageRun, CoverageStatus
@@ -148,20 +148,20 @@ async def test_database_operations():
 
     # Save to database
     db.save_coverage_run(test_run)
-    print(f"✅ Saved run: {test_run.run_id}")
+    print(f" Saved run: {test_run.run_id}")
 
     # Retrieve from database
     retrieved = db.get_coverage_run(test_run.run_id)
     if retrieved:
-        print(f"✅ Retrieved run: {retrieved.run_id}")
+        print(f" Retrieved run: {retrieved.run_id}")
         print(f"   Coverage: {retrieved.overall_coverage_percent}%")
         print(f"   Tests: {retrieved.test_count}")
     else:
-        print("❌ Failed to retrieve run")
+        print(" Failed to retrieve run")
 
     # List recent runs
     recent = db.get_recent_runs(limit=5)
-    print(f"✅ Found {len(recent)} recent runs")
+    print(f" Found {len(recent)} recent runs")
 
 
 async def test_pr_diff_analysis():
@@ -184,7 +184,7 @@ async def test_pr_diff_analysis():
 
     for url in test_urls:
         pr_number = analyzer._extract_pr_number(url)
-        print(f"✅ Parsed PR URL: {url} → PR #{pr_number}")
+        print(f" Parsed PR URL: {url} → PR #{pr_number}")
 
     # Test critical code detection
     test_changes = [
@@ -195,7 +195,7 @@ async def test_pr_diff_analysis():
 
     for change in test_changes:
         is_critical = analyzer._is_critical_change(change)
-        print(f"{'🚨' if is_critical else '  '} {change.file_path}: {'CRITICAL' if is_critical else 'normal'}")
+        print(f"{'' if is_critical else '  '} {change.file_path}: {'CRITICAL' if is_critical else 'normal'}")
 
 
 async def test_stop_conditions():
@@ -214,7 +214,7 @@ async def test_stop_conditions():
     }
 
     for name, config in configs.items():
-        print(f"\n📋 {name}")
+        print(f"\n {name}")
         orchestrator = CoverageOrchestrator(
             config=config.to_dict()
         )
@@ -246,7 +246,7 @@ async def main():
         await test_stop_conditions()
 
         print("\n" + "="*70)
-        print("✅ ALL TESTS PASSED")
+        print(" ALL TESTS PASSED")
         print("="*70)
         print("\nCoverage system is functional!")
         print("\nNext steps:")
@@ -256,7 +256,7 @@ async def main():
         print("4. Save HTML reports to files")
 
     except Exception as e:
-        print(f"\n❌ TEST FAILED: {str(e)}")
+        print(f"\n TEST FAILED: {str(e)}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

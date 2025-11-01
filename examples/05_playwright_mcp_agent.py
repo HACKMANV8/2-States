@@ -33,23 +33,23 @@ class PlaywrightMCPAgent:
     async def initialize(self):
         """Initialize MCP connection and agent (call once)."""
         if self._initialized:
-            print("⚠️  Already initialized, skipping...")
+            print("  Already initialized, skipping...")
             return
 
-        print("🚀 Initializing Playwright MCP Agent...")
+        print(" Initializing Playwright MCP Agent...")
         print("-" * 70)
 
         # Connect to Playwright MCP server
-        print("📡 Connecting to Playwright MCP server...")
+        print(" Connecting to Playwright MCP server...")
         self.mcp_tools = MCPTools(
             command="npx -y @playwright/mcp@latest"
         )
 
         await self.mcp_tools.connect()
-        print("✅ Playwright MCP server connected")
+        print(" Playwright MCP server connected")
 
         # Create agent with persistent MCP tools
-        print("🤖 Creating agent with Playwright tools...")
+        print(" Creating agent with Playwright tools...")
         self.agent = Agent(
             name="PlaywrightAgent",
             model=Claude(id="claude-sonnet-4-20250514"),
@@ -71,7 +71,7 @@ Important: The browser session persists between calls, so you can continue where
         )
 
         self._initialized = True
-        print("✅ Agent ready with persistent browser session!\n")
+        print(" Agent ready with persistent browser session!\n")
 
     async def run(self, task: str):
         """
@@ -82,13 +82,13 @@ Important: The browser session persists between calls, so you can continue where
         if not self._initialized:
             raise RuntimeError("Agent not initialized. Call initialize() first.")
 
-        print(f"📝 Task: {task}")
+        print(f" Task: {task}")
         print("-" * 70)
 
         response = await self.agent.arun(task)
         result = response.content if hasattr(response, 'content') else str(response)
 
-        print(f"\n✨ Response:\n{result}")
+        print(f"\n Response:\n{result}")
         print("-" * 70)
 
         return result
@@ -96,9 +96,9 @@ Important: The browser session persists between calls, so you can continue where
     async def cleanup(self):
         """Close the MCP connection and clean up resources."""
         if self.mcp_tools:
-            print("\n🔌 Closing Playwright MCP connection...")
+            print("\n Closing Playwright MCP connection...")
             await self.mcp_tools.close()
-            print("✅ Connection closed")
+            print(" Connection closed")
 
         self._initialized = False
 
@@ -112,10 +112,10 @@ async def example_multi_step_workflow():
     """
 
     print("""
-    ╔══════════════════════════════════════════════════════════════════╗
-    ║  Playwright MCP Agent - Persistent Browser Session Example      ║
-    ║  Solves: GitHub Issue #2732                                      ║
-    ╚══════════════════════════════════════════════════════════════════╝
+    
+      Playwright MCP Agent - Persistent Browser Session Example      
+      Solves: GitHub Issue #2732                                      
+    
     """)
 
     # Create and initialize the agent
@@ -145,7 +145,7 @@ async def example_multi_step_workflow():
         )
 
         print("\n" + "=" * 70)
-        print("✅ Multi-step workflow completed with persistent session!")
+        print(" Multi-step workflow completed with persistent session!")
         print("=" * 70)
 
     finally:
@@ -162,9 +162,9 @@ async def example_form_filling():
     """
 
     print("""
-    ╔══════════════════════════════════════════════════════════════════╗
-    ║  Form Filling Example - Persistent Session                      ║
-    ╚══════════════════════════════════════════════════════════════════╝
+    
+      Form Filling Example - Persistent Session                      
+    
     """)
 
     agent_manager = PlaywrightMCPAgent()
@@ -184,7 +184,7 @@ async def example_form_filling():
             print("=" * 70)
             await agent_manager.run(task)
 
-        print("\n✅ Form filling workflow completed!")
+        print("\n Form filling workflow completed!")
 
     finally:
         await agent_manager.cleanup()
@@ -196,10 +196,10 @@ async def interactive_mode():
     """
 
     print("""
-    ╔══════════════════════════════════════════════════════════════════╗
-    ║  Interactive Playwright Agent                                    ║
-    ║  Browser state persists between commands                         ║
-    ╚══════════════════════════════════════════════════════════════════╝
+    
+      Interactive Playwright Agent                                    
+      Browser state persists between commands                         
+    
     """)
 
     agent_manager = PlaywrightMCPAgent()
@@ -215,7 +215,7 @@ async def interactive_mode():
 
     try:
         while True:
-            command = input("🎯 Command: ").strip()
+            command = input(" Command: ").strip()
 
             if command.lower() in ['quit', 'exit', 'q']:
                 print("Exiting...")

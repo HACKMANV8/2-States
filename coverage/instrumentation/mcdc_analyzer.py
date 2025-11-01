@@ -110,14 +110,14 @@ class MCDCAnalyzer:
         Returns:
             MCDCResult with analysis
         """
-        print(f"🔍 Analyzing MCDC for: {expression}")
+        print(f" Analyzing MCDC for: {expression}")
 
         # Parse decision into conditions
         decision = self._parse_decision(expression, file_path, line_number)
 
         # Check if analyzable
         if len(decision.conditions) > self.max_conditions:
-            print(f"   ⚠️  Too many conditions ({len(decision.conditions)} > {self.max_conditions})")
+            print(f"     Too many conditions ({len(decision.conditions)} > {self.max_conditions})")
             return MCDCResult(
                 decision=decision,
                 truth_table=[],
@@ -160,7 +160,7 @@ class MCDCAnalyzer:
         Returns:
             List of MCDC results for each decision
         """
-        print(f"🔍 Analyzing MCDC in file: {file_path}")
+        print(f" Analyzing MCDC in file: {file_path}")
 
         results = []
 
@@ -169,7 +169,7 @@ class MCDCAnalyzer:
         elif language in ["javascript", "typescript"]:
             decisions = self._extract_js_decisions(code, file_path)
         else:
-            print(f"   ⚠️  Unsupported language: {language}")
+            print(f"     Unsupported language: {language}")
             return []
 
         print(f"   Found {len(decisions)} decisions")

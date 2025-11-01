@@ -40,19 +40,19 @@ async def run_agent(message: str, directory_path: str) -> None:
         print("Please create a .env file with your Anthropic API key.")
         return
 
-    print(f"🚀 Initializing Filesystem Agent...")
-    print(f"📁 Directory: {directory_path}")
+    print(f" Initializing Filesystem Agent...")
+    print(f" Directory: {directory_path}")
     print("=" * 60)
 
     # Initialize and connect to the MCP server to access the filesystem
-    print("\n📡 Connecting to Filesystem MCP server...")
+    print("\n Connecting to Filesystem MCP server...")
     mcp_tools = MCPTools(
         command=f"npx -y @modelcontextprotocol/server-filesystem {directory_path}"
     )
     await mcp_tools.connect()
 
     try:
-        print("✅ Successfully connected to Filesystem MCP server")
+        print(" Successfully connected to Filesystem MCP server")
 
         agent = Agent(
             model=Claude(id="claude-sonnet-4-20250514"),
@@ -70,36 +70,36 @@ async def run_agent(message: str, directory_path: str) -> None:
         )
 
         print("\n" + "=" * 60)
-        print("🤖 Agent ready!")
+        print(" Agent ready!")
         print("=" * 60)
-        print(f"\n📝 Task: {message}")
+        print(f"\n Task: {message}")
         print("=" * 60)
-        print("\n💭 Agent is working...\n")
+        print("\n Agent is working...\n")
 
         # Run the agent
         response = await agent.arun(message)
 
         print("\n" + "=" * 60)
-        print("✨ Agent Response:")
+        print(" Agent Response:")
         print("=" * 60)
         print(response.content if hasattr(response, 'content') else str(response))
         print("\n" + "=" * 60)
 
     finally:
         # Always close the connection when done
-        print("\n🔌 Closing MCP connection...")
+        print("\n Closing MCP connection...")
         await mcp_tools.close()
-        print("✅ Connection closed")
+        print(" Connection closed")
 
 
 async def main():
     """Main function to run filesystem agent examples."""
 
     print("""
-    ╔══════════════════════════════════════════════════════════╗
-    ║  Agno Filesystem Agent with MCP Integration             ║
-    ║  Explores and analyzes files in a directory              ║
-    ╚══════════════════════════════════════════════════════════╝
+    
+      Agno Filesystem Agent with MCP Integration             
+      Explores and analyzes files in a directory              
+    
     """)
 
     # Get the current project directory

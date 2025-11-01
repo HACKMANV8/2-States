@@ -26,11 +26,11 @@ async def test_github_repo_example():
     the dynamic system works correctly.
     """
     print("""
-╔══════════════════════════════════════════════════════════════════════╗
-║                                                                      ║
-║          Example: Test GitHub Repository                            ║
-║                                                                      ║
-╚══════════════════════════════════════════════════════════════════════╝
+
+                                                                      
+          Example: Test GitHub Repository                            
+                                                                      
+
     """)
 
     # Initialize orchestrator
@@ -38,14 +38,14 @@ async def test_github_repo_example():
 
     # For this example, we'll test the local sample API
     # In a real scenario, you would provide a GitHub URL
-    print("\n📝 Test Configuration:")
+    print("\n Test Configuration:")
     print("=" * 70)
     print("NOTE: For this demo, you need a real API to test.")
     print("Please modify this example to point to your own API,")
     print("or use option 2 to test a GitHub repository.")
     print("=" * 70)
 
-    print("\n⚠️  No sample API available in this demo.")
+    print("\n  No sample API available in this demo.")
     print("Please use option 2 to test a real GitHub repository.")
     return {"overall_success": False, "status": "skipped"}
 
@@ -64,18 +64,18 @@ async def test_github_repo_example():
         print(f"\nTests Run: {len(result['test_results'])}")
         print(f"Passed: {result.get('passed_count', 0)}")
         print(f"Failed: {result.get('failed_count', 0)}")
-        print(f"Overall Success: {'✅ YES' if result['overall_success'] else '❌ NO'}")
+        print(f"Overall Success: {' YES' if result['overall_success'] else ' NO'}")
 
-        print("\n📊 Test Details:")
+        print("\n Test Details:")
         for i, test in enumerate(result['test_results'], 1):
-            status = "✅ PASS" if test.get('success') else "❌ FAIL"
+            status = " PASS" if test.get('success') else " FAIL"
             endpoint = test.get('endpoint', 'Unknown')
             print(f"  {i}. {status} - {endpoint}")
             if test.get('error'):
                 print(f"      Error: {test['error']}")
 
     if result.get('error'):
-        print(f"\n❌ Error: {result['error']}")
+        print(f"\n Error: {result['error']}")
 
     print("\n" + "=" * 70)
 
@@ -89,11 +89,11 @@ async def test_real_github_repo_example():
     Uncomment and modify this to test a real repo.
     """
     print("""
-╔══════════════════════════════════════════════════════════════════════╗
-║                                                                      ║
-║          Example: Test Real GitHub Repository                       ║
-║                                                                      ║
-╚══════════════════════════════════════════════════════════════════════╝
+
+                                                                      
+          Example: Test Real GitHub Repository                       
+                                                                      
+
     """)
 
     orchestrator = DynamicBackendOrchestrator()
@@ -113,7 +113,7 @@ async def test_real_github_repo_example():
     print("TEST RESULTS")
     print("=" * 70)
     print(f"Status: {result['status']}")
-    print(f"Overall Success: {'✅ YES' if result.get('overall_success') else '❌ NO'}")
+    print(f"Overall Success: {' YES' if result.get('overall_success') else ' NO'}")
 
     if result.get('repo_info'):
         print(f"\nRepository: {result['repo_info'].get('remote_url')}")

@@ -13,17 +13,17 @@ API_BASE_URL = "http://localhost:8000"
 
 def test_health():
     """Test health check endpoint"""
-    print("\n🏥 Testing health check...")
+    print("\n Testing health check...")
     response = requests.get(f"{API_BASE_URL}/health")
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "healthy"
-    print("✅ Health check passed")
+    print(" Health check passed")
 
 
 def test_create_config():
     """Test creating a configuration template"""
-    print("\n⚙️  Testing configuration template creation...")
+    print("\n  Testing configuration template creation...")
     config_data = {
         "name": "Test Config",
         "description": "Configuration for testing",
@@ -48,24 +48,24 @@ def test_create_config():
     assert response.status_code == 200
     config = response.json()
     assert config["name"] == "Test Config"
-    print(f"✅ Created config: {config['id']}")
+    print(f" Created config: {config['id']}")
     return config["id"]
 
 
 def test_list_configs():
     """Test listing configuration templates"""
-    print("\n📋 Testing configuration list...")
+    print("\n Testing configuration list...")
     response = requests.get(f"{API_BASE_URL}/api/configs")
     assert response.status_code == 200
     configs = response.json()
     assert isinstance(configs, list)
-    print(f"✅ Found {len(configs)} configurations")
+    print(f" Found {len(configs)} configurations")
     return configs
 
 
 def test_create_test_suite():
     """Test creating a test suite"""
-    print("\n🧪 Testing test suite creation...")
+    print("\n Testing test suite creation...")
     test_data = {
         "name": "Homepage Test",
         "description": "Test the homepage functionality",
@@ -102,35 +102,35 @@ def test_create_test_suite():
     suite = response.json()
     assert suite["name"] == "Homepage Test"
     assert len(suite["test_steps"]) == 2
-    print(f"✅ Created test suite: {suite['id']}")
+    print(f" Created test suite: {suite['id']}")
     return suite["id"]
 
 
 def test_list_test_suites():
     """Test listing test suites"""
-    print("\n📋 Testing test suite list...")
+    print("\n Testing test suite list...")
     response = requests.get(f"{API_BASE_URL}/api/tests")
     assert response.status_code == 200
     suites = response.json()
     assert isinstance(suites, list)
-    print(f"✅ Found {len(suites)} test suites")
+    print(f" Found {len(suites)} test suites")
     return suites
 
 
 def test_get_test_suite(suite_id):
     """Test getting a specific test suite"""
-    print(f"\n🔍 Testing get test suite {suite_id}...")
+    print(f"\n Testing get test suite {suite_id}...")
     response = requests.get(f"{API_BASE_URL}/api/tests/{suite_id}")
     assert response.status_code == 200
     suite = response.json()
     assert suite["id"] == suite_id
-    print(f"✅ Retrieved test suite: {suite['name']}")
+    print(f" Retrieved test suite: {suite['name']}")
     return suite
 
 
 def test_update_test_suite(suite_id):
     """Test updating a test suite"""
-    print(f"\n✏️  Testing update test suite {suite_id}...")
+    print(f"\n  Testing update test suite {suite_id}...")
     update_data = {
         "description": "Updated description",
         "tags": ["homepage", "smoke", "updated"]
@@ -146,12 +146,12 @@ def test_update_test_suite(suite_id):
     suite = response.json()
     assert suite["description"] == "Updated description"
     assert "updated" in suite["tags"]
-    print(f"✅ Updated test suite")
+    print(f" Updated test suite")
 
 
 def test_run_test(suite_id, config_id):
     """Test running a test (creates pending execution)"""
-    print(f"\n▶️  Testing run test {suite_id}...")
+    print(f"\n  Testing run test {suite_id}...")
     run_data = {
         "test_suite_id": suite_id,
         "config_id": config_id,
@@ -173,56 +173,56 @@ def test_run_test(suite_id, config_id):
     execution = response.json()
     assert execution["status"] == "pending"
     assert execution["test_suite_id"] == suite_id
-    print(f"✅ Created execution: {execution['id']} (status: {execution['status']})")
+    print(f" Created execution: {execution['id']} (status: {execution['status']})")
     return execution["id"]
 
 
 def test_list_executions():
     """Test listing executions"""
-    print("\n📋 Testing execution list...")
+    print("\n Testing execution list...")
     response = requests.get(f"{API_BASE_URL}/api/executions")
     assert response.status_code == 200
     executions = response.json()
     assert isinstance(executions, list)
-    print(f"✅ Found {len(executions)} executions")
+    print(f" Found {len(executions)} executions")
     return executions
 
 
 def test_get_execution(execution_id):
     """Test getting execution details"""
-    print(f"\n🔍 Testing get execution {execution_id}...")
+    print(f"\n Testing get execution {execution_id}...")
     response = requests.get(f"{API_BASE_URL}/api/executions/{execution_id}")
     assert response.status_code == 200
     execution = response.json()
     assert execution["id"] == execution_id
-    print(f"✅ Retrieved execution: {execution['status']}")
+    print(f" Retrieved execution: {execution['status']}")
 
 
 def test_get_history(suite_id):
     """Test getting execution history"""
-    print(f"\n📊 Testing execution history for {suite_id}...")
+    print(f"\n Testing execution history for {suite_id}...")
     response = requests.get(f"{API_BASE_URL}/api/tests/{suite_id}/history")
     assert response.status_code == 200
     history = response.json()
     assert history["test_suite_id"] == suite_id
     assert "executions" in history
-    print(f"✅ Retrieved history: {history['total_runs']} runs")
+    print(f" Retrieved history: {history['total_runs']} runs")
 
 
 def test_statistics():
     """Test getting statistics"""
-    print("\n📊 Testing statistics...")
+    print("\n Testing statistics...")
     response = requests.get(f"{API_BASE_URL}/api/statistics")
     assert response.status_code == 200
     stats = response.json()
     assert "total_test_suites" in stats
     assert "total_executions" in stats
-    print(f"✅ Statistics: {stats['total_test_suites']} suites, {stats['total_executions']} executions")
+    print(f" Statistics: {stats['total_test_suites']} suites, {stats['total_executions']} executions")
 
 
 def test_batch_run(suite_ids, config_id):
     """Test batch test execution"""
-    print(f"\n🚀 Testing batch run...")
+    print(f"\n Testing batch run...")
     batch_data = {
         "test_suite_ids": suite_ids,
         "config_id": config_id,
@@ -239,17 +239,17 @@ def test_batch_run(suite_ids, config_id):
     assert response.status_code == 200
     batch = response.json()
     assert batch["total_tests"] == len(suite_ids)
-    print(f"✅ Batch created: {batch['total_tests']} tests queued")
+    print(f" Batch created: {batch['total_tests']} tests queued")
 
 
 def test_delete_test_suite(suite_id):
     """Test deleting a test suite"""
-    print(f"\n🗑️  Testing delete test suite {suite_id}...")
+    print(f"\n  Testing delete test suite {suite_id}...")
     response = requests.delete(f"{API_BASE_URL}/api/tests/{suite_id}")
     assert response.status_code == 200
     result = response.json()
     assert result["status"] == "deleted"
-    print(f"✅ Deleted test suite")
+    print(f" Deleted test suite")
 
 
 def main():
@@ -290,19 +290,19 @@ def main():
         test_delete_test_suite(suite_id_2)
 
         print("\n" + "=" * 60)
-        print("✅ ALL TESTS PASSED!")
+        print(" ALL TESTS PASSED!")
         print("=" * 60)
 
     except AssertionError as e:
-        print(f"\n❌ Test failed: {str(e)}")
+        print(f"\n Test failed: {str(e)}")
         return False
     except requests.exceptions.ConnectionError:
-        print("\n❌ Cannot connect to API server at http://localhost:8000")
+        print("\n Cannot connect to API server at http://localhost:8000")
         print("   Make sure the backend server is running:")
         print("   python backend/api/main.py")
         return False
     except Exception as e:
-        print(f"\n❌ Unexpected error: {str(e)}")
+        print(f"\n Unexpected error: {str(e)}")
         import traceback
         traceback.print_exc()
         return False

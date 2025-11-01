@@ -92,13 +92,13 @@ async def test_scenario_list():
 async def main():
     """Run all tests."""
     print("""
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                                                                              ║
-║  TestGPT Engine Test Suite                                                  ║
-║                                                                              ║
-║  Demonstrates the full multi-environment QA testing pipeline                ║
-║                                                                              ║
-╚══════════════════════════════════════════════════════════════════════════════╝
+
+                                                                              
+  TestGPT Engine Test Suite                                                  
+                                                                              
+  Demonstrates the full multi-environment QA testing pipeline                
+                                                                              
+
     """)
 
     # Run tests
@@ -111,7 +111,7 @@ async def main():
     await test_scenario_list()
 
     print("\n" + "=" * 80)
-    print("✅ ALL TESTS COMPLETED")
+    print(" ALL TESTS COMPLETED")
     print("=" * 80)
     print("\nCheck ./testgpt_data_test/ directory for:")
     print("  • scenarios/*.json - Saved scenario definitions")

@@ -100,7 +100,7 @@ class PRDiffAnalyzer:
         Returns:
             PRDiffSummary with all changes
         """
-        print(f"🔍 Analyzing PR: {pr_url}")
+        print(f" Analyzing PR: {pr_url}")
 
         # Extract PR info
         pr_number = self._extract_pr_number(pr_url)
@@ -153,7 +153,7 @@ class PRDiffAnalyzer:
             if self._is_critical_change(change)
         ]
 
-        print(f"   ✅ Analysis complete:")
+        print(f"    Analysis complete:")
         print(f"      Lines added: {total_added}")
         print(f"      Lines deleted: {total_deleted}")
         print(f"      Lines modified: {total_modified}")
@@ -187,7 +187,7 @@ class PRDiffAnalyzer:
         Returns:
             List of file paths containing dependent code
         """
-        print(f"🔗 Identifying dependent code...")
+        print(f" Identifying dependent code...")
 
         dependent_files = set()
 
@@ -210,9 +210,9 @@ class PRDiffAnalyzer:
             # Import TestGPT's GitHub service
             from pr_testing.github_service import GitHubService
             self.github_service = GitHubService(github_token)
-            print("   ✅ GitHub service initialized")
+            print("    GitHub service initialized")
         except ImportError:
-            print("   ⚠️  GitHub service not available, using fallback")
+            print("     GitHub service not available, using fallback")
             self.github_service = None
 
     async def _fetch_pr_data(self, pr_url: str) -> Dict:
@@ -491,6 +491,6 @@ class PRDiffAnalyzer:
                         callers.add(line)
 
         except Exception as e:
-            print(f"   ⚠️  Error finding callers: {e}")
+            print(f"     Error finding callers: {e}")
 
         return callers

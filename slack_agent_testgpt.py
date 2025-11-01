@@ -43,22 +43,22 @@ async def initialize_testgpt():
         return testgpt_engine
 
     print("\n" + "=" * 70)
-    print("🔧 Initializing TestGPT Engine")
+    print(" Initializing TestGPT Engine")
     print("=" * 70)
 
     # Connect to Playwright MCP
-    print("📡 Connecting to Playwright MCP...")
+    print(" Connecting to Playwright MCP...")
     mcp_tools = MCPTools(command="npx -y @playwright/mcp@latest")
     await mcp_tools.connect()
-    print("✅ Playwright MCP connected\n")
+    print(" Playwright MCP connected\n")
 
     # Create TestGPT engine
-    print("🤖 Initializing TestGPT orchestration engine...")
+    print(" Initializing TestGPT orchestration engine...")
     testgpt_engine = TestGPTEngine(mcp_tools=mcp_tools, storage_dir="./testgpt_data")
-    print("✅ TestGPT engine initialized\n")
+    print(" TestGPT engine initialized\n")
 
     print("=" * 70)
-    print("✅ TestGPT Ready for Multi-Environment Testing")
+    print(" TestGPT Ready for Multi-Environment Testing")
     print("=" * 70 + "\n")
 
     return testgpt_engine
@@ -90,7 +90,7 @@ async def run_testgpt_task(user_message: str, user_id: str) -> str:
         return result
 
     except Exception as e:
-        return f"❌ Error: {str(e)}\n\nPlease try again or rephrase your request."
+        return f" Error: {str(e)}\n\nPlease try again or rephrase your request."
 
 
 @app.event("app_mention")
@@ -111,28 +111,28 @@ def handle_mention(event, say):
         say(text=get_welcome_message(), channel=channel)
         return
 
-    print(f"\n📝 Received message from user {user_id}: {user_message}")
+    print(f"\n Received message from user {user_id}: {user_message}")
 
     # Send initial acknowledgment
-    say(text=f"🤖 TestGPT received your request!\n\nAnalyzing: '{user_message}'\n\nProcessing...", channel=channel)
+    say(text=f" TestGPT received your request!\n\nAnalyzing: '{user_message}'\n\nProcessing...", channel=channel)
 
     # Run TestGPT task
     try:
         result = asyncio.run(run_testgpt_task(user_message, user_id))
 
         # Post result back to Slack
-        print(f"✅ TestGPT completed. Posting results to Slack...")
+        print(f" TestGPT completed. Posting results to Slack...")
         say(text=result, channel=channel)
 
     except Exception as e:
-        error_msg = f"❌ Error running TestGPT: {str(e)}"
+        error_msg = f" Error running TestGPT: {str(e)}"
         print(error_msg)
         say(text=error_msg, channel=channel)
 
 
 def get_welcome_message() -> str:
     """Get welcome message for bot."""
-    return """👋 **Welcome to TestGPT!**
+    return """ **Welcome to TestGPT!**
 
 I'm your AI-powered QA testing assistant. I can run comprehensive cross-browser,
 cross-device, and cross-network tests on your websites.
@@ -147,12 +147,12 @@ cross-device, and cross-network tests on your websites.
 • `list scenarios` - See all saved test scenarios
 
 **What I test:**
-✓ Multiple viewports (iPhone, iPad, desktop, etc.)
-✓ Multiple browsers (Chrome, Safari, Firefox)
-✓ Network conditions (normal, slow 3G, flaky)
-✓ Responsive design issues
-✓ Cross-browser compatibility
-✓ Performance under network constraints
+ Multiple viewports (iPhone, iPad, desktop, etc.)
+ Multiple browsers (Chrome, Safari, Firefox)
+ Network conditions (normal, slow 3G, flaky)
+ Responsive design issues
+ Cross-browser compatibility
+ Performance under network constraints
 
 Try mentioning me with a test request!
 """
@@ -160,7 +160,7 @@ Try mentioning me with a test request!
 
 def get_help_message() -> str:
     """Get help message."""
-    return """📖 **TestGPT Help**
+    return """ **TestGPT Help**
 
 **How to use:**
 Mention me with a natural language test request. I'll automatically:
@@ -208,47 +208,47 @@ async def cleanup():
     """Clean up MCP connection on shutdown."""
     global mcp_tools
     if mcp_tools:
-        print("\n🔌 Closing Playwright MCP connection...")
+        print("\n Closing Playwright MCP connection...")
         await mcp_tools.close()
-        print("✅ Connection closed")
+        print(" Connection closed")
 
 
 if __name__ == "__main__":
     print("""
-╔══════════════════════════════════════════════════════════════════════╗
-║                                                                      ║
-║  TestGPT - Multi-Environment QA Testing Agent                       ║
-║                                                                      ║
-║  Powered by: Agno + Playwright MCP + Claude Sonnet 4                ║
-║                                                                      ║
-╚══════════════════════════════════════════════════════════════════════╝
+
+                                                                      
+  TestGPT - Multi-Environment QA Testing Agent                       
+                                                                      
+  Powered by: Agno + Playwright MCP + Claude Sonnet 4                
+                                                                      
+
     """)
 
     # Verify environment variables
     if not os.environ.get("SLACK_BOT_TOKEN"):
-        print("❌ Error: SLACK_BOT_TOKEN not found in environment!")
+        print(" Error: SLACK_BOT_TOKEN not found in environment!")
         exit(1)
 
     if not os.environ.get("SLACK_APP_TOKEN"):
-        print("❌ Error: SLACK_APP_TOKEN not found in environment!")
+        print(" Error: SLACK_APP_TOKEN not found in environment!")
         exit(1)
 
     if not os.environ.get("ANTHROPIC_API_KEY"):
-        print("❌ Error: ANTHROPIC_API_KEY not found in environment!")
+        print(" Error: ANTHROPIC_API_KEY not found in environment!")
         exit(1)
 
-    print("✅ All environment variables found")
-    print("\n⚡️ Starting TestGPT Slack bot...")
-    print("💡 Mention the bot in any channel to trigger QA testing")
+    print(" All environment variables found")
+    print("\n Starting TestGPT Slack bot...")
+    print(" Mention the bot in any channel to trigger QA testing")
     print("=" * 70)
 
     try:
         handler = SocketModeHandler(app, os.environ["SLACK_APP_TOKEN"])
         handler.start()
     except KeyboardInterrupt:
-        print("\n\n⚠️  Shutting down...")
+        print("\n\n  Shutting down...")
         asyncio.run(cleanup())
-        print("👋 Goodbye!")
+        print(" Goodbye!")
     except Exception as e:
-        print(f"\n❌ Error: {e}")
+        print(f"\n Error: {e}")
         asyncio.run(cleanup())
