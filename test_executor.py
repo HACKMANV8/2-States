@@ -497,12 +497,10 @@ YOUR WORKFLOW:
 4. Report what you observe
 
 IMPORTANT:
-- DO NOT use browser_install - all browsers are already installed and ready
 - DO NOT use browser_resize - viewport is already correct from launch
 - The page will render properly at {cell.viewport.width}×{cell.viewport.height} from initial load
 - CSS media queries will fire correctly for this viewport size
 - Test what you see - responsive behavior should work properly
-- If you get "browser not installed" error, just navigate directly - the browser IS installed
 
 YOUR MISSION:
 {mission_section}
